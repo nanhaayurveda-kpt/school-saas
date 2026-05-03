@@ -16,14 +16,14 @@ export async function GET() {
     httpOnly: true,
     maxAge: 600,
     path: "/",
-    sameSite: "none",
+    sameSite: "lax",
     secure: true,
   });
   response.cookies.set("code_verifier", codeVerifier, {
     httpOnly: true,
     maxAge: 600,
     path: "/",
-    sameSite: "none",
+    sameSite: "lax",
     secure: true,
   });
   return response;
