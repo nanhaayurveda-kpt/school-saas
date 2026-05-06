@@ -528,7 +528,6 @@ export async function saveSettings(formData) {
   let logo_url = current.logo_url || null;
   const logoFile = formData.get("logo");
   if (logoFile && logoFile.size > 0) {
-    const { put } = await import("@vercel/blob");
     const blob = await put(`logos/${user.id}/${logoFile.name}`, logoFile, {
       access: "public",
       allowOverwrite: true,
