@@ -75,6 +75,9 @@ export async function addStudent(formData) {
 
   await db.insert(schema.students).values({
     ...parsed.data,
+    admission_date: parsed.data.admission_date
+      ? new Date(parsed.data.admission_date)
+      : new Date(),
     fee_status: "pending",
   });
 
@@ -581,7 +584,8 @@ export async function addTeacherSubject(formData) {
   const subject = formData.get("subject");
   const className = formData.get("class");
 
-  if (!teacher_id || !subject || !className) redirect(`/teachers/${teacher_id}`);
+  if (!teacher_id || !subject || !className)
+    redirect(`/teachers/${teacher_id}`);
 
   await db.insert(schema.teacher_subjects).values({
     teacher_id,
@@ -591,4 +595,14 @@ export async function addTeacherSubject(formData) {
 
   await setFlash("success", "Subject assigned successfully!");
   redirect(`/teachers/${teacher_id}`);
+}
+
+// ─── Delete Student ───────────────────────────────────────────────────────────
+
+export async function deleteStudent(formData) {
+  await getAuth();
+  const id = parseInt(formData.get("id"));
+  await db.delete(schema.students).where(eq(schema.students.id, id));
+  await setFlash("success", "Student deleted successfully!");
+  redirect("/students");
 }
