@@ -28,8 +28,8 @@ const studentSchema = z.object({
   class: z.string().min(1, "Class is required"),
   section: z.string().min(1, "Section is required"),
   roll_number: z.string().optional(),
-  parent_name: z.string().optional(),
-  parent_phone: z.string().optional(),
+  father_name: z.string().optional(),
+  phone: z.string().optional(),
   admission_no: z.string().optional(),
   admission_date: z.string().optional(),
   gender: z.string().optional(),
@@ -50,8 +50,8 @@ export async function addStudent(formData) {
     class: formData.get("class"),
     section: formData.get("section"),
     roll_number: formData.get("roll_number") || undefined,
-    parent_name: formData.get("parent_name") || undefined,
-    parent_phone: formData.get("parent_phone") || undefined,
+    father_name: formData.get("father_name") || undefined,
+    phone: formData.get("phone") || undefined,
     admission_no: formData.get("admission_no") || undefined,
     admission_date: formData.get("admission_date") || undefined,
     gender: formData.get("gender") || undefined,
@@ -93,8 +93,8 @@ export async function updateStudent(formData) {
     class: formData.get("class"),
     section: formData.get("section"),
     roll_number: formData.get("roll_number"),
-    parent_name: formData.get("parent_name"),
-    parent_phone: formData.get("parent_phone"),
+    father_name: formData.get("father_name") || undefined,
+    phone: formData.get("phone") || undefined,
     fee_status: formData.get("fee_status"),
     admission_no: formData.get("admission_no") || null,
     gender: formData.get("gender") || null,
@@ -137,8 +137,7 @@ export async function importStudents(formData) {
   let count = 0;
   for (const line of dataLines) {
     const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
-    const [name, className, section, roll_number, parent_name, parent_phone] =
-      cols;
+    const [name, className, section, roll_number, father_name, phone] = cols;
     if (!name || !className) continue;
     try {
       await db.insert(schema.students).values({
@@ -146,8 +145,8 @@ export async function importStudents(formData) {
         class: className,
         section: section || "",
         roll_number: roll_number || null,
-        parent_name: parent_name || null,
-        parent_phone: parent_phone || null,
+        father_name: father_name || null,
+        phone: phone || null,
         fee_status: "pending",
       });
       count++;
@@ -224,7 +223,6 @@ export async function addTeacher(formData) {
 
   await db.insert(schema.teachers).values({
     name: formData.get("name"),
-    subject: formData.get("subject"),
     qualification: formData.get("qualification"),
     phone: formData.get("phone"),
     email: formData.get("email"),
@@ -572,4 +570,25 @@ export async function saveSettings(formData) {
 
   await setFlash("success", "Settings saved successfully!");
   redirect("/settings");
+}
+
+// ─── Teacher Subjects ─────────────────────────────────────────────────────────
+
+export async function addTeacherSubject(formData) {
+  await getAuth();
+
+  const teacher_id = parseInt(formData.get("teacher_id"));
+  const subject = formData.get("subject");
+  const className = formData.get("class");
+
+  if (!teacher_id || !subject || !className) redirect(`/teachers/${teacher_id}`);
+
+  await db.insert(schema.teacher_subjects).values({
+    teacher_id,
+    subject,
+    class: className,
+  });
+
+  await setFlash("success", "Subject assigned successfully!");
+  redirect(`/teachers/${teacher_id}`);
 }
