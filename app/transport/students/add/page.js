@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { transport, student_transport, students } from "@/lib/schema";
 import { setFlash } from "@/lib/flash";
 import { assignStudent } from '@/app/actions'

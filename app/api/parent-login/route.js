@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db-drizzle'
+import { db } from '@/lib/db'
 import { parents } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 

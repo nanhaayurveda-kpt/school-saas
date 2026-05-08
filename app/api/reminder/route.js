@@ -1,7 +1,7 @@
 // app/api/reminder/route.js
 
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { eq, and, lte, gt } from "drizzle-orm";
 import { Resend } from "resend";

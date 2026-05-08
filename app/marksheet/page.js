@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { exams, students } from "@/lib/schema";
 
 export default async function MarksheetPage({ searchParams }) {

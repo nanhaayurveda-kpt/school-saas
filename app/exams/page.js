@@ -1,7 +1,7 @@
 // app/exams/page.js
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { exams, results } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import Link from "next/link";

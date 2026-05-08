@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";

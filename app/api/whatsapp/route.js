@@ -1,6 +1,6 @@
 // app/api/whatsapp/route.js
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { students, attendance } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { students, attendance, fees, results, exams, notices } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 

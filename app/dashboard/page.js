@@ -4,7 +4,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { students, teachers, fees, attendance, exams, notices, school_settings } from "@/lib/schema";
 import { sql } from "drizzle-orm";
 

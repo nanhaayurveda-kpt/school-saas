@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { students } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";

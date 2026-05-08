@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { certificates, students, school_settings } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";

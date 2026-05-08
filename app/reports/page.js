@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { students, fees, attendance, results, exams } from "@/lib/schema";
 import { sql, eq } from "drizzle-orm";
 

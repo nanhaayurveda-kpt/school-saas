@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { fees, students } from "@/lib/schema";
 import { setFlash } from "@/lib/flash";
 import { addPayment } from '@/app/actions'

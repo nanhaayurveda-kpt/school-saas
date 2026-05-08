@@ -1,6 +1,6 @@
 // app/api/certificates/route.js  ← CORRECTED
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { certificates } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";

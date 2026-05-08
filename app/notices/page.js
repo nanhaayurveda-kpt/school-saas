@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { notices } from "@/lib/schema";
 import { desc } from "drizzle-orm";
 import Link from "next/link";

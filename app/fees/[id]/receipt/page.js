@@ -1,4 +1,4 @@
-import { db } from '@/lib/db-drizzle'
+import { db } from '@/lib/db'
 import { fees, students, school_settings } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import PrintButton from './PrintButton'

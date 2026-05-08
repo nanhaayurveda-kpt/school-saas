@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { notices } from "@/lib/schema";
 import { setFlash } from "@/lib/flash";
 import { createNotice } from '@/app/actions'

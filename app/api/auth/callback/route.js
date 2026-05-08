@@ -1,6 +1,6 @@
 import { google } from "@/lib/auth";
 import { createSession } from "@/lib/session";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { users, pre_activations as preActivations } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";

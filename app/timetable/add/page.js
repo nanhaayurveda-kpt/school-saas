@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { timetable, students, teachers } from "@/lib/schema";
 import { redirect } from "next/navigation";
 import { setFlash } from "@/lib/flash";

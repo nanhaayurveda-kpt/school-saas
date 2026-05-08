@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { teachers, timetable } from "@/lib/schema";
 import Link from "next/link";
 

@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { transport } from "@/lib/schema";
 import { setFlash } from "@/lib/flash";
 import { addRoute } from '@/app/actions'

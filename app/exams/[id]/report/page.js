@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import PrintButton from "./PrintButton";
-import { db } from "@/lib/db-drizzle";
+import { db } from "@/lib/db";
 import { exams, students, results, school_settings } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
