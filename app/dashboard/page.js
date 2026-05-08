@@ -13,8 +13,9 @@ import {
   exams,
   notices,
   school_settings,
+  users,
 } from "@/lib/schema";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -60,7 +61,17 @@ export default async function DashboardPage() {
     .orderBy(sql`exam_date ASC`)
     .limit(3);
 
-  const settingsRows = await db.select().from(school_settings).limit(1);
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  const settingsRows = user
+    ? await db
+        .select()
+        .from(school_settings)
+        .where(eq(school_settings.user_id, user.id))
+    : [];
   const settings = settingsRows[0] || null;
   const settingsIncomplete =
     !settings?.school_name || !settings?.principal_name;
