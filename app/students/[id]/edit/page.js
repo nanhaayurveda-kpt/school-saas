@@ -35,13 +35,34 @@ export default async function EditStudentPage({ params }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Full Name <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              name="name"
+            <select
+              name="class"
               required
-              defaultValue={s.name}
+              defaultValue={s.class}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            >
+              <option value="">Select...</option>
+              {[
+                "Nursery",
+                "KG",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+              ].map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -135,7 +156,6 @@ export default async function EditStudentPage({ params }) {
                 name="father_name"
                 required
                 defaultValue={s.father_name}
-                
               />
             </div>
             <div>
@@ -150,9 +170,15 @@ export default async function EditStudentPage({ params }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Guardian Name</label>
-              <input type="text" name="guardian_name" defaultValue={s.guardian_name || ""}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Guardian Name
+              </label>
+              <input
+                type="text"
+                name="guardian_name"
+                defaultValue={s.guardian_name || ""}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
           </div>
 
@@ -161,7 +187,11 @@ export default async function EditStudentPage({ params }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Phone <span className="text-red-500">*</span>
               </label>
-              <input type="tel" name="phone" required defaultValue={s.phone}
+              <input
+                type="tel"
+                name="phone"
+                required
+                defaultValue={s.phone}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>

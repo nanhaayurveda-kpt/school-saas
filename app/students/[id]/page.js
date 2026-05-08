@@ -33,10 +33,7 @@ export default async function StudentDetailPage({ params }) {
           >
             Edit
           </Link>
-          <form
-            action={deleteStudent}
-            onSubmit="return confirm('Delete this student?')"
-          >
+          <form action={deleteStudent}>
             <input type="hidden" name="id" value={s.id} />
             <button
               type="submit"
