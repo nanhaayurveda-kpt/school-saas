@@ -78,7 +78,7 @@ export async function addStudent(formData) {
     admission_date: parsed.data.admission_date
       ? new Date(parsed.data.admission_date)
       : new Date(),
-    fee_status: "pending",
+    fee_status: parsed.data.fee_status || "pending",
   });
 
   await setFlash("success", "Student added successfully!");
@@ -241,8 +241,9 @@ const paymentSchema = z.object({
   student_id: z.string().min(1, "Student is required"),
   amount: z.string().min(1, "Amount is required"),
   due_date: z.string().min(1, "Due date is required"),
-  fee_type: z.string().optional(),
+  fee_type: z.string().optional(),  
   academic_year: z.string().optional(),
+  fee_status: z.string().optional(),
   month: z.string().optional(),
   receipt_no: z.string().optional(),
   paid_date: z.string().optional(),
