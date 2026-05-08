@@ -597,11 +597,21 @@ export async function addTeacherSubject(formData) {
   redirect(`/teachers/${teacher_id}`);
 }
 
-// ─── Delete Student ───────────────────────────────────────────────────────────
-
 export async function deleteStudent(formData) {
   await getAuth();
   const id = parseInt(formData.get("id"));
+  await db.delete(schema.fees).where(eq(schema.fees.student_id, id));
+  await db
+    .delete(schema.attendance)
+    .where(eq(schema.attendance.student_id, id));
+  await db.delete(schema.results).where(eq(schema.results.student_id, id));
+  await db.delete(schema.parents).where(eq(schema.parents.student_id, id));
+  await db
+    .delete(schema.student_transport)
+    .where(eq(schema.student_transport.student_id, id));
+  await db
+    .delete(schema.certificates)
+    .where(eq(schema.certificates.student_id, id));
   await db.delete(schema.students).where(eq(schema.students.id, id));
   await setFlash("success", "Student deleted successfully!");
   redirect("/students");
