@@ -132,6 +132,14 @@ export async function importStudents(formData) {
     redirect("/students/import");
   }
 
+  const className = formData.get("class");
+  const section = formData.get("section");
+
+  if (!className) {
+    await setFlash("error", "Please select a class.");
+    redirect("/students/import");
+  }
+
   const lines = csvText.trim().split("\n").filter(Boolean);
   const dataLines = lines[0]?.toLowerCase().includes("name")
     ? lines.slice(1)
@@ -140,15 +148,14 @@ export async function importStudents(formData) {
   let count = 0;
   for (const line of dataLines) {
     const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
-    const [name, className, section, roll_number, father_name, phone] = cols;
-    if (!name || !className) continue;
+    const [name, roll_number, phone] = cols;
+    if (!name) continue;
     try {
       await db.insert(schema.students).values({
         name,
         class: className,
         section: section || "",
         roll_number: roll_number || null,
-        father_name: father_name || null,
         phone: phone || null,
         fee_status: "pending",
       });
@@ -241,7 +248,7 @@ const paymentSchema = z.object({
   student_id: z.string().min(1, "Student is required"),
   amount: z.string().min(1, "Amount is required"),
   due_date: z.string().min(1, "Due date is required"),
-  fee_type: z.string().optional(),  
+  fee_type: z.string().optional(),
   academic_year: z.string().optional(),
   fee_status: z.string().optional(),
   month: z.string().optional(),
