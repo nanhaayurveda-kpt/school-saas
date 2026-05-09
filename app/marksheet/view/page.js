@@ -3,9 +3,11 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { exams, students, results, school_settings } from "@/lib/schema";
+import { exams, students, results, school_settings, users } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
 
 export default async function MarksheetViewPage({ searchParams }) {
@@ -16,7 +18,19 @@ export default async function MarksheetViewPage({ searchParams }) {
 
   if (!selectedClass || !selectedType) notFound();
 
-  const settingsRows = await db.select().from(school_settings).limit(1);
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  const session = token ? await getSession(token) : null;
+  const userResult = session
+    ? await db.select().from(users).where(eq(users.email, session.email))
+    : [];
+  const user = userResult[0] || null;
+  const settingsRows = user
+    ? await db
+        .select()
+        .from(school_settings)
+        .where(eq(school_settings.user_id, user.id))
+    : [];
   const school = settingsRows[0] || {};
 
   const classStudents = await db
@@ -44,7 +58,10 @@ export default async function MarksheetViewPage({ searchParams }) {
       <div>
         <div className="print:hidden flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold text-gray-900">Marksheet</h1>
-          <a href="/marksheet" className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
+          <a
+            href="/marksheet"
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium"
+          >
             ← Back
           </a>
         </div>
@@ -52,7 +69,10 @@ export default async function MarksheetViewPage({ searchParams }) {
           No exams found for Class {selectedClass} — {selectedType}
           {selectedYear ? ` (${selectedYear})` : ""}.
           <br />
-          <a href="/exams/add" className="text-indigo-600 font-medium mt-2 inline-block">
+          <a
+            href="/exams/add"
+            className="text-indigo-600 font-medium mt-2 inline-block"
+          >
             + Schedule Exam
           </a>
         </div>
@@ -86,25 +106,35 @@ export default async function MarksheetViewPage({ searchParams }) {
         <div>
           <h1 className="text-xl font-bold text-gray-900">Marksheet</h1>
           <p className="text-gray-500 text-xs mt-0.5">
-            Class {selectedClass} · {examTypeLabel[selectedType] || selectedType}
+            Class {selectedClass} ·{" "}
+            {examTypeLabel[selectedType] || selectedType}
             {selectedYear ? ` · ${selectedYear}` : ""}
           </p>
         </div>
         <div className="flex gap-2">
           <PrintButton />
-          <a href="/marksheet" className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
+          <a
+            href="/marksheet"
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium"
+          >
             ← Back
           </a>
         </div>
       </div>
 
       {/* Print Area */}
-      <div id="print-area" className="bg-white rounded-xl border border-gray-200 p-4 print:p-6 print:rounded-none print:border-0">
-
+      <div
+        id="print-area"
+        className="bg-white rounded-xl border border-gray-200 p-4 print:p-6 print:rounded-none print:border-0"
+      >
         {/* School Header */}
         <div className="text-center mb-4 border-b border-gray-300 pb-3">
           {school.logo_url && (
-            <img src={school.logo_url} alt="Logo" className="h-14 w-14 object-contain mx-auto mb-1" />
+            <img
+              src={school.logo_url}
+              alt="Logo"
+              className="h-14 w-14 object-contain mx-auto mb-1"
+            />
           )}
           <h2 className="text-lg font-bold text-gray-900 uppercase">
             {school.school_name || "School Name"}
@@ -113,7 +143,8 @@ export default async function MarksheetViewPage({ searchParams }) {
             <p className="text-xs text-gray-500">{school.address}</p>
           )}
           <h3 className="text-sm font-bold text-gray-800 mt-2 underline underline-offset-2">
-            {examTypeLabel[selectedType] || selectedType} — Class {selectedClass}
+            {examTypeLabel[selectedType] || selectedType} — Class{" "}
+            {selectedClass}
             {selectedYear ? ` (${selectedYear})` : ""}
           </h3>
         </div>
@@ -123,25 +154,47 @@ export default async function MarksheetViewPage({ searchParams }) {
           <table className="w-full text-xs border-collapse border border-gray-300">
             <thead>
               <tr className="bg-indigo-600 text-white">
-                <th className="border border-gray-300 px-2 py-2 text-left w-6">#</th>
-                <th className="border border-gray-300 px-2 py-2 text-left min-w-[120px]">Student Name</th>
-                <th className="border border-gray-300 px-2 py-2 text-center w-12">Roll</th>
+                <th className="border border-gray-300 px-2 py-2 text-left w-6">
+                  #
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-left min-w-[120px]">
+                  Student Name
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-center w-12">
+                  Roll
+                </th>
                 {classExams.map((exam) => (
-                  <th key={exam.id} className="border border-gray-300 px-2 py-2 text-center min-w-[60px]">
+                  <th
+                    key={exam.id}
+                    className="border border-gray-300 px-2 py-2 text-center min-w-[60px]"
+                  >
                     {exam.subject}
-                    <div className="font-normal text-indigo-200">({exam.max_marks})</div>
+                    <div className="font-normal text-indigo-200">
+                      ({exam.max_marks})
+                    </div>
                   </th>
                 ))}
-                <th className="border border-gray-300 px-2 py-2 text-center w-16">Total</th>
-                <th className="border border-gray-300 px-2 py-2 text-center w-12">%</th>
-                <th className="border border-gray-300 px-2 py-2 text-center w-12">Grade</th>
-                <th className="border border-gray-300 px-2 py-2 text-center w-16">Result</th>
+                <th className="border border-gray-300 px-2 py-2 text-center w-16">
+                  Total
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-center w-12">
+                  %
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-center w-12">
+                  Grade
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-center w-16">
+                  Result
+                </th>
               </tr>
             </thead>
             <tbody>
               {classStudents.map((student, idx) => {
                 const studentResults = resultsMap[student.id] || {};
-                const totalMax = classExams.reduce((sum, e) => sum + e.max_marks, 0);
+                const totalMax = classExams.reduce(
+                  (sum, e) => sum + e.max_marks,
+                  0,
+                );
                 const totalObtained = classExams.reduce((sum, e) => {
                   const r = studentResults[e.id];
                   return sum + (r ? r.marks_obtained : 0);
@@ -161,7 +214,10 @@ export default async function MarksheetViewPage({ searchParams }) {
                   else if (pct >= 60) grade = "B";
                   else if (pct >= 45) grade = "C";
                   else if (pct >= 33) grade = "D";
-                  else { grade = "F"; passed = false; }
+                  else {
+                    grade = "F";
+                    passed = false;
+                  }
                 }
 
                 classExams.forEach((e) => {
@@ -170,15 +226,27 @@ export default async function MarksheetViewPage({ searchParams }) {
                 });
 
                 return (
-                  <tr key={student.id} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                    <td className="border border-gray-200 px-2 py-1.5 text-center text-gray-500">{idx + 1}</td>
-                    <td className="border border-gray-200 px-2 py-1.5 font-medium text-gray-900">{student.name}</td>
-                    <td className="border border-gray-200 px-2 py-1.5 text-center text-gray-600">{student.roll_number || "—"}</td>
+                  <tr
+                    key={student.id}
+                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                  >
+                    <td className="border border-gray-200 px-2 py-1.5 text-center text-gray-500">
+                      {idx + 1}
+                    </td>
+                    <td className="border border-gray-200 px-2 py-1.5 font-medium text-gray-900">
+                      {student.name}
+                    </td>
+                    <td className="border border-gray-200 px-2 py-1.5 text-center text-gray-600">
+                      {student.roll_number || "—"}
+                    </td>
                     {classExams.map((exam) => {
                       const r = studentResults[exam.id];
                       const failed = r && r.marks_obtained < exam.passing_marks;
                       return (
-                        <td key={exam.id} className={`border border-gray-200 px-2 py-1.5 text-center font-medium ${failed ? "text-red-600" : "text-gray-800"}`}>
+                        <td
+                          key={exam.id}
+                          className={`border border-gray-200 px-2 py-1.5 text-center font-medium ${failed ? "text-red-600" : "text-gray-800"}`}
+                        >
                           {r ? r.marks_obtained : "—"}
                         </td>
                       );
@@ -189,8 +257,12 @@ export default async function MarksheetViewPage({ searchParams }) {
                     <td className="border border-gray-200 px-2 py-1.5 text-center text-gray-700">
                       {percentage !== null ? `${percentage}%` : "—"}
                     </td>
-                    <td className="border border-gray-200 px-2 py-1.5 text-center font-bold text-indigo-700">{grade}</td>
-                    <td className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-xs ${passed ? "text-green-600" : "text-red-600"}`}>
+                    <td className="border border-gray-200 px-2 py-1.5 text-center font-bold text-indigo-700">
+                      {grade}
+                    </td>
+                    <td
+                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-xs ${passed ? "text-green-600" : "text-red-600"}`}
+                    >
                       {passed ? "Pass" : "Fail"}
                     </td>
                   </tr>
@@ -199,13 +271,24 @@ export default async function MarksheetViewPage({ searchParams }) {
             </tbody>
             <tfoot>
               <tr className="bg-gray-100 font-medium">
-                <td colSpan={3} className="border border-gray-300 px-2 py-1.5 text-xs text-gray-600">Max Marks</td>
+                <td
+                  colSpan={3}
+                  className="border border-gray-300 px-2 py-1.5 text-xs text-gray-600"
+                >
+                  Max Marks
+                </td>
                 {classExams.map((exam) => (
-                  <td key={exam.id} className="border border-gray-300 px-2 py-1.5 text-center text-xs text-gray-600">
+                  <td
+                    key={exam.id}
+                    className="border border-gray-300 px-2 py-1.5 text-center text-xs text-gray-600"
+                  >
                     {exam.max_marks}
                   </td>
                 ))}
-                <td colSpan={4} className="border border-gray-300 px-2 py-1.5 text-center text-xs text-gray-600">
+                <td
+                  colSpan={4}
+                  className="border border-gray-300 px-2 py-1.5 text-center text-xs text-gray-600"
+                >
                   Total: {classExams.reduce((s, e) => s + e.max_marks, 0)}
                 </td>
               </tr>
