@@ -236,6 +236,7 @@ export async function addTeacher(formData) {
     qualification: formData.get("qualification"),
     phone: formData.get("phone"),
     email: formData.get("email"),
+    pin: formData.get("pin"),
   });
 
   await setFlash("success", "Teacher added successfully!");
