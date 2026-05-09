@@ -63,8 +63,8 @@ export default async function PromotePage() {
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4 text-xs text-yellow-800">
-        ⚠️  action स selected class के students  अगली class में move कर
-         एक बार हो जाने के बाद undo  होगा।
+        ⚠️ This action will move all students of the selected class to the next
+        class. This cannot be undone.
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-4">
@@ -118,7 +118,7 @@ export default async function PromotePage() {
               required
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="">Promote  किस class में जागे...</option>
+              <option value="">Promote किस class में जागे...</option>
               {allClassOptions.map((c) => (
                 <option key={c} value={c}>
                   {c}

@@ -671,3 +671,20 @@ export async function deleteTeacherSubject(formData) {
   await setFlash("success", "Subject removed!");
   redirect(`/teachers/${teacher_id}`);
 }
+
+export async function markFeePaid(formData) {
+  await getAuth();
+  const fee_id = parseInt(formData.get("fee_id"));
+  const paid_date = formData.get("paid_date");
+  const receipt_no = formData.get("receipt_no") || null;
+  await db
+    .update(schema.fees)
+    .set({
+      status: "paid",
+      paid_date: new Date(paid_date),
+      receipt_no,
+    })
+    .where(eq(schema.fees.id, fee_id));
+  await setFlash("success", "Fee marked as paid!");
+  redirect(`/fees/${fee_id}/receipt`);
+}
