@@ -39,7 +39,31 @@ export default async function MarksheetViewPage({ searchParams }) {
     .where(eq(students.class, selectedClass))
     .orderBy(students.roll_number, students.name);
 
-  if (classStudents.length === 0) notFound();
+  if (classStudents.length === 0) {
+    return (
+      <div>
+        <div className="print:hidden flex justify-between items-center mb-4">
+          <h1 className="text-xl font-bold text-gray-900">Marksheet</h1>
+          <a
+            href="/marksheet"
+            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            ← Back
+          </a>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-400 text-sm">
+          No students found in Class {selectedClass}.
+          <br />
+          <a
+            href="/students/add"
+            className="text-indigo-600 font-medium mt-2 inline-block"
+          >
+            + Add Students
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   const conditions = [
     eq(exams.class, selectedClass),
