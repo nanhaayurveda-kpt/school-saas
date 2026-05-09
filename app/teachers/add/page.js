@@ -1,7 +1,3 @@
-import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { teachers } from "@/lib/schema";
-import { setFlash } from "@/lib/flash";
 import { addTeacher } from "@/app/actions";
 
 export default function AddTeacherPage() {
