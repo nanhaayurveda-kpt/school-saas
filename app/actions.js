@@ -591,6 +591,7 @@ export async function addTeacherSubject(formData) {
   const teacher_id = parseInt(formData.get("teacher_id"));
   const subject = formData.get("subject");
   const className = formData.get("class");
+  const section = formData.get("section") || null;
 
   if (!teacher_id || !subject || !className)
     redirect(`/teachers/${teacher_id}`);
@@ -599,6 +600,7 @@ export async function addTeacherSubject(formData) {
     teacher_id,
     subject,
     class: className,
+    section,
   });
 
   await setFlash("success", "Subject assigned successfully!");
@@ -652,4 +654,19 @@ export async function updateTeacher(formData) {
     .where(eq(schema.teachers.id, id));
   await setFlash("success", "Teacher updated successfully!");
   redirect(`/teachers/${id}`);
+}
+
+export async function deleteTeacherSubject(formData) {
+  await getAuth();
+  const id = parseInt(formData.get("id"));
+  const result = await db
+    .select()
+    .from(schema.teacher_subjects)
+    .where(eq(schema.teacher_subjects.id, id));
+  const teacher_id = result[0]?.teacher_id;
+  await db
+    .delete(schema.teacher_subjects)
+    .where(eq(schema.teacher_subjects.id, id));
+  await setFlash("success", "Subject removed!");
+  redirect(`/teachers/${teacher_id}`);
 }
