@@ -8,7 +8,10 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 
 export default async function TransportPage() {
-  const allRoutes = await db.select().from(transport).orderBy(transport.route_name);
+  const allRoutes = await db
+    .select()
+    .from(transport)
+    .orderBy(transport.route_name);
 
   const allAssignments = await db
     .select({
@@ -20,7 +23,7 @@ export default async function TransportPage() {
       student_class: students.class,
       student_section: students.section,
       roll_number: students.roll_number,
-      parent_phone: students.parent_phone,
+      phone: students.phone,
     })
     .from(student_transport)
     .leftJoin(students, eq(student_transport.student_id, students.id));
@@ -44,7 +47,9 @@ export default async function TransportPage() {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Transport</h1>
-          <p className="text-gray-500 text-xs mt-0.5">Routes · Stops · Students</p>
+          <p className="text-gray-500 text-xs mt-0.5">
+            Routes · Stops · Students
+          </p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -73,7 +78,9 @@ export default async function TransportPage() {
           <p className="text-xs text-green-500">Students</p>
         </div>
         <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-3 text-center">
-          <p className="text-lg font-bold text-yellow-700">₹{totalCollection}</p>
+          <p className="text-lg font-bold text-yellow-700">
+            ₹{totalCollection}
+          </p>
           <p className="text-xs text-yellow-600">Monthly</p>
         </div>
       </div>
@@ -88,14 +95,23 @@ export default async function TransportPage() {
           {allRoutes.map((route) => {
             const routeStudents = assignMap[route.id] || [];
             return (
-              <div key={route.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+              <div
+                key={route.id}
+                className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden"
+              >
                 <div className="bg-indigo-600 px-4 py-2.5 flex justify-between items-center">
                   <div>
-                    <span className="text-white font-bold text-sm">{route.route_name}</span>
-                    <span className="text-indigo-200 text-xs ml-2">— {route.stop_name}</span>
+                    <span className="text-white font-bold text-sm">
+                      {route.route_name}
+                    </span>
+                    <span className="text-indigo-200 text-xs ml-2">
+                      — {route.stop_name}
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-indigo-200 text-xs">₹{route.monthly_fee}/mo</span>
+                    <span className="text-indigo-200 text-xs">
+                      ₹{route.monthly_fee}/mo
+                    </span>
                     <span className="bg-white text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">
                       {routeStudents.length} students
                     </span>
@@ -110,29 +126,45 @@ export default async function TransportPage() {
                 )}
 
                 {routeStudents.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-gray-400">No students assigned.</div>
+                  <div className="px-4 py-3 text-xs text-gray-400">
+                    No students assigned.
+                  </div>
                 ) : (
                   <div className="divide-y divide-gray-50">
                     {routeStudents.map((a, idx) => {
-                      const phone = a.parent_phone?.replace(/\D/g, "") || "";
-                      const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
+                      const phone = a.phone?.replace(/\D/g, "") || "";
+                      const fullPhone = phone.startsWith("91")
+                        ? phone
+                        : `91${phone}`;
                       const msg = encodeURIComponent(
-                        `Dear Parent, transport fee of ₹${route.monthly_fee} for ${a.student_name} is due. — School`
+                        `Dear Parent, transport fee of ₹${route.monthly_fee} for ${a.student_name} is due. — School`,
                       );
                       return (
-                        <div key={a.id} className="px-4 py-2.5 flex justify-between items-center">
+                        <div
+                          key={a.id}
+                          className="px-4 py-2.5 flex justify-between items-center"
+                        >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-xs text-gray-400 w-5 shrink-0">{idx + 1}.</span>
+                            <span className="text-xs text-gray-400 w-5 shrink-0">
+                              {idx + 1}.
+                            </span>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{a.student_name}</p>
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {a.student_name}
+                              </p>
                               <p className="text-xs text-gray-400">
-                                Class {a.student_class} {a.student_section || ""}
-                                {a.roll_number ? ` · Roll ${a.roll_number}` : ""}
+                                Class {a.student_class}{" "}
+                                {a.student_section || ""}
+                                {a.roll_number
+                                  ? ` · Roll ${a.roll_number}`
+                                  : ""}
                               </p>
                             </div>
                           </div>
                           <div className="ml-2 shrink-0 text-right">
-                            <p className="text-xs font-bold text-green-700">₹{route.monthly_fee}</p>
+                            <p className="text-xs font-bold text-green-700">
+                              ₹{route.monthly_fee}
+                            </p>
                             <div className="flex flex-col gap-0.5 items-end">
                               <Link
                                 href={`/transport/receipt?student_id=${a.student_id}`}
@@ -140,7 +172,7 @@ export default async function TransportPage() {
                               >
                                 🖨️ Receipt
                               </Link>
-                              {a.parent_phone && (
+                              {a.phone && (
                                 <a
                                   href={`https://wa.me/${fullPhone}?text=${msg}`}
                                   target="_blank"
