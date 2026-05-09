@@ -27,7 +27,22 @@ export default async function ExamsPage({ searchParams }) {
     .from(exams)
     .orderBy(sql`${exams.exam_date} DESC`);
 
-  const classes = [...new Set(allExams.map((e) => e.class).filter(Boolean))].sort();
+  const classes = [
+    "Nursery",
+    "KG",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+  ];
 
   const filtered = allExams.filter((e) => {
     const matchClass = !filterClass || e.class === filterClass;
@@ -59,7 +74,8 @@ export default async function ExamsPage({ searchParams }) {
         <div>
           <h1 className="text-xl font-bold text-gray-900">Exams & Results</h1>
           <p className="text-gray-500 text-xs mt-0.5">
-            {allExams.length} total · {upcoming.length} upcoming · {past.length} past
+            {allExams.length} total · {upcoming.length} upcoming · {past.length}{" "}
+            past
           </p>
         </div>
         <Link
@@ -112,7 +128,9 @@ export default async function ExamsPage({ searchParams }) {
         >
           <option value="">All Classes</option>
           {classes.map((c) => (
-            <option key={c} value={c}>Class {c}</option>
+            <option key={c} value={c}>
+              Class {c}
+            </option>
           ))}
         </select>
         <button
@@ -122,7 +140,12 @@ export default async function ExamsPage({ searchParams }) {
           Filter
         </button>
         {(filterClass || filterType) && (
-          <a href="/exams" className="bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm">✕</a>
+          <a
+            href="/exams"
+            className="bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm"
+          >
+            ✕
+          </a>
         )}
       </form>
 
@@ -147,9 +170,13 @@ export default async function ExamsPage({ searchParams }) {
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <p className="text-sm font-semibold text-gray-900">{exam.name}</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {exam.name}
+                      </p>
                       {exam.exam_type && (
-                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${TYPE_COLORS[exam.exam_type] || "bg-gray-100 text-gray-600"}`}>
+                        <span
+                          className={`px-2 py-0.5 text-xs rounded-full font-medium ${TYPE_COLORS[exam.exam_type] || "bg-gray-100 text-gray-600"}`}
+                        >
                           {TYPE_LABELS[exam.exam_type] || exam.exam_type}
                         </span>
                       )}
@@ -167,7 +194,8 @@ export default async function ExamsPage({ searchParams }) {
                       Class {exam.class} · {exam.subject}
                     </p>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      📅 {exam.exam_date} · Max: {exam.max_marks} · Pass: {exam.passing_marks}
+                      📅 {exam.exam_date} · Max: {exam.max_marks} · Pass:{" "}
+                      {exam.passing_marks}
                       {exam.academic_year ? ` · ${exam.academic_year}` : ""}
                     </p>
                     {hasResults && (

@@ -1,14 +1,9 @@
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db";
-import { exams, students } from "@/lib/schema";
-import { redirect } from "next/navigation";
-import { setFlash } from "@/lib/flash";
-import { createExam } from '@/app/actions'
+import { createExam } from "@/app/actions";
 
 export default async function AddExamPage() {
-  const allStudents = await db.select().from(students);
-  const classes = [...new Set(allStudents.map((s) => s.class))].sort();
+  const classes = ["Nursery","KG","1","2","3","4","5","6","7","8","9","10","11","12"];
 
   return (
     <div>
@@ -19,12 +14,22 @@ export default async function AddExamPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-2xl">
         <form action={createExam} className="space-y-6">
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Exam Name <span className="text-red-500">*</span>
             </label>
-            <input type="text" name="name" required placeholder="e.g., Half Yearly Exam 2025"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <select name="name" required
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">Select...</option>
+              <option value="Unit Test 1">Unit Test 1</option>
+              <option value="Unit Test 2">Unit Test 2</option>
+              <option value="Unit Test 3">Unit Test 3</option>
+              <option value="Quarterly Exam">Quarterly Exam</option>
+              <option value="Half Yearly Exam">Half Yearly Exam</option>
+              <option value="Annual Exam">Annual Exam</option>
+              <option value="Pre-Board Exam">Pre-Board Exam</option>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -32,16 +37,13 @@ export default async function AddExamPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Class <span className="text-red-500">*</span>
               </label>
-              {classes.length > 0 ? (
-                <select name="class" required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="">Select class</option>
-                  {classes.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              ) : (
-                <input type="text" name="class" required placeholder="e.g., Class 10"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              )}
+              <select name="class" required
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Select...</option>
+                {classes.map((c) => (
+                  <option key={c} value={c}>Class {c}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
