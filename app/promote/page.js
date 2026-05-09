@@ -118,7 +118,7 @@ export default async function PromotePage() {
               required
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="">Promote किस class में जागे...</option>
+              <option value="">Select destination class...</option>
               {allClassOptions.map((c) => (
                 <option key={c} value={c}>
                   {c}

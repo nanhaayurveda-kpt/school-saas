@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { transport, student_transport, students } from "@/lib/schema";
 import { setFlash } from "@/lib/flash";
-import { assignStudent } from '@/app/actions'
+import { assignStudent } from "@/app/actions";
 
 export default async function AssignTransportPage() {
   const allStudents = await db
@@ -21,19 +21,19 @@ export default async function AssignTransportPage() {
 
   const today = new Date().toISOString().split("T")[0];
   const now = new Date();
-  const baseYear = now.getMonth() < 3 ? now.getFullYear() - 1 : now.getFullYear();
+  const baseYear =
+    now.getMonth() < 3 ? now.getFullYear() - 1 : now.getFullYear();
   const academicYear = `${baseYear}-${String(baseYear + 1).slice(-2)}`;
 
   return (
     <div>
       <div className="mb-4">
         <h1 className="text-xl font-bold text-gray-900">Assign Transport</h1>
-        <p className="text-gray-500 text-xs mt-0.5">Student  route assign </p>
+        <p className="text-gray-500 text-xs mt-0.5">Student route assign </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <form action={assignStudent} className="space-y-4">
-
           {/* Student */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -61,9 +61,9 @@ export default async function AssignTransportPage() {
             </label>
             {allRoutes.length === 0 ? (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2.5 text-sm text-yellow-700">
-                no route  है।{" "}
+                No routes added yet.{" "}
                 <a href="/transport/add" className="font-medium underline">
-                  first route add 
+                  first route add
                 </a>
               </div>
             ) : (
