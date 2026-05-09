@@ -41,14 +41,14 @@ export default function AddTeacherPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 6-Digit PIN <span className="text-red-500">*</span>
               </label>
-              <input 
-                type="text" 
-                name="pin" 
-                required 
-                maxLength={6} 
-                minLength={6} 
+              <input
+                type="text"
+                name="pin"
+                required
+                maxLength={6}
+                minLength={6}
                 placeholder="e.g. 123456"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -79,6 +79,10 @@ export default function AddTeacherPage() {
           </div>
 
           {/* Buttons */}
+          <p className="text-xs text-gray-400 pt-2">
+            After saving, go to the teacher's profile to assign subjects and
+            classes.
+          </p>
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
