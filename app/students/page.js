@@ -205,7 +205,9 @@ export default async function StudentsPage({ searchParams }) {
                               <span
                                 className={`px-1.5 py-0.5 text-xs rounded-full font-medium ${student.fee_status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
                               >
-                                {student.fee_status === "paid" ? "✓" : "₹"}
+                                {student.fee_status === "paid"
+                                  ? "Paid"
+                                  : "Pending"}
                               </span>
                               <Link
                                 href={`/students/${student.id}/edit`}
