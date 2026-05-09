@@ -79,7 +79,7 @@ export default function AddTeacherPage() {
           </div>
 
           {/* Buttons */}
-          <p className="text-xs text-gray-400 pt-2">
+          <p className="text-xs font-bold text-pink-500 pt-2">
             After saving, go to the teacher's profile to assign subjects and
             classes.
           </p>
