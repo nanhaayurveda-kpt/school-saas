@@ -624,3 +624,32 @@ export async function deleteStudent(formData) {
   await setFlash("success", "Student deleted successfully!");
   redirect("/students");
 }
+
+// ─── Delete Teacher ───────────────────────────────────────────────────────────
+
+export async function deleteTeacher(formData) {
+  await getAuth();
+  const id = parseInt(formData.get("id"));
+  await db
+    .delete(schema.teacher_subjects)
+    .where(eq(schema.teacher_subjects.teacher_id, id));
+  await db.delete(schema.teachers).where(eq(schema.teachers.id, id));
+  await setFlash("success", "Teacher deleted successfully!");
+  redirect("/teachers");
+}
+
+export async function updateTeacher(formData) {
+  await getAuth();
+  const id = parseInt(formData.get("id"));
+  await db
+    .update(schema.teachers)
+    .set({
+      name: formData.get("name"),
+      qualification: formData.get("qualification") || null,
+      phone: formData.get("phone") || null,
+      email: formData.get("email") || null,
+    })
+    .where(eq(schema.teachers.id, id));
+  await setFlash("success", "Teacher updated successfully!");
+  redirect(`/teachers/${id}`);
+}
