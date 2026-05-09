@@ -10,6 +10,7 @@ export default function AddTeacherPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-2xl">
         <form action={addTeacher} className="space-y-6">
+          {/* Name Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Full Name <span className="text-red-500">*</span>
@@ -22,6 +23,7 @@ export default function AddTeacherPage() {
             />
           </div>
 
+          {/* Qualification and PIN Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -39,19 +41,19 @@ export default function AddTeacherPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 6-Digit PIN <span className="text-red-500">*</span>
               </label>
-              <input type="text" name="pin" required maxLength={6} minLength={6} placeholder="e.g. 123456"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input 
+                type="text" 
+                name="pin" 
+                required 
+                maxLength={6} 
+                minLength={6} 
+                placeholder="e.g. 123456"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+              />
             </div>
           </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              6-Digit PIN <span className="text-red-500">*</span>
-            </label>
-            <input type="text" name="pin" required maxLength={6} minLength={6} placeholder="e.g. 123456"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-          </div>
 
+          {/* Phone and Email Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -76,6 +78,7 @@ export default function AddTeacherPage() {
             </div>
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
