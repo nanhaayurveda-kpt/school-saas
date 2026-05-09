@@ -35,9 +35,24 @@ export default function AddTeacherPage() {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                6-Digit PIN <span className="text-red-500">*</span>
+              </label>
+              <input type="text" name="pin" required maxLength={6} minLength={6} placeholder="e.g. 123456"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              6-Digit PIN <span className="text-red-500">*</span>
+            </label>
+            <input type="text" name="pin" required maxLength={6} minLength={6} placeholder="e.g. 123456"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
           </div>
 
-          <div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Phone Number <span className="text-red-500">*</span>
@@ -51,12 +66,11 @@ export default function AddTeacherPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
+                Email
               </label>
               <input
                 type="email"
                 name="email"
-                required
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
