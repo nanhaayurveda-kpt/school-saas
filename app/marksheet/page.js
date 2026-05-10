@@ -14,7 +14,8 @@ export default async function MarksheetPage({ searchParams }) {
   const allExams = await db.select().from(exams);
   const classes = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",

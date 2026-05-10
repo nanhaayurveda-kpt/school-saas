@@ -3,7 +3,8 @@ import { addStudent } from "@/app/actions";
 export default async function AddStudentPage() {
   const classes = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",

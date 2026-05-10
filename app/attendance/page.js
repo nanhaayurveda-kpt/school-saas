@@ -15,7 +15,8 @@ export default async function AttendancePage({ searchParams }) {
 
   const classes = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",

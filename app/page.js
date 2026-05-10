@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 
+const SCHOOL_EXE_URL = "https://github.com/kp1153/school-saas/releases/download/v1.0.0/EduSaaS%20School%20Setup%200.1.0.exe";
+
 const features = [
   {
     icon: "🎓",
@@ -123,16 +125,23 @@ export default async function HomePage() {
           <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-8">
             Students · Fees · Attendance · Exams · Certificates · Reports — all in one place.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <Link href="/login"
               className="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-medium text-sm shadow-sm">
               Admin Login →
             </Link>
+            <a href={SCHOOL_EXE_URL}
+              className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-700 font-medium text-sm shadow-sm">
+              🖥️ Download Windows App
+            </a>
             <Link href="/parent/login"
               className="bg-white text-indigo-600 px-8 py-3 rounded-lg hover:bg-indigo-50 font-medium text-sm border border-indigo-200">
               Guardian Login
             </Link>
           </div>
+          <p className="text-xs text-gray-400 mt-3">
+            To install on Android: Chrome → ⋮ → Add to Home Screen
+          </p>
         </div>
 
         {/* Features */}

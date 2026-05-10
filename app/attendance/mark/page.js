@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { students, attendance } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import AttendanceForm from './AttendanceForm'
+import AttendanceForm from "./AttendanceForm";
 
 export default async function MarkAttendancePage({ searchParams }) {
   const params = await searchParams;
@@ -12,15 +12,36 @@ export default async function MarkAttendancePage({ searchParams }) {
   const selectedClass = params?.class || "";
 
   const allStudents = await db.select().from(students);
-  const classes = ["Nursery","KG","1","2","3","4","5","6","7","8","9","10","11","12"];
+  const classes = [
+    "Nursery",
+    "LKG",
+    "UKG",    
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+  ];
 
   const filteredStudents = selectedClass
     ? allStudents.filter((s) => s.class === selectedClass)
     : allStudents;
 
-  const existing = await db.select().from(attendance).where(eq(attendance.date, selectedDate));
+  const existing = await db
+    .select()
+    .from(attendance)
+    .where(eq(attendance.date, selectedDate));
   const attendanceMap = {};
-  existing.forEach((a) => { attendanceMap[a.student_id] = a.status; });
+  existing.forEach((a) => {
+    attendanceMap[a.student_id] = a.status;
+  });
 
   const alreadyMarked = existing.length > 0;
 
@@ -41,8 +62,12 @@ export default async function MarkAttendancePage({ searchParams }) {
     return as_.localeCompare(bs);
   });
 
-  const presentCount = filteredStudents.filter((s) => attendanceMap[s.id] === "present").length;
-  const absentCount = filteredStudents.filter((s) => attendanceMap[s.id] === "absent").length;
+  const presentCount = filteredStudents.filter(
+    (s) => attendanceMap[s.id] === "present",
+  ).length;
+  const absentCount = filteredStudents.filter(
+    (s) => attendanceMap[s.id] === "absent",
+  ).length;
 
   return (
     <div>
@@ -56,19 +81,33 @@ export default async function MarkAttendancePage({ searchParams }) {
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-xs text-gray-500 mb-1">Date</label>
-              <input type="date" name="date" defaultValue={selectedDate}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input
+                type="date"
+                name="date"
+                defaultValue={selectedDate}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
             </div>
             <div className="flex-1">
               <label className="block text-xs text-gray-500 mb-1">Class</label>
-              <select name="class" defaultValue={selectedClass}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <select
+                name="class"
+                defaultValue={selectedClass}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
                 <option value="">All Classes</option>
-                {classes.map((c) => <option key={c} value={c}>Class {c}</option>)}
+                {classes.map((c) => (
+                  <option key={c} value={c}>
+                    Class {c}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
-          <button type="submit" className="w-full bg-gray-800 text-white py-2 rounded-lg text-sm font-medium">
+          <button
+            type="submit"
+            className="w-full bg-gray-800 text-white py-2 rounded-lg text-sm font-medium"
+          >
             Filter
           </button>
         </form>
@@ -76,8 +115,11 @@ export default async function MarkAttendancePage({ searchParams }) {
 
       {alreadyMarked && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 mb-4 text-xs text-yellow-800">
-          ⚠️ Attendance already marked for this date — edit below and save again.
-          <span className="ml-2 font-semibold">P: {presentCount} · A: {absentCount}</span>
+          ⚠️ Attendance already marked for this date — edit below and save
+          again.
+          <span className="ml-2 font-semibold">
+            P: {presentCount} · A: {absentCount}
+          </span>
         </div>
       )}
 

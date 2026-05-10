@@ -11,7 +11,8 @@ export default async function PromotePage() {
   const allStudents = await db.select().from(students);
   const classes = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",
@@ -38,7 +39,8 @@ export default async function PromotePage() {
 
   const allClassOptions = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",

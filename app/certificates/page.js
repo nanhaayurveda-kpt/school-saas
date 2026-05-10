@@ -28,7 +28,8 @@ export default async function CertificatesPage({ searchParams }) {
 
   const classes = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",
