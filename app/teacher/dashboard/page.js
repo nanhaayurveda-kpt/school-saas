@@ -46,16 +46,16 @@ export default async function TeacherDashboard() {
             <div className="text-gray-400 text-xs mt-1">View & add students</div>
           </Link>
 
-          <Link href="/teacher/fees" className="bg-white rounded-xl border border-indigo-100 p-6 text-center shadow-sm hover:shadow-md transition">
-            <div className="text-4xl mb-2">💰</div>
-            <div className="font-bold text-gray-800 text-sm">Fees</div>
-            <div className="text-gray-400 text-xs mt-1">Record fee payments</div>
-          </Link>
-
           <Link href="/teacher/exams" className="bg-white rounded-xl border border-indigo-100 p-6 text-center shadow-sm hover:shadow-md transition">
             <div className="text-4xl mb-2">📝</div>
             <div className="font-bold text-gray-800 text-sm">Exams & Results</div>
             <div className="text-gray-400 text-xs mt-1">Enter marks</div>
+          </Link>
+
+          <Link href="/teacher/homework" className="bg-white rounded-xl border border-indigo-100 p-6 text-center shadow-sm hover:shadow-md transition">
+            <div className="text-4xl mb-2">📚</div>
+            <div className="font-bold text-gray-800 text-sm">Homework</div>
+            <div className="text-gray-400 text-xs mt-1">Assign homework</div>
           </Link>
         </div>
       </div>

@@ -3,8 +3,9 @@ export const dynamic = "force-dynamic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { students, attendance, fees, results, exams, notices } from "@/lib/schema";
+import { students, attendance, fees, results, exams, notices, homeworks } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import Link from "next/link";
 
 export default async function StudentDashboardPage() {
   const cookieStore = await cookies();
@@ -37,6 +38,14 @@ export default async function StudentDashboardPage() {
     .from(results)
     .leftJoin(exams, eq(results.exam_id, exams.id))
     .where(eq(results.student_id, student.id));
+
+  const myHomeworks = await db
+    .select()
+    .from(homeworks)
+    .where(eq(homeworks.class, student.class))
+    .orderBy(homeworks.created_at);
+
+  const recentHomeworks = myHomeworks.slice(0, 5);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,6 +83,27 @@ export default async function StudentDashboardPage() {
             <div className="text-sm text-gray-500 mt-1">Exams Appeared</div>
           </div>
         </div>
+
+        {recentHomeworks.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h2 className="font-bold text-gray-800">📚 Homework</h2>
+              <Link href="/student/homework" className="text-indigo-600 text-sm hover:underline">View All →</Link>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {recentHomeworks.map((hw) => (
+                <div key={hw.id} className="px-6 py-4 flex justify-between items-start">
+                  <div>
+                    <div className="font-medium text-gray-900 text-sm">{hw.title}</div>
+                    <div className="text-indigo-600 text-xs mt-1">{hw.subject}{hw.section ? ` (${hw.section})` : ""}</div>
+                    {hw.description && <div className="text-gray-500 text-xs mt-1">{hw.description}</div>}
+                  </div>
+                  <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg whitespace-nowrap ml-4">Due: {hw.due_date}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {examResults.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
