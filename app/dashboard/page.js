@@ -230,7 +230,11 @@ export default async function DashboardPage() {
               { href: "/fees/add", label: "💰 Record Fee" },
               {
                 href: `/attendance/mark?date=${today}`,
-                label: "✅ Attendance",
+                label: "✅ Student Attendance",
+              },
+              {
+                href: `/teacher-attendance?date=${today}`,
+                label: "👨‍🏫 Teacher Attendance",
               },
               { href: "/exams/add", label: "📝 Schedule Exam" },
               { href: "/notices/add", label: "📋 Post Notice" },
