@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 
-const SCHOOL_EXE_URL = "https://github.com/kp1153/school-saas/releases/download/v1.0.0/EduSaaS%20School%20Setup%200.1.0.exe";
+const SCHOOL_EXE_URL =
+  "https://github.com/kp1153/school-saas/releases/download/v1.0.0/EduSaaS%20School%20Setup%200.1.0.exe";
 
 const features = [
   {
@@ -42,11 +43,7 @@ const features = [
     title: "Certificates",
     desc: "Transfer Certificate, Character, Bonafide and Birth Certificate — generated in one click with school name, logo and Principal's name. Ready to print.",
   },
-  {
-    icon: "👨‍👩‍👧",
-    title: "Guardian Portal",
-    desc: "Guardians check their child's fees, attendance and exam results from their mobile — without coming to school.",
-  },
+
   {
     icon: "🚌",
     title: "Transport Management",
@@ -111,7 +108,6 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
       <div className="max-w-5xl mx-auto px-4 py-12">
-
         {/* Hero */}
         <div className="text-center mb-14">
           <div className="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-5">
@@ -123,21 +119,28 @@ export default async function HomePage() {
             <span className="text-indigo-600">In One Place — On Mobile</span>
           </h1>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-8">
-            Students · Fees · Attendance · Exams · Certificates · Reports — all in one place.
+            Students · Fees · Attendance · Exams · Certificates · Reports — all
+            in one place.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
-            <Link href="/login"
-              className="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-medium text-sm shadow-sm">
+            <Link
+              href="/login"
+              className="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-medium text-sm shadow-sm"
+            >
               Admin Login →
             </Link>
-            <a href={SCHOOL_EXE_URL}
-              className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-700 font-medium text-sm shadow-sm">
+            <Link
+              href="/teacher-login"
+              className="bg-yellow-500 text-white px-8 py-3 rounded-lg hover:bg-yellow-600 font-medium text-sm shadow-sm"
+            >
+              🔑 Teacher Login
+            </Link>
+            <a
+              href={SCHOOL_EXE_URL}
+              className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-700 font-medium text-sm shadow-sm"
+            >
               🖥️ Download Windows App
             </a>
-            <Link href="/parent/login"
-              className="bg-white text-indigo-600 px-8 py-3 rounded-lg hover:bg-indigo-50 font-medium text-sm border border-indigo-200">
-              Guardian Login
-            </Link>
           </div>
           <p className="text-xs text-gray-400 mt-3">
             To install on Android: Chrome → ⋮ → Add to Home Screen
@@ -146,14 +149,25 @@ export default async function HomePage() {
 
         {/* Features */}
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">What's Included?</h2>
-          <p className="text-center text-gray-400 text-sm mb-8">12 features — one software, one price</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+            What's Included?
+          </h2>
+          <p className="text-center text-gray-400 text-sm mb-8">
+            11 features — one software, one price
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {features.map((f, i) => (
-              <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+              <div
+                key={i}
+                className="bg-white p-5 rounded-xl shadow-sm border border-gray-100"
+              >
                 <div className="text-3xl mb-2">{f.icon}</div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">{f.title}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{f.desc}</p>
+                <h3 className="font-bold text-gray-900 text-sm mb-1">
+                  {f.title}
+                </h3>
+                <p className="text-gray-500 text-xs leading-relaxed">
+                  {f.desc}
+                </p>
               </div>
             ))}
           </div>
@@ -161,17 +175,28 @@ export default async function HomePage() {
 
         {/* How To */}
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">How to Get Started?</h2>
-          <p className="text-center text-gray-400 text-sm mb-8">5 steps — up and running in 10 minutes</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+            How to Get Started?
+          </h2>
+          <p className="text-center text-gray-400 text-sm mb-8">
+            5 steps — up and running in 10 minutes
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {howTo.map((h) => (
-              <div key={h.step} className="bg-white rounded-xl border border-indigo-100 p-4 text-center shadow-sm">
+              <div
+                key={h.step}
+                className="bg-white rounded-xl border border-indigo-100 p-4 text-center shadow-sm"
+              >
                 <div className="w-8 h-8 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center mx-auto mb-2">
                   {h.step}
                 </div>
                 <div className="text-2xl mb-2">{h.icon}</div>
-                <div className="font-bold text-gray-800 text-sm mb-1">{h.title}</div>
-                <div className="text-gray-500 text-xs leading-relaxed">{h.desc}</div>
+                <div className="font-bold text-gray-800 text-sm mb-1">
+                  {h.title}
+                </div>
+                <div className="text-gray-500 text-xs leading-relaxed">
+                  {h.desc}
+                </div>
               </div>
             ))}
           </div>
@@ -179,20 +204,41 @@ export default async function HomePage() {
 
         {/* How Teacher Takes Attendance */}
         <div className="mb-14 bg-indigo-50 rounded-2xl p-6 border border-indigo-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-1">🔑 How Does a Teacher Take Attendance?</h2>
-          <p className="text-gray-500 text-sm mb-5">No email login needed. Just a PIN.</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-1">
+            🔑 How Does a Teacher Take Attendance?
+          </h2>
+          <p className="text-gray-500 text-sm mb-5">
+            No email login needed. Just a PIN.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              { step: "1", text: "Principal sets a 6-digit PIN for each teacher when adding them." },
-              { step: "2", text: "Teacher opens the website on their mobile and goes to Teacher Login." },
-              { step: "3", text: "Teacher enters their PIN — they see only their assigned class." },
-              { step: "4", text: "Teacher marks attendance and clicks Save — Principal sees it instantly." },
+              {
+                step: "1",
+                text: "Principal sets a 6-digit PIN for each teacher when adding them.",
+              },
+              {
+                step: "2",
+                text: "Teacher opens the website on their mobile and goes to Teacher Login.",
+              },
+              {
+                step: "3",
+                text: "Teacher enters their PIN — they see only their assigned class.",
+              },
+              {
+                step: "4",
+                text: "Teacher marks attendance and clicks Save — Principal sees it instantly.",
+              },
             ].map((s) => (
-              <div key={s.step} className="bg-white rounded-xl p-4 shadow-sm flex gap-3 items-start">
+              <div
+                key={s.step}
+                className="bg-white rounded-xl p-4 shadow-sm flex gap-3 items-start"
+              >
                 <div className="w-7 h-7 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center shrink-0 text-sm">
                   {s.step}
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">{s.text}</p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {s.text}
+                </p>
               </div>
             ))}
           </div>
@@ -200,31 +246,55 @@ export default async function HomePage() {
 
         {/* Pricing */}
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">Pricing</h2>
-          <p className="text-center text-gray-400 text-sm mb-8">7 days completely free — no card required</p>
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+            Pricing
+          </h2>
+          <p className="text-center text-gray-400 text-sm mb-8">
+            7 days completely free — no card required
+          </p>
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <div className="rounded-2xl border-2 border-indigo-600 p-6 text-center shadow-lg relative">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-sm font-bold px-4 py-1 rounded-full">
                 New Account
               </div>
-              <h3 className="text-xl font-bold mb-1 text-gray-700 mt-2">First Year</h3>
-              <div className="text-5xl font-extrabold text-indigo-600 mb-1">₹4,999</div>
-              <p className="text-gray-400 text-sm mb-4">One-time — 1 year included</p>
-              <Link href="/login"
-                className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition mb-3 text-sm">
+              <h3 className="text-xl font-bold mb-1 text-gray-700 mt-2">
+                First Year
+              </h3>
+              <div className="text-5xl font-extrabold text-indigo-600 mb-1">
+                ₹4,999
+              </div>
+              <p className="text-gray-400 text-sm mb-4">
+                One-time — 1 year included
+              </p>
+              <Link
+                href="/login"
+                className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition mb-3 text-sm"
+              >
                 Try Free for 7 Days
               </Link>
-              <a href="https://nishantsoftwares.in/school" target="_blank" rel="noopener noreferrer"
-                className="block w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition text-sm">
+              <a
+                href="https://nishantsoftwares.in/school"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition text-sm"
+              >
                 💳 Buy Now — ₹4,999
               </a>
             </div>
             <div className="rounded-2xl border-2 border-gray-200 p-6 text-center shadow-sm">
-              <h3 className="text-xl font-bold mb-1 text-gray-700 mt-2">Renewal</h3>
-              <div className="text-5xl font-extrabold text-indigo-600 mb-1">₹2,500</div>
+              <h3 className="text-xl font-bold mb-1 text-gray-700 mt-2">
+                Renewal
+              </h3>
+              <div className="text-5xl font-extrabold text-indigo-600 mb-1">
+                ₹2,500
+              </div>
               <p className="text-gray-400 text-sm mb-4">Per year</p>
-              <a href="https://nishantsoftwares.in/school" target="_blank" rel="noopener noreferrer"
-                className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition text-sm">
+              <a
+                href="https://nishantsoftwares.in/school"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition text-sm"
+              >
                 💳 Renew Now
               </a>
             </div>
@@ -234,16 +304,31 @@ export default async function HomePage() {
         {/* CTA */}
         <div className="text-center bg-indigo-900 rounded-2xl p-10 text-white">
           <h2 className="text-2xl font-bold mb-2">Start Today — 7 Days Free</h2>
-          <p className="text-indigo-300 mb-6 text-sm">No card required. No setup fees. Direct support from the developer.</p>
+          <p className="text-indigo-300 mb-6 text-sm">
+            No card required. No setup fees. Direct support from the developer.
+          </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 text-sm text-indigo-300">
-            <a href="tel:+919996865069" className="hover:text-white">📞 9996865069</a>
+            <a href="tel:+919996865069" className="hover:text-white">
+              📞 9996865069
+            </a>
             <span className="hidden sm:inline">|</span>
-            <a href="https://wa.me/919996865069" target="_blank" rel="noopener noreferrer" className="hover:text-white">💬 WhatsApp</a>
+            <a
+              href="https://wa.me/919996865069"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              💬 WhatsApp
+            </a>
             <span className="hidden sm:inline">|</span>
-            <a href="mailto:prasad.kamta@gmail.com" className="hover:text-white">✉️ prasad.kamta@gmail.com</a>
+            <a
+              href="mailto:prasad.kamta@gmail.com"
+              className="hover:text-white"
+            >
+              ✉️ prasad.kamta@gmail.com
+            </a>
           </div>
         </div>
-
       </div>
     </div>
   );
