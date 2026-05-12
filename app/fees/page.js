@@ -4,10 +4,22 @@ import { db } from "@/lib/db";
 import { fees, students } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { users } from "@/lib/schema";
 
 export default async function FeesPage({ searchParams }) {
   const params = await searchParams;
   const tab = params?.tab || "class";
+  const cookieStore = await cookies();
+  const session = await getSession(cookieStore.get("session")?.value);
+  if (!session) redirect("/login");
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
 
   const allFees = await db
     .select({
@@ -25,6 +37,7 @@ export default async function FeesPage({ searchParams }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
+    .where(eq(students.user_id, user.id))
     .orderBy(fees.due_date);
 
   const stats = await db
@@ -38,6 +51,8 @@ export default async function FeesPage({ searchParams }) {
       total_collected: sql`SUM(CASE WHEN ${fees.status} = 'paid' THEN ${fees.amount} ELSE 0 END)`,
       total_overdue: sql`SUM(CASE WHEN ${fees.status} = 'overdue' THEN ${fees.amount} ELSE 0 END)`,
     })
+    .leftJoin(students, eq(fees.student_id, students.id))
+    .where(eq(students.user_id, user.id))
     .from(fees);
 
   const summary = stats[0] || {};
