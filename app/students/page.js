@@ -208,9 +208,12 @@ export default async function StudentsPage({ searchParams }) {
                                 {idx + 1}.
                               </span>
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
+                                <Link
+                                  href={`/students/${student.id}`}
+                                  className="text-sm font-medium text-gray-900 truncate hover:text-indigo-600"
+                                >
                                   {student.name}
-                                </p>
+                                </Link>
                                 <p className="text-xs text-gray-400">
                                   Roll {student.roll_number || "—"} ·{" "}
                                   {student.phone || "—"}
