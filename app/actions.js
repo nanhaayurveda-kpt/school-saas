@@ -753,3 +753,29 @@ export async function markFeePaid(formData) {
   await setFlash("success", "Fee marked as paid!");
   redirect(`/fees/${fee_id}/receipt`);
 }
+
+export async function addFeeStructure(formData) {
+  const session = await getAuth();
+  const userResult = await db.select().from(schema.users).where(eq(schema.users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
+
+  const cls = formData.get("class");
+  const fee_type = formData.get("fee_type");
+  const amount = parseInt(formData.get("amount"));
+  const academic_year = formData.get("academic_year") || null;
+
+  if (!cls || !fee_type || !amount) redirect("/fee-structure/add");
+
+  await db.insert(schema.fee_structures).values({
+    user_id: user.id,
+    class: cls,
+    fee_type,
+    amount,
+    academic_year,
+    created_at: new Date(),
+  });
+
+  await setFlash("success", "Fee structure saved!");
+  redirect("/fee-structure");
+}
