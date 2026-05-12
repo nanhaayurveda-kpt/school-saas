@@ -30,9 +30,13 @@ export default async function FeesPage({ searchParams }) {
   const stats = await db
     .select({
       pending_count: sql`COUNT(CASE WHEN ${fees.status} = 'pending' THEN 1 END)`,
+      partial_count: sql`COUNT(CASE WHEN ${fees.status} = 'partial' THEN 1 END)`,
       paid_count: sql`COUNT(CASE WHEN ${fees.status} = 'paid' THEN 1 END)`,
+      overdue_count: sql`COUNT(CASE WHEN ${fees.status} = 'overdue' THEN 1 END)`,
       total_pending: sql`SUM(CASE WHEN ${fees.status} = 'pending' THEN ${fees.amount} ELSE 0 END)`,
+      total_partial: sql`SUM(CASE WHEN ${fees.status} = 'partial' THEN (${fees.amount} - ${fees.paid_amount}) ELSE 0 END)`,
       total_collected: sql`SUM(CASE WHEN ${fees.status} = 'paid' THEN ${fees.amount} ELSE 0 END)`,
+      total_overdue: sql`SUM(CASE WHEN ${fees.status} = 'overdue' THEN ${fees.amount} ELSE 0 END)`,
     })
     .from(fees);
 
@@ -47,7 +51,12 @@ export default async function FeesPage({ searchParams }) {
     grouped[cls][sec].push(fee);
   });
   const sortedClasses = Object.keys(grouped).sort();
-  const defaulters = allFees.filter((f) => f.status === "pending");
+  const defaulters = allFees.filter(
+    (f) =>
+      f.status === "pending" ||
+      f.status === "partial" ||
+      f.status === "overdue",
+  );
 
   const FeeRow = ({ fee }) => {
     const phone = fee.parent_phone?.replace(/\D/g, "") || "";
@@ -63,9 +72,23 @@ export default async function FeesPage({ searchParams }) {
               {fee.student_name}
             </p>
             <span
-              className={`shrink-0 px-1.5 py-0.5 text-xs rounded-full font-medium ${fee.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+              className={`shrink-0 px-1.5 py-0.5 text-xs rounded-full font-medium ${
+                fee.status === "paid"
+                  ? "bg-green-100 text-green-700"
+                  : fee.status === "partial"
+                    ? "bg-orange-100 text-orange-700"
+                    : fee.status === "overdue"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-yellow-100 text-yellow-700"
+              }`}
             >
-              {fee.status === "paid" ? "Paid" : "Pending"}
+              {fee.status === "paid"
+                ? "Paid"
+                : fee.status === "partial"
+                  ? "Partial"
+                  : fee.status === "overdue"
+                    ? "Overdue"
+                    : "Pending"}
             </span>
           </div>
           <p className="text-xs text-gray-400">
@@ -76,7 +99,9 @@ export default async function FeesPage({ searchParams }) {
         </div>
         <div className="ml-3 shrink-0 text-right">
           <p className="text-sm font-bold text-gray-900">₹{fee.amount}</p>
-          {fee.status === "pending" && (
+          {(fee.status === "pending" ||
+            fee.status === "partial" ||
+            fee.status === "overdue") && (
             <div className="flex flex-col gap-0.5 items-end">
               <Link
                 href={`/fees/${fee.id}/pay`}
@@ -124,17 +149,43 @@ export default async function FeesPage({ searchParams }) {
         >
           + Record
         </Link>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-red-50 rounded-xl p-4 border border-red-100">
-          <p className="text-xs text-red-500 font-medium">Pending</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">
-            ₹{summary.total_pending || 0}
-          </p>
-          <p className="text-xs text-red-400 mt-0.5">
-            {summary.pending_count || 0} records
-          </p>
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="bg-red-50 rounded-xl p-4 border border-red-100">
+            <p className="text-xs text-red-500 font-medium">Pending</p>
+            <p className="text-2xl font-bold text-red-600 mt-1">
+              ₹{summary.total_pending || 0}
+            </p>
+            <p className="text-xs text-red-400 mt-0.5">
+              {summary.pending_count || 0} records
+            </p>
+          </div>
+          <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+            <p className="text-xs text-green-600 font-medium">Collected</p>
+            <p className="text-2xl font-bold text-green-700 mt-1">
+              ₹{summary.total_collected || 0}
+            </p>
+            <p className="text-xs text-green-500 mt-0.5">
+              {summary.paid_count || 0} records
+            </p>
+          </div>
+          <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+            <p className="text-xs text-orange-600 font-medium">Partial</p>
+            <p className="text-2xl font-bold text-orange-600 mt-1">
+              ₹{summary.total_partial || 0}
+            </p>
+            <p className="text-xs text-orange-400 mt-0.5">
+              {summary.partial_count || 0} records
+            </p>
+          </div>
+          <div className="bg-red-50 rounded-xl p-4 border border-red-200">
+            <p className="text-xs text-red-700 font-medium">Overdue</p>
+            <p className="text-2xl font-bold text-red-700 mt-1">
+              ₹{summary.total_overdue || 0}
+            </p>
+            <p className="text-xs text-red-400 mt-0.5">
+              {summary.overdue_count || 0} records
+            </p>
+          </div>
         </div>
         <div className="bg-green-50 rounded-xl p-4 border border-green-100">
           <p className="text-xs text-green-600 font-medium">Collected</p>

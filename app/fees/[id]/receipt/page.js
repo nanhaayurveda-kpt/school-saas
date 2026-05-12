@@ -5,6 +5,8 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function FeeReceiptPage({ params }) {
   const { id } = await params;
 
@@ -12,13 +14,19 @@ export default async function FeeReceiptPage({ params }) {
     .select({
       id: fees.id,
       amount: fees.amount,
+      paid_amount: fees.paid_amount,
       due_date: fees.due_date,
       paid_date: fees.paid_date,
       status: fees.status,
+      fee_type: fees.fee_type,
+      month: fees.month,
+      academic_year: fees.academic_year,
+      receipt_no: fees.receipt_no,
       student_name: students.name,
       student_class: students.class,
       student_section: students.section,
       roll_number: students.roll_number,
+      admission_no: students.admission_no,
       parent_name: students.father_name,
       parent_phone: students.phone,
     })
@@ -27,8 +35,6 @@ export default async function FeeReceiptPage({ params }) {
     .where(eq(fees.id, parseInt(id)));
 
   if (!fee) return <div className="p-8 text-red-500">Receipt not found.</div>;
-  if (fee.status !== "paid")
-    return <div className="p-8 text-yellow-600">This fee is not paid yet.</div>;
 
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -45,7 +51,7 @@ export default async function FeeReceiptPage({ params }) {
     : [];
   const settings = settingsResult[0] || {};
 
-  const receiptNo = `RCP-${String(fee.id).padStart(5, "0")}`;
+  const receiptNo = fee.receipt_no || `RCP-${String(fee.id).padStart(5, "0")}`;
   const paidDate = fee.paid_date
     ? new Date(fee.paid_date).toLocaleDateString("en-IN", {
         day: "numeric",
@@ -57,6 +63,18 @@ export default async function FeeReceiptPage({ params }) {
         month: "long",
         year: "numeric",
       });
+
+  const totalAmount = fee.amount || 0;
+  const paidAmount = fee.paid_amount || 0;
+  const balance = totalAmount - paidAmount;
+
+  const feeTypeLabel = {
+    monthly: "Monthly Fee",
+    admission: "Admission Fee",
+    exam: "Exam Fee",
+    transport: "Transport Fee",
+    misc: "Miscellaneous",
+  }[fee.fee_type] || fee.fee_type || "School Fee";
 
   return (
     <div>
@@ -78,9 +96,10 @@ export default async function FeeReceiptPage({ params }) {
       </div>
 
       {/* Receipt */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 max-w-2xl mx-auto p-8 print:shadow-none print:border-none">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 max-w-2xl mx-auto print:shadow-none print:border-none">
+
         {/* Header */}
-        <div className="text-center border-b border-gray-200 pb-6 mb-6">
+        <div className="text-center border-b-2 border-indigo-600 p-6">
           {settings.logo_url && (
             <img
               src={settings.logo_url}
@@ -89,102 +108,163 @@ export default async function FeeReceiptPage({ params }) {
             />
           )}
           <h2 className="text-2xl font-bold text-indigo-700">
-            {settings.school_name || "Nishant School"}
+            {settings.school_name || "School"}
           </h2>
           {settings.address && (
-            <p className="text-gray-400 text-xs mt-1">{settings.address}</p>
+            <p className="text-gray-500 text-xs mt-1">{settings.address}</p>
           )}
-          <p className="text-gray-500 text-sm mt-1">Fee Payment Receipt</p>
-        </div>
-
-        {/* Receipt No & Date */}
-        <div className="flex justify-between mb-6 text-sm">
-          <div>
-            <span className="text-gray-500">Receipt No:</span>
-            <span className="font-bold text-gray-900 ml-2">{receiptNo}</span>
-          </div>
-          <div>
-            <span className="text-gray-500">Date:</span>
-            <span className="font-medium text-gray-900 ml-2">{paidDate}</span>
+          {settings.phone && (
+            <p className="text-gray-500 text-xs">📞 {settings.phone}</p>
+          )}
+          {settings.affiliation_no && (
+            <p className="text-gray-400 text-xs mt-0.5">
+              Affiliation No: {settings.affiliation_no}
+            </p>
+          )}
+          <div className="mt-3 inline-block bg-indigo-600 text-white text-xs font-bold px-4 py-1 rounded-full">
+            FEE PAYMENT RECEIPT
           </div>
         </div>
 
-        {/* Student Details */}
-        <div className="bg-gray-50 rounded-lg p-5 mb-6">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">
-            Student Details
-          </h3>
-          <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="p-6">
+          {/* Receipt No & Date */}
+          <div className="flex justify-between mb-5 bg-gray-50 rounded-lg px-4 py-3 text-sm">
             <div>
-              <span className="text-gray-500">Name:</span>
-              <span className="font-medium text-gray-900 ml-2">
-                {fee.student_name}
-              </span>
+              <span className="text-gray-500">Receipt No:</span>
+              <span className="font-bold text-gray-900 ml-2">{receiptNo}</span>
             </div>
             <div>
-              <span className="text-gray-500">Class:</span>
-              <span className="font-medium text-gray-900 ml-2">
-                {fee.student_class} {fee.student_section}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500">Roll No:</span>
-              <span className="font-medium text-gray-900 ml-2">
-                {fee.roll_number || "—"}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500">Parent:</span>
-              <span className="font-medium text-gray-900 ml-2">
-                {fee.parent_name || "—"}
-              </span>
+              <span className="text-gray-500">Date:</span>
+              <span className="font-medium text-gray-900 ml-2">{paidDate}</span>
             </div>
           </div>
-        </div>
 
-        {/* Fee Details */}
-        <div className="border border-gray-200 rounded-lg overflow-hidden mb-6">
-          <table className="min-w-full">
-            <thead className="bg-indigo-50">
-              <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-indigo-700 uppercase">
-                  Description
-                </th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-indigo-700 uppercase">
-                  Amount
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-t border-gray-200">
-                <td className="px-5 py-4 text-sm text-gray-700">School Fee</td>
-                <td className="px-5 py-4 text-sm text-gray-900 text-right">
-                  ₹{fee.amount}
-                </td>
-              </tr>
-              <tr className="border-t border-gray-200 bg-gray-50">
-                <td className="px-5 py-4 text-sm font-bold text-gray-900">
-                  Total Paid
-                </td>
-                <td className="px-5 py-4 text-sm font-bold text-green-600 text-right">
-                  ₹{fee.amount}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          {/* Student Details */}
+          <div className="border border-gray-200 rounded-lg p-4 mb-5">
+            <h3 className="text-xs font-bold text-indigo-600 uppercase mb-3">
+              Student Details
+            </h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-gray-500">Name:</span>
+                <span className="font-semibold text-gray-900 ml-2">
+                  {fee.student_name}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Class:</span>
+                <span className="font-semibold text-gray-900 ml-2">
+                  {fee.student_class} {fee.student_section}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Roll No:</span>
+                <span className="font-semibold text-gray-900 ml-2">
+                  {fee.roll_number || "—"}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Admission No:</span>
+                <span className="font-semibold text-gray-900 ml-2">
+                  {fee.admission_no || "—"}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500">Parent:</span>
+                <span className="font-semibold text-gray-900 ml-2">
+                  {fee.parent_name || "—"}
+                </span>
+              </div>
+              {fee.academic_year && (
+                <div>
+                  <span className="text-gray-500">Session:</span>
+                  <span className="font-semibold text-gray-900 ml-2">
+                    {fee.academic_year}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
 
-        {/* Status */}
-        <div className="flex justify-center mb-8">
-          <span className="px-6 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-            ✅ Payment Received
-          </span>
-        </div>
+          {/* Fee Details Table */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden mb-5">
+            <table className="min-w-full">
+              <thead className="bg-indigo-600">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-white uppercase">
+                    Description
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-bold text-white uppercase">
+                    Month
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-bold text-white uppercase">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-t border-gray-200">
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {feeTypeLabel}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700 text-center">
+                    {fee.month || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 text-right font-medium">
+                    ₹{totalAmount}
+                  </td>
+                </tr>
+                <tr className="border-t border-gray-100 bg-gray-50">
+                  <td className="px-4 py-3 text-sm text-gray-600" colSpan={2}>
+                    Amount Paid
+                  </td>
+                  <td className="px-4 py-3 text-sm text-green-600 text-right font-bold">
+                    ₹{paidAmount}
+                  </td>
+                </tr>
+                {balance > 0 && (
+                  <tr className="border-t border-gray-100 bg-red-50">
+                    <td className="px-4 py-3 text-sm text-red-600" colSpan={2}>
+                      Balance Due
+                    </td>
+                    <td className="px-4 py-3 text-sm text-red-600 text-right font-bold">
+                      ₹{balance}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Footer */}
-        <div className="border-t border-gray-200 pt-6 flex justify-between text-xs text-gray-400 print:mt-8">
-          <span>Nishant School Software</span>
-          <span>Authorised Signature: _______________</span>
+          {/* Status */}
+          <div className="flex justify-center mb-6">
+            {balance === 0 ? (
+              <span className="px-6 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                ✅ Payment Complete
+              </span>
+            ) : (
+              <span className="px-6 py-2 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
+                ⚠️ Partial Payment — Balance ₹{balance} Due
+              </span>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t border-gray-200 pt-5 flex justify-between items-end">
+            <div className="text-xs text-gray-400">
+              <p>Powered by Nishant School Software</p>
+              <p>nishantsoftwares.in</p>
+            </div>
+            <div className="text-right text-xs text-gray-500">
+              <p className="mb-6">Authorised Signature</p>
+              <p>___________________</p>
+              {settings.principal_name && (
+                <p className="font-medium text-gray-700">
+                  {settings.principal_name}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

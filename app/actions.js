@@ -311,6 +311,7 @@ export async function addPayment(formData) {
     due_date: new Date(parsed.data.due_date),
     paid_date: paidDate ? new Date(paidDate) : null,
     status: paidDate ? "paid" : "pending",
+    paid_amount: paidDate ? parseFloat(parsed.data.amount) : 0,
     fee_type: parsed.data.fee_type || "tuition",
     academic_year: parsed.data.academic_year || null,
     month: parsed.data.month || null,
@@ -729,14 +730,26 @@ export async function markFeePaid(formData) {
   const fee_id = parseInt(formData.get("fee_id"));
   const paid_date = formData.get("paid_date");
   const receipt_no = formData.get("receipt_no") || null;
+
+  const paid_amount = parseInt(formData.get("paid_amount"));
+  const feeResult = await db
+    .select()
+    .from(schema.fees)
+    .where(eq(schema.fees.id, fee_id));
+  const fee = feeResult[0];
+  const newPaidAmount = (fee.paid_amount || 0) + paid_amount;
+  const newStatus = newPaidAmount >= fee.amount ? "paid" : "partial";
+
   await db
     .update(schema.fees)
     .set({
-      status: "paid",
-      paid_date: new Date(paid_date),
-      receipt_no,
+      status: newStatus,
+      paid_date: newStatus === "paid" ? new Date(paid_date) : null,
+      receipt_no: newStatus === "paid" ? receipt_no : null,
+      paid_amount: newPaidAmount,
     })
     .where(eq(schema.fees.id, fee_id));
+
   await setFlash("success", "Fee marked as paid!");
   redirect(`/fees/${fee_id}/receipt`);
 }
