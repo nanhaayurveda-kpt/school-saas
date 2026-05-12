@@ -31,7 +31,9 @@ export default async function TeacherStudentsPage() {
   const assignedClasses = [...new Set(assignedSubjects.map((s) => s.class))];
 
   const allStudents = await db.select().from(students);
-  const myStudents = allStudents.filter((s) => assignedClasses.includes(s.class));
+  const myStudents = allStudents.filter((s) =>
+    assignedClasses.includes(s.class),
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,16 +43,22 @@ export default async function TeacherStudentsPage() {
           <p className="text-indigo-200 text-xs">Teacher Portal</p>
         </div>
         <div className="flex gap-4 items-center">
-          <Link href="/teacher/dashboard" className="text-indigo-200 text-sm">← Back</Link>
-          <a href="/api/teacher-logout" className="text-red-300 text-sm">Logout</a>
+          <Link href="/teacher/dashboard" className="text-indigo-200 text-sm">
+            ← Back
+          </Link>
+          <a href="/api/teacher-logout" className="text-red-300 text-sm">
+            Logout
+          </a>
         </div>
       </div>
 
       <div className="p-4 max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold text-gray-900">Students</h1>
-          <Link href="/teacher/students/add"
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+          <Link
+            href="/teacher/students/add"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
             + Add Student
           </Link>
         </div>
@@ -62,14 +70,24 @@ export default async function TeacherStudentsPage() {
         ) : (
           <div className="space-y-2">
             {myStudents.map((s) => (
-              <div key={s.id} className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex justify-between items-center">
+              <div
+                key={s.id}
+                className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex justify-between items-center"
+              >
                 <div>
                   <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                  <p className="text-xs text-gray-400">Class {s.class} {s.section ? `— ${s.section}` : ""} · Roll {s.roll_number || "—"}</p>
+                  <p className="text-xs text-gray-400">
+                    Class {s.class} {s.section ? `— ${s.section}` : ""} · Roll{" "}
+                    {s.roll_number || "—"}
+                  </p>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                  s.fee_status === "paid" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                }`}>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    s.fee_status === "paid"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
                   {s.fee_status === "paid" ? "Paid" : "Pending"}
                 </span>
               </div>
