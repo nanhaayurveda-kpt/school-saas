@@ -85,7 +85,7 @@ export default async function AddFeeStructurePage() {
             >
               Save
             </button>
-            
+            <a
               href="/fee-structure"
               className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium text-center"
             >
