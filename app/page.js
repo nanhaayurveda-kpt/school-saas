@@ -135,6 +135,12 @@ export default async function HomePage() {
             >
               🔑 Teacher Login
             </Link>
+            <Link
+              href="/student/login"
+              className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-medium text-sm shadow-sm"
+            >
+              🎓 Student / Parent Login
+            </Link>
             <a
               href={SCHOOL_EXE_URL}
               className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-700 font-medium text-sm shadow-sm"
