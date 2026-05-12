@@ -304,10 +304,11 @@ export async function addPayment(formData) {
   }
 
   const paidDate = parsed.data.paid_date || null;
-
+  const net_amount =
+    parseInt(formData.get("net_amount")) || parseFloat(parsed.data.amount);
   await db.insert(schema.fees).values({
     student_id: parseInt(parsed.data.student_id),
-    amount: parseFloat(parsed.data.amount),
+    amount: net_amount,
     due_date: new Date(parsed.data.due_date),
     paid_date: paidDate ? new Date(paidDate) : null,
     status: paidDate ? "paid" : "pending",
@@ -791,4 +792,36 @@ export async function deleteFeeStructure(formData) {
     .where(eq(schema.fee_structures.id, id));
   await setFlash("success", "Fee structure deleted!");
   redirect("/fee-structure");
+}
+
+export async function addConcession(formData) {
+  await getAuth();
+  const student_id = parseInt(formData.get("student_id"));
+  const reason = formData.get("reason") || null;
+  const discount_type = formData.get("discount_type");
+  const discount_value = parseInt(formData.get("discount_value"));
+
+  if (!student_id || !discount_value) redirect(`/students/${student_id}`);
+
+  await db.insert(schema.fee_concessions).values({
+    student_id,
+    reason,
+    discount_type,
+    discount_value,
+    created_at: new Date(),
+  });
+
+  await setFlash("success", "Concession added!");
+  redirect(`/students/${student_id}`);
+}
+
+export async function deleteConcession(formData) {
+  await getAuth();
+  const id = parseInt(formData.get("id"));
+  const student_id = parseInt(formData.get("student_id"));
+  await db
+    .delete(schema.fee_concessions)
+    .where(eq(schema.fee_concessions.id, id));
+  await setFlash("success", "Concession removed!");
+  redirect(`/students/${student_id}`);
 }

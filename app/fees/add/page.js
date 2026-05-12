@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import FeeAddForm from "@/components/FeeAddForm";
+import { fee_concessions } from "@/lib/schema";
 
 export default async function AddFeePage() {
   const cookieStore = await cookies();
@@ -30,6 +31,11 @@ export default async function AddFeePage() {
     .from(fee_structures)
     .where(eq(fee_structures.user_id, user.id));
 
+  const concessions = await db
+    .select()
+    .from(fee_concessions)
+    .leftJoin(students, eq(fee_concessions.student_id, students.id))
+    .where(eq(students.user_id, user.id));
   const today = new Date().toISOString().split("T")[0];
   const currentMonth = new Date().toLocaleString("en-IN", { month: "long" });
   const now = new Date();
@@ -64,6 +70,7 @@ export default async function AddFeePage() {
         <FeeAddForm
           allStudents={allStudents}
           feeStructures={feeStructures}
+          concessions={concessions}
           today={today}
           currentMonth={currentMonth}
           currentAcademicYear={currentAcademicYear}

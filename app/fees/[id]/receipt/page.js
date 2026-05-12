@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
+import { fee_concessions } from "@/lib/schema";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,11 @@ export default async function FeeReceiptPage({ params }) {
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
     .where(eq(fees.id, parseInt(id)));
+  const concessionResult = await db
+    .select()
+    .from(fee_concessions)
+    .where(eq(fee_concessions.student_id, fee.student_id));
+  const concession = concessionResult[0] || null;
 
   if (!fee) return <div className="p-8 text-red-500">Receipt not found.</div>;
 
@@ -68,13 +74,16 @@ export default async function FeeReceiptPage({ params }) {
   const paidAmount = fee.paid_amount || 0;
   const balance = totalAmount - paidAmount;
 
-  const feeTypeLabel = {
-    monthly: "Monthly Fee",
-    admission: "Admission Fee",
-    exam: "Exam Fee",
-    transport: "Transport Fee",
-    misc: "Miscellaneous",
-  }[fee.fee_type] || fee.fee_type || "School Fee";
+  const feeTypeLabel =
+    {
+      monthly: "Monthly Fee",
+      admission: "Admission Fee",
+      exam: "Exam Fee",
+      transport: "Transport Fee",
+      misc: "Miscellaneous",
+    }[fee.fee_type] ||
+    fee.fee_type ||
+    "School Fee";
 
   return (
     <div>
@@ -97,7 +106,6 @@ export default async function FeeReceiptPage({ params }) {
 
       {/* Receipt */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 max-w-2xl mx-auto print:shadow-none print:border-none">
-
         {/* Header */}
         <div className="text-center border-b-2 border-indigo-600 p-6">
           {settings.logo_url && (
@@ -222,6 +230,23 @@ export default async function FeeReceiptPage({ params }) {
                     ₹{paidAmount}
                   </td>
                 </tr>
+                {concession && (
+                  <tr className="border-t border-gray-100 bg-green-50">
+                    <td
+                      className="px-4 py-3 text-sm text-green-600"
+                      colSpan={2}
+                    >
+                      Concession{" "}
+                      {concession.reason ? `(${concession.reason})` : ""}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-green-600 text-right font-bold">
+                      {concession.discount_type === "percent"
+                        ? `${concession.discount_value}%`
+                        : `₹${concession.discount_value}`}{" "}
+                      off
+                    </td>
+                  </tr>
+                )}
                 {balance > 0 && (
                   <tr className="border-t border-gray-100 bg-red-50">
                     <td className="px-4 py-3 text-sm text-red-600" colSpan={2}>

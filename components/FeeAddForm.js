@@ -3,32 +3,63 @@
 import { useState } from "react";
 import { addPayment } from "@/app/actions";
 
-export default function FeeAddForm({ allStudents, feeStructures, today, currentMonth, currentAcademicYear, months }) {
+export default function FeeAddForm({ allStudents, feeStructures, concessions, today, currentMonth, currentAcademicYear, months }) {
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [selectedFeeType, setSelectedFeeType] = useState("monthly");
   const [amount, setAmount] = useState("");
+  const [concessionInfo, setConcessionInfo] = useState(null);
+  const [netAmount, setNetAmount] = useState("");
 
   function handleStudentChange(e) {
     const studentId = parseInt(e.target.value);
     setSelectedStudentId(studentId);
-    fillAmount(studentId, selectedFeeType);
+    const conc = concessions.find((c) => c.student_id === studentId) || null;
+    setConcessionInfo(conc);
+    fillAmount(studentId, selectedFeeType, conc);
   }
 
   function handleFeeTypeChange(e) {
     const feeType = e.target.value;
     setSelectedFeeType(feeType);
-    fillAmount(selectedStudentId, feeType);
+    const conc = concessions.find((c) => c.student_id === selectedStudentId) || null;
+    fillAmount(selectedStudentId, feeType, conc);
   }
 
-  function fillAmount(studentId, feeType) {
+  function fillAmount(studentId, feeType, conc) {
     if (!studentId || !feeType) return;
     const student = allStudents.find((s) => s.id === studentId);
     if (!student) return;
     const structure = feeStructures.find(
       (fs) => fs.class === student.class && fs.fee_type === feeType
     );
-    if (structure) setAmount(String(structure.amount));
-    else setAmount("");
+    if (structure) {
+      const base = structure.amount;
+      setAmount(String(base));
+      if (conc) {
+        const discount = conc.discount_type === "percent"
+          ? Math.round((base * conc.discount_value) / 100)
+          : conc.discount_value;
+        setNetAmount(String(Math.max(0, base - discount)));
+      } else {
+        setNetAmount(String(base));
+      }
+    } else {
+      setAmount("");
+      setNetAmount("");
+    }
+  }
+
+  function handleAmountChange(e) {
+    const base = parseInt(e.target.value) || 0;
+    setAmount(e.target.value);
+    if (concessionInfo) {
+      const discount = concessionInfo.discount_type === "percent"
+        ? Math.round((base * concessionInfo.discount_value) / 100)
+        : concessionInfo.discount_value;
+      setNetAmount(String(Math.max(0, base - discount)));
+    } else {
+      setNetAmount(e.target.value);
+    }
   }
 
   return (
@@ -56,7 +87,7 @@ export default function FeeAddForm({ allStudents, feeStructures, today, currentM
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Amount (₹) <span className="text-red-500">*</span>
+            Total Amount (₹) <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
@@ -65,7 +96,7 @@ export default function FeeAddForm({ allStudents, feeStructures, today, currentM
             min="1"
             step="1"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={handleAmountChange}
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
@@ -87,6 +118,27 @@ export default function FeeAddForm({ allStudents, feeStructures, today, currentM
           </select>
         </div>
       </div>
+
+      {concessionInfo && (
+        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+          <p className="text-xs font-semibold text-green-700 mb-1">
+            💸 Concession Applied
+          </p>
+          <p className="text-xs text-green-600">
+            {concessionInfo.discount_type === "percent"
+              ? `${concessionInfo.discount_value}% discount`
+              : `₹${concessionInfo.discount_value} off`}
+            {concessionInfo.reason ? ` — ${concessionInfo.reason}` : ""}
+          </p>
+          {netAmount && amount && (
+            <p className="text-xs text-green-700 font-bold mt-1">
+              Net Payable: ₹{netAmount}
+            </p>
+          )}
+        </div>
+      )}
+
+      <input type="hidden" name="net_amount" value={netAmount || amount} />
 
       <div className="grid grid-cols-2 gap-3">
         <div>
