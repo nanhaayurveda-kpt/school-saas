@@ -1,9 +1,7 @@
-// app/api/reminder/route.js
-
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { users } from "@/lib/schema";
-import { eq, and, lte, gt } from "drizzle-orm";
+import { users, fees } from "@/lib/schema";
+import { eq, and, lte, gt, lt } from "drizzle-orm";
 import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
@@ -33,21 +31,21 @@ export async function GET(req) {
 
       if (daysPassed >= 6) {
         await resend.emails.send({
-          from: "निशांत स्कूल सॉफ्टवेयर <no-reply@nishantsoftwares.in>",
+          from: "Nishant School Software <no-reply@nishantsoftwares.in>",
           to: [user.email],
-          subject: "निशांत स्कूल सॉफ्टवेयर — Trial कल समाप्त होगा",
+          subject: "Nishant School Software — Trial ends tomorrow",
           html: `
-            <p>नमस्ते ${user.name || ""}!</p>
-            <p>आपका <strong>7 दिन का मुफ्त trial कल समाप्त</strong> हो जाएगा।</p>
-            <p>सॉफ्टवेयर जारी रखने के लिए अभी खरीदें:</p>
+            <p>Hello ${user.name || ""}!</p>
+            <p>Your <strong>7-day free trial ends tomorrow</strong>.</p>
+            <p>To continue using the software, purchase now:</p>
             <p>
-              <strong>पहली बार: ₹4,999</strong> (1 साल शामिल)<br/>
-              उसके बाद server खर्च मात्र ₹2,500/वर्ष
+              <strong>First year: ₹4,999</strong> (1 year included)<br/>
+              Renewal: ₹2,500/year
             </p>
             <p>
               <a href="https://nishantsoftwares.in/payment?software=school&email=${encodeURIComponent(user.email)}" 
                  style="background:#4f46e5;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
-                अभी खरीदें
+                Buy Now
               </a>
             </p>
             <p style="color:#666;font-size:12px;">
@@ -66,7 +64,7 @@ export async function GET(req) {
       }
     }
 
-    // ── 2. Renewal reminder — expiry से 7 दिन पहले से रोज ──────
+    // ── 2. Renewal reminder — 7 days before expiry ──────────────
     const in7Days = new Date();
     in7Days.setDate(in7Days.getDate() + 7);
 
@@ -88,18 +86,18 @@ export async function GET(req) {
       const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
 
       await resend.emails.send({
-        from: "निशांत स्कूल सॉफ्टवेयर <no-reply@nishantsoftwares.in>",
+        from: "Nishant School Software <no-reply@nishantsoftwares.in>",
         to: [user.email],
-        subject: `निशांत स्कूल सॉफ्टवेयर — Subscription ${daysLeft} दिन में समाप्त`,
+        subject: `Nishant School Software — Subscription expires in ${daysLeft} days`,
         html: `
-          <p>नमस्ते ${user.name || ""}!</p>
-          <p>आपका <strong>निशांत स्कूल सॉफ्टवेयर subscription ${daysLeft} दिन में समाप्त</strong> हो जाएगा।</p>
-          <p>सेवा जारी रखने के लिए अभी नवीनीकरण करें:</p>
-          <p><strong>Server खर्च: ₹2,500/वर्ष</strong></p>
+          <p>Hello ${user.name || ""}!</p>
+          <p>Your <strong>Nishant School Software subscription expires in ${daysLeft} days</strong>.</p>
+          <p>Renew now to continue without interruption:</p>
+          <p><strong>Renewal: ₹2,500/year</strong></p>
           <p>
             <a href="https://nishantsoftwares.in/payment?software=school&email=${encodeURIComponent(user.email)}"
                style="background:#4f46e5;color:#fff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">
-              अभी नवीनीकरण करें
+              Renew Now
             </a>
           </p>
           <p style="color:#666;font-size:12px;">
@@ -111,6 +109,17 @@ export async function GET(req) {
 
       sent++;
     }
+
+    // ── 3. Fee overdue auto-set ──────────────────────────────────
+    await db
+      .update(fees)
+      .set({ status: "overdue" })
+      .where(
+        and(
+          eq(fees.status, "pending"),
+          lt(fees.due_date, now),
+        )
+      );
 
     return NextResponse.json({ success: true, sent });
   } catch (error) {
