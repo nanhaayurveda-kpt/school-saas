@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { fees, students } from "@/lib/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
@@ -72,17 +72,17 @@ export default async function FeesPage({ searchParams }) {
     (f) =>
       f.status === "pending" ||
       f.status === "partial" ||
-      f.status === "overdue",
+      f.status === "overdue"
   );
 
   const FeeRow = ({ fee }) => {
     const phone = fee.parent_phone?.replace(/\D/g, "") || "";
     const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
     const msg = encodeURIComponent(
-      `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending. Please pay at the earliest.\n\n— School`,
+      `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending. Please pay at the earliest.\n\n— School`
     );
     return (
-      <div className="px-4 py-2.5 flex justify-between items-center">
+      <div className="px-4 py-3 flex justify-between items-center">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <p className="text-sm font-medium text-gray-900 truncate">
@@ -93,19 +93,19 @@ export default async function FeesPage({ searchParams }) {
                 fee.status === "paid"
                   ? "bg-green-100 text-green-700"
                   : fee.status === "partial"
-                    ? "bg-orange-100 text-orange-700"
-                    : fee.status === "overdue"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-yellow-100 text-yellow-700"
+                  ? "bg-orange-100 text-orange-700"
+                  : fee.status === "overdue"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-yellow-100 text-yellow-700"
               }`}
             >
               {fee.status === "paid"
                 ? "Paid"
                 : fee.status === "partial"
-                  ? "Partial"
-                  : fee.status === "overdue"
-                    ? "Overdue"
-                    : "Pending"}
+                ? "Partial"
+                : fee.status === "overdue"
+                ? "Overdue"
+                : "Pending"}
             </span>
           </div>
           <p className="text-xs text-gray-400">
@@ -127,7 +127,7 @@ export default async function FeesPage({ searchParams }) {
                 Mark Paid
               </Link>
               {fee.parent_phone && (
-                <a
+                
                   href={`https://wa.me/${fullPhone}?text=${msg}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -153,7 +153,8 @@ export default async function FeesPage({ searchParams }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Fee Management</h1>
           <p className="text-gray-500 text-xs mt-0.5">
@@ -166,76 +167,83 @@ export default async function FeesPage({ searchParams }) {
         >
           + Record
         </Link>
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="bg-red-50 rounded-xl p-4 border border-red-100">
-            <p className="text-xs text-red-500 font-medium">Pending</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">
-              ₹{summary.total_pending || 0}
-            </p>
-            <p className="text-xs text-red-400 mt-0.5">
-              {summary.pending_count || 0} records
-            </p>
-          </div>
-          <div className="bg-green-50 rounded-xl p-4 border border-green-100">
-            <p className="text-xs text-green-600 font-medium">Collected</p>
-            <p className="text-2xl font-bold text-green-700 mt-1">
-              ₹{summary.total_collected || 0}
-            </p>
-            <p className="text-xs text-green-500 mt-0.5">
-              {summary.paid_count || 0} records
-            </p>
-          </div>
-          <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
-            <p className="text-xs text-orange-600 font-medium">Partial</p>
-            <p className="text-2xl font-bold text-orange-600 mt-1">
-              ₹{summary.total_partial || 0}
-            </p>
-            <p className="text-xs text-orange-400 mt-0.5">
-              {summary.partial_count || 0} records
-            </p>
-          </div>
-          <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-            <p className="text-xs text-red-700 font-medium">Overdue</p>
-            <p className="text-2xl font-bold text-red-700 mt-1">
-              ₹{summary.total_overdue || 0}
-            </p>
-            <p className="text-xs text-red-400 mt-0.5">
-              {summary.overdue_count || 0} records
-            </p>
-          </div>
+      </div>
+
+      {/* Summary Cards — 2x2 grid */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="bg-red-50 rounded-xl p-3 border border-red-100">
+          <p className="text-xs text-red-500 font-medium">Pending</p>
+          <p className="text-xl font-bold text-red-600 mt-1">
+            ₹{summary.total_pending || 0}
+          </p>
+          <p className="text-xs text-red-400 mt-0.5">
+            {summary.pending_count || 0} records
+          </p>
         </div>
-        <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+        <div className="bg-green-50 rounded-xl p-3 border border-green-100">
           <p className="text-xs text-green-600 font-medium">Collected</p>
-          <p className="text-2xl font-bold text-green-700 mt-1">
+          <p className="text-xl font-bold text-green-700 mt-1">
             ₹{summary.total_collected || 0}
           </p>
           <p className="text-xs text-green-500 mt-0.5">
             {summary.paid_count || 0} records
           </p>
         </div>
+        <div className="bg-orange-50 rounded-xl p-3 border border-orange-100">
+          <p className="text-xs text-orange-600 font-medium">Partial</p>
+          <p className="text-xl font-bold text-orange-600 mt-1">
+            ₹{summary.total_partial || 0}
+          </p>
+          <p className="text-xs text-orange-400 mt-0.5">
+            {summary.partial_count || 0} records
+          </p>
+        </div>
+        <div className="bg-red-50 rounded-xl p-3 border border-red-200">
+          <p className="text-xs text-red-700 font-medium">Overdue</p>
+          <p className="text-xl font-bold text-red-700 mt-1">
+            ₹{summary.total_overdue || 0}
+          </p>
+          <p className="text-xs text-red-400 mt-0.5">
+            {summary.overdue_count || 0} records
+          </p>
+        </div>
       </div>
 
-      <div className="flex gap-2 mb-4">
+      {/* Tabs — scrollable on mobile */}
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         <a
           href="/fees?tab=class"
-          className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "class" ? "bg-indigo-600 text-white" : "bg-white border border-gray-200 text-gray-600"}`}
+          className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium ${
+            tab === "class"
+              ? "bg-indigo-600 text-white"
+              : "bg-white border border-gray-200 text-gray-600"
+          }`}
         >
           Class-wise
         </a>
         <a
           href="/fees?tab=defaulters"
-          className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "defaulters" ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-red-600"}`}
+          className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium ${
+            tab === "defaulters"
+              ? "bg-red-600 text-white"
+              : "bg-white border border-gray-200 text-red-600"
+          }`}
         >
           🔴 Defaulters ({defaulters.length})
         </a>
         <a
           href="/fees?tab=all"
-          className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "all" ? "bg-gray-700 text-white" : "bg-white border border-gray-200 text-gray-600"}`}
+          className={`shrink-0 px-4 py-2 rounded-lg text-sm font-medium ${
+            tab === "all"
+              ? "bg-gray-700 text-white"
+              : "bg-white border border-gray-200 text-gray-600"
+          }`}
         >
           All
         </a>
       </div>
 
+      {/* Class-wise Tab */}
       {tab === "class" && (
         <div className="space-y-5">
           {sortedClasses.length === 0 ? (
@@ -257,7 +265,7 @@ export default async function FeesPage({ searchParams }) {
                   key={cls}
                   className="bg-white rounded-xl border border-indigo-100 shadow-sm overflow-hidden"
                 >
-                  <div className="bg-indigo-600 px-4 py-2.5 flex justify-between items-center flex-wrap gap-1">
+                  <div className="bg-indigo-600 px-4 py-2.5 flex justify-between items-center">
                     <span className="text-white font-bold text-sm">
                       Class {cls}
                     </span>
@@ -304,6 +312,7 @@ export default async function FeesPage({ searchParams }) {
         </div>
       )}
 
+      {/* Defaulters Tab */}
       {tab === "defaulters" && (
         <div>
           {defaulters.length === 0 ? (
@@ -314,9 +323,11 @@ export default async function FeesPage({ searchParams }) {
             <div className="space-y-3">
               {defaulters.map((fee) => {
                 const phone = fee.parent_phone?.replace(/\D/g, "") || "";
-                const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
+                const fullPhone = phone.startsWith("91")
+                  ? phone
+                  : `91${phone}`;
                 const msg = encodeURIComponent(
-                  `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`,
+                  `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`
                 );
                 return (
                   <div
@@ -366,6 +377,7 @@ export default async function FeesPage({ searchParams }) {
         </div>
       )}
 
+      {/* All Tab */}
       {tab === "all" && (
         <div className="space-y-3">
           {allFees.length === 0 ? (
@@ -375,9 +387,11 @@ export default async function FeesPage({ searchParams }) {
           ) : (
             allFees.map((fee) => {
               const phone = fee.parent_phone?.replace(/\D/g, "") || "";
-              const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
+              const fullPhone = phone.startsWith("91")
+                ? phone
+                : `91${phone}`;
               const msg = encodeURIComponent(
-                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`,
+                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`
               );
               return (
                 <div
@@ -391,7 +405,15 @@ export default async function FeesPage({ searchParams }) {
                           {fee.student_name}
                         </p>
                         <span
-                          className={`shrink-0 px-2 py-0.5 text-xs rounded-full font-medium ${fee.status === "paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                          className={`shrink-0 px-2 py-0.5 text-xs rounded-full font-medium ${
+                            fee.status === "paid"
+                              ? "bg-green-100 text-green-700"
+                              : fee.status === "overdue"
+                              ? "bg-red-100 text-red-700"
+                              : fee.status === "partial"
+                              ? "bg-orange-100 text-orange-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
                         >
                           {fee.status}
                         </span>
@@ -403,7 +425,9 @@ export default async function FeesPage({ searchParams }) {
                         Due:{" "}
                         {new Date(fee.due_date).toLocaleDateString("en-IN")}
                         {fee.paid_date &&
-                          ` · Paid: ${new Date(fee.paid_date).toLocaleDateString("en-IN")}`}
+                          ` · Paid: ${new Date(
+                            fee.paid_date
+                          ).toLocaleDateString("en-IN")}`}
                       </p>
                     </div>
                     <div className="ml-3 shrink-0 text-right">
@@ -418,7 +442,9 @@ export default async function FeesPage({ searchParams }) {
                           🖨️ Receipt
                         </Link>
                       )}
-                      {fee.status === "pending" && (
+                      {(fee.status === "pending" ||
+                        fee.status === "partial" ||
+                        fee.status === "overdue") && (
                         <div className="flex flex-col gap-0.5 items-end">
                           <Link
                             href={`/fees/${fee.id}/pay`}

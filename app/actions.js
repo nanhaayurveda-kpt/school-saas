@@ -39,6 +39,8 @@ const studentSchema = z.object({
   religion: z.string().optional(),
   caste: z.string().optional(),
   aadhaar: z.string().optional(),
+  pen: z.string().optional(),
+  photo_url: z.string().optional(),
   academic_year: z.string().optional(),
 });
 
@@ -66,6 +68,8 @@ export async function addStudent(formData) {
     religion: formData.get("religion") || undefined,
     caste: formData.get("caste") || undefined,
     aadhaar: formData.get("aadhaar") || undefined,
+    pen: formData.get("pen") || undefined,
+    photo_url: formData.get("photo_url") || undefined,
     academic_year: formData.get("academic_year") || undefined,
   };
 
@@ -114,6 +118,11 @@ export async function updateStudent(formData) {
     caste: formData.get("caste") || null,
     aadhaar: formData.get("aadhaar") || null,
     academic_year: formData.get("academic_year") || null,
+    pen: formData.get("pen") || null,
+    photo_url: formData.get("photo_url") || null,
+    admission_date: formData.get("admission_date")
+      ? new Date(formData.get("admission_date"))
+      : undefined,
   };
 
   if (password && password.trim() !== "") {
