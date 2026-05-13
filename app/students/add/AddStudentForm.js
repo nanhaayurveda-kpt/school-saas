@@ -95,7 +95,7 @@ export default function AddStudentForm({ classes, today }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Scholar No. (Oblique No.)
+                Admission/Scholor Number
               </label>
               <input type="text" name="admission_no"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
@@ -200,17 +200,7 @@ export default function AddStudentForm({ classes, today }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <textarea name="address" rows={2}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
-          </div>
-
-          {/* Fee Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Fee Status</label>
-            <select name="fee_status" defaultValue="pending"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
-            </select>
-          </div>
+          </div>    
 
           {/* Buttons */}
           <div className="flex gap-3 pt-2">
