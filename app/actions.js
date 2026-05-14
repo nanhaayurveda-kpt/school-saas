@@ -8,7 +8,6 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 import { z } from "zod";
-import { put } from "@vercel/blob";
 
 // ─── Auth Helper ────────────────────────────────────────────────────────────
 
@@ -601,11 +600,17 @@ export async function saveSettings(formData) {
   let logo_url = current.logo_url || null;
   const logoFile = formData.get("logo");
   if (logoFile && logoFile.size > 0) {
-    const blob = await put(`logos/${user.id}/${logoFile.name}`, logoFile, {
-      access: "public",
-      allowOverwrite: true,
-    });
-    logo_url = blob.url;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const fd = new FormData();
+    fd.append("file", logoFile);
+    fd.append("upload_preset", uploadPreset);
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: "POST", body: fd },
+    );
+    const data = await res.json();
+    logo_url = data.secure_url;
   }
 
   const raw = {
