@@ -1,68 +1,65 @@
+// app/page.js
 export const dynamic = "force-dynamic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 
-const SCHOOL_EXE_URL =
-  "https://github.com/kp1153/school-saas/releases/download/v1.0.0/EduSaaS%20School%20Setup%200.1.0.exe";
-
 const features = [
   {
     icon: "🎓",
-    title: "Student Management",
-    desc: "Complete records for every student — name, class, section, roll number, parent name and phone. Add one by one or import hundreds at once.",
+    title: "विद्यार्थी प्रबंधन",
+    desc: "हर विद्यार्थी का पूरा रिकॉर्ड — नाम, कक्षा, अनुभाग, रोल नंबर, पिता का नाम और फोन। एक-एक करके या एक साथ सैकड़ों विद्यार्थी जोड़ें।",
   },
   {
     icon: "💰",
-    title: "Fee Collection & Receipt",
-    desc: "Record monthly fees, print receipts instantly. See who paid, who hasn't. Send WhatsApp reminders to defaulters in one click.",
+    title: "फीस संग्रह और रसीद",
+    desc: "मासिक फीस रिकॉर्ड करें, तुरंत रसीद प्रिंट करें। देखें किसने भुगतान किया, किसने नहीं। बकायेदारों को एक क्लिक में WhatsApp रिमाइंडर भेजें।",
   },
   {
     icon: "✅",
-    title: "Daily Attendance",
-    desc: "Mark class-wise attendance every day. See present, absent and unmarked count instantly. Send WhatsApp alert to absent students' parents.",
+    title: "दैनिक उपस्थिति",
+    desc: "हर दिन कक्षावार उपस्थिति दर्ज करें। उपस्थित, अनुपस्थित की संख्या तुरंत देखें। अनुपस्थित विद्यार्थियों के अभिभावकों को WhatsApp अलर्ट भेजें।",
   },
   {
     icon: "🔑",
-    title: "Teacher Attendance via PIN",
-    desc: "Each teacher gets a 6-digit PIN from the Principal. They log in from their own mobile, mark attendance for their class only. Principal sees it instantly.",
+    title: "शिक्षक उपस्थिति PIN से",
+    desc: "प्रधानाचार्य हर शिक्षक को 6 अंकों का PIN देते हैं। शिक्षक अपने मोबाइल से लॉगिन करके केवल अपनी कक्षा की उपस्थिति दर्ज करते हैं।",
   },
   {
     icon: "📝",
-    title: "Exams & Results",
-    desc: "Schedule exams, enter marks — grade, pass/fail and class average calculated automatically. Print report cards.",
+    title: "परीक्षा और परिणाम",
+    desc: "परीक्षा निर्धारित करें, अंक दर्ज करें — ग्रेड, पास/फेल और कक्षा औसत स्वचालित रूप से गणना होता है। रिपोर्ट कार्ड प्रिंट करें।",
   },
   {
     icon: "📄",
-    title: "Marksheet",
-    desc: "Quarterly, half-yearly and annual marksheets for the entire class at once. Print directly or share as PDF on WhatsApp.",
+    title: "मार्कशीट",
+    desc: "त्रैमासिक, अर्धवार्षिक और वार्षिक मार्कशीट पूरी कक्षा के लिए एक साथ। सीधे प्रिंट करें या WhatsApp पर PDF शेयर करें।",
   },
   {
     icon: "🏅",
-    title: "Certificates",
-    desc: "Transfer Certificate, Character, Bonafide and Birth Certificate — generated in one click with school name, logo and Principal's name. Ready to print.",
+    title: "प्रमाण पत्र",
+    desc: "स्थानांतरण प्रमाण पत्र, चरित्र, बोनाफाइड और जन्म प्रमाण पत्र — एक क्लिक में विद्यालय के नाम, लोगो और प्रधानाचार्य के नाम के साथ तैयार।",
   },
-
   {
     icon: "🚌",
-    title: "Transport Management",
-    desc: "Manage bus routes, stops, monthly fees, driver and vehicle details. Assign students to routes and generate transport receipts.",
+    title: "परिवहन प्रबंधन",
+    desc: "बस मार्ग, स्टॉप, मासिक शुल्क, चालक और वाहन विवरण प्रबंधित करें। विद्यार्थियों को मार्ग पर असाइन करें और परिवहन रसीद बनाएं।",
   },
   {
     icon: "📊",
-    title: "Reports",
-    desc: "Class-wise student count, fee collection, attendance percentage and exam results — all on one page.",
+    title: "रिपोर्ट",
+    desc: "कक्षावार विद्यार्थी संख्या, फीस संग्रह, उपस्थिति प्रतिशत और परीक्षा परिणाम — सब एक पेज पर।",
   },
   {
     icon: "📣",
-    title: "Notice Board",
-    desc: "Post school notices with priority. Urgent notices shown with red badge. Guardians see them instantly on their portal.",
+    title: "सूचना पट्ट",
+    desc: "प्राथमिकता के साथ विद्यालय की सूचनाएं पोस्ट करें। अत्यावश्यक सूचनाएं लाल बैज के साथ दिखती हैं।",
   },
   {
     icon: "📱",
-    title: "Mobile + Desktop",
-    desc: "Works as an Android app on mobile and as a Windows application on computer. One purchase covers both.",
+    title: "मोबाइल और डेस्कटॉप",
+    desc: "मोबाइल पर Android ऐप की तरह और कंप्यूटर पर ब्राउजर से चलता है।",
   },
 ];
 
@@ -70,32 +67,32 @@ const howTo = [
   {
     step: "1",
     icon: "🔐",
-    title: "Login with Google",
-    desc: "Open the website and click Admin Login. Sign in with your school Gmail account — no password to create or remember.",
+    title: "Google से लॉगिन करें",
+    desc: "वेबसाइट खोलें और Admin Login पर क्लिक करें। अपने विद्यालय के Gmail खाते से साइन इन करें — कोई पासवर्ड बनाने की जरूरत नहीं।",
   },
   {
     step: "2",
     icon: "⚙️",
-    title: "Setup School Details",
-    desc: "Go to Settings — enter school name, address, Principal name and upload your school logo. Done once — appears on every receipt and certificate automatically.",
+    title: "विद्यालय की जानकारी सेट करें",
+    desc: "Settings में जाएं — विद्यालय का नाम, पता, प्रधानाचार्य का नाम दर्ज करें और लोगो अपलोड करें। एक बार सेट होने पर हर रसीद और प्रमाण पत्र पर अपने आप आएगा।",
   },
   {
     step: "3",
     icon: "🎓",
-    title: "Add Students & Teachers",
-    desc: "Add students one by one or import hundreds from a file. Add teachers and set a 6-digit PIN for each — their mobile login key.",
+    title: "विद्यार्थी और शिक्षक जोड़ें",
+    desc: "विद्यार्थियों को एक-एक करके या फाइल से सैकड़ों एक साथ जोड़ें। शिक्षक जोड़ें और हर शिक्षक को 6 अंकों का PIN दें — उनकी मोबाइल लॉगिन कुंजी।",
   },
   {
     step: "4",
     icon: "👨‍🏫",
-    title: "Assign Classes to Teachers",
-    desc: "Go to each teacher's profile and assign which class and subject they teach. Teachers will see only their assigned class when they log in.",
+    title: "शिक्षकों को कक्षाएं असाइन करें",
+    desc: "हर शिक्षक की प्रोफाइल में जाएं और असाइन करें कि वे कौन सी कक्षा और विषय पढ़ाते हैं। लॉगिन पर शिक्षक केवल अपनी कक्षा देखेंगे।",
   },
   {
     step: "5",
     icon: "📱",
-    title: "Start Daily Work",
-    desc: "Mark attendance, collect fees, schedule exams — all on mobile, from anywhere, any time.",
+    title: "दैनिक कार्य शुरू करें",
+    desc: "उपस्थिति दर्ज करें, फीस लें, परीक्षा निर्धारित करें — मोबाइल पर, कहीं से भी, कभी भी।",
   },
 ];
 
@@ -106,72 +103,92 @@ export default async function HomePage() {
   if (session) redirect("/dashboard");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white">
+    <div className="min-h-screen bg-white" style={{ fontSize: "18px" }}>
       <div className="max-w-5xl mx-auto px-4 py-12">
+
         {/* Hero */}
         <div className="text-center mb-14">
-          <div className="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-5">
-            🏫 School Management Software
+          <div
+            className="inline-block px-4 py-1.5 bg-amber-100 text-amber-600 rounded-full font-medium mb-5"
+            style={{ fontSize: "18px" }}
+          >
+            🏫 विद्यालय प्रबंधन सॉफ्टवेयर
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-            Everything Your School Needs
+          <h1
+            className="font-bold text-gray-900 mb-4 leading-tight"
+            style={{ fontSize: "36px" }}
+          >
+            आपके विद्यालय की हर जरूरत
             <br />
-            <span className="text-indigo-600">In One Place — On Mobile</span>
+            <span className="text-amber-600">एक जगह — मोबाइल पर</span>
           </h1>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-8">
-            Students · Fees · Attendance · Exams · Certificates · Reports — all
-            in one place.
+          <p
+            className="text-gray-500 max-w-2xl mx-auto mb-8"
+            style={{ fontSize: "18px" }}
+          >
+            विद्यार्थी · फीस · उपस्थिति · परीक्षा · प्रमाण पत्र · रिपोर्ट — सब एक जगह।
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <Link
               href="/login"
-              className="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 font-medium text-sm shadow-sm"
+              className="bg-amber-600 text-white px-8 py-3 rounded-lg hover:bg-amber-700 font-medium shadow-sm"
+              style={{ fontSize: "18px" }}
             >
-              Admin Login →
+              प्रशासक लॉगिन →
             </Link>
             <Link
               href="/teacher-login"
-              className="bg-yellow-500 text-white px-8 py-3 rounded-lg hover:bg-yellow-600 font-medium text-sm shadow-sm"
+              className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-700 font-medium shadow-sm"
+              style={{ fontSize: "18px" }}
             >
-              🔑 Teacher Login
+              🔑 शिक्षक लॉगिन
             </Link>
             <Link
               href="/student/login"
-              className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-medium text-sm shadow-sm"
+              className="bg-amber-100 text-amber-700 px-8 py-3 rounded-lg hover:bg-amber-200 font-medium shadow-sm"
+              style={{ fontSize: "18px" }}
             >
-              🎓 Student / Parent Login
+              🎓 विद्यार्थी / अभिभावक लॉगिन
             </Link>
-            <a
-              href={SCHOOL_EXE_URL}
-              className="bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-700 font-medium text-sm shadow-sm"
-            >
-              🖥️ Download Windows App
-            </a>
           </div>
-          <p className="text-xs text-gray-400 mt-3">
-            To install on Android: Chrome → ⋮ → Add to Home Screen
+          <p className="text-gray-400 mt-3" style={{ fontSize: "14px" }}>
+            Android पर इंस्टॉल करने के लिए: Chrome → ⋮ → Add to Home Screen
           </p>
         </div>
 
         {/* Features */}
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
-            What's Included?
+          <h2
+            className="font-bold text-center text-gray-900 mb-2"
+            style={{ fontSize: "24px" }}
+          >
+            क्या-क्या शामिल है?
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-8">
-            11 features — one software, one price
+          <p
+            className="text-center text-gray-400 mb-8"
+            style={{ fontSize: "18px" }}
+          >
+            11 सुविधाएं — एक सॉफ्टवेयर, एक कीमत
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {features.map((f, i) => (
               <div
                 key={i}
-                className="bg-white p-5 rounded-xl shadow-sm border border-gray-100"
+                className="bg-white p-5 rounded-xl shadow-sm border border-amber-100"
               >
-                <div className="text-3xl mb-2">{f.icon}</div>
-                <h3 className="font-bold text-gray-900 text-sm mb-1">
+                <div className="mb-2" style={{ fontSize: "30px" }}>
+                  {f.icon}
+                </div>
+                <h3
+                  className="font-bold text-gray-900 mb-1"
+                  style={{ fontSize: "18px" }}
+                >
                   {f.title}
                 </h3>
-                <p className="text-gray-500 text-xs leading-relaxed">
+                <p
+                  className="text-gray-500 leading-relaxed"
+                  style={{ fontSize: "14px" }}
+                >
                   {f.desc}
                 </p>
               </div>
@@ -181,26 +198,43 @@ export default async function HomePage() {
 
         {/* How To */}
         <div className="mb-14">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
-            How to Get Started?
+          <h2
+            className="font-bold text-center text-gray-900 mb-2"
+            style={{ fontSize: "24px" }}
+          >
+            शुरू कैसे करें?
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-8">
-            5 steps — up and running in 10 minutes
+          <p
+            className="text-center text-gray-400 mb-8"
+            style={{ fontSize: "18px" }}
+          >
+            5 कदम — 10 मिनट में तैयार
           </p>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {howTo.map((h) => (
               <div
                 key={h.step}
-                className="bg-white rounded-xl border border-indigo-100 p-4 text-center shadow-sm"
+                className="bg-white rounded-xl border border-amber-100 p-4 text-center shadow-sm"
               >
-                <div className="w-8 h-8 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center mx-auto mb-2">
+                <div
+                  className="w-8 h-8 bg-amber-600 text-white font-black rounded-full flex items-center justify-center mx-auto mb-2"
+                  style={{ fontSize: "16px" }}
+                >
                   {h.step}
                 </div>
-                <div className="text-2xl mb-2">{h.icon}</div>
-                <div className="font-bold text-gray-800 text-sm mb-1">
+                <div className="mb-2" style={{ fontSize: "24px" }}>
+                  {h.icon}
+                </div>
+                <div
+                  className="font-bold text-gray-800 mb-1"
+                  style={{ fontSize: "16px" }}
+                >
                   {h.title}
                 </div>
-                <div className="text-gray-500 text-xs leading-relaxed">
+                <div
+                  className="text-gray-500 leading-relaxed"
+                  style={{ fontSize: "13px" }}
+                >
                   {h.desc}
                 </div>
               </div>
@@ -208,41 +242,38 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* How Teacher Takes Attendance */}
-        <div className="mb-14 bg-indigo-50 rounded-2xl p-6 border border-indigo-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-1">
-            🔑 How Does a Teacher Take Attendance?
+        {/* Teacher Attendance */}
+        <div className="mb-14 bg-amber-50 rounded-2xl p-6 border border-amber-100">
+          <h2
+            className="font-bold text-gray-900 mb-1"
+            style={{ fontSize: "22px" }}
+          >
+            🔑 शिक्षक उपस्थिति कैसे दर्ज करते हैं?
           </h2>
-          <p className="text-gray-500 text-sm mb-5">
-            No email login needed. Just a PIN.
+          <p className="text-gray-500 mb-5" style={{ fontSize: "18px" }}>
+            Email लॉगिन की जरूरत नहीं। बस PIN।
           </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              {
-                step: "1",
-                text: "Principal sets a 6-digit PIN for each teacher when adding them.",
-              },
-              {
-                step: "2",
-                text: "Teacher opens the website on their mobile and goes to Teacher Login.",
-              },
-              {
-                step: "3",
-                text: "Teacher enters their PIN — they see only their assigned class.",
-              },
-              {
-                step: "4",
-                text: "Teacher marks attendance and clicks Save — Principal sees it instantly.",
-              },
+              { step: "1", text: "प्रधानाचार्य हर शिक्षक को जोड़ते समय 6 अंकों का PIN सेट करते हैं।" },
+              { step: "2", text: "शिक्षक अपने मोबाइल पर वेबसाइट खोलते हैं और Teacher Login पर जाते हैं।" },
+              { step: "3", text: "शिक्षक अपना PIN डालते हैं — केवल अपनी असाइन कक्षा दिखती है।" },
+              { step: "4", text: "शिक्षक उपस्थिति दर्ज करके Save करते हैं — प्रधानाचार्य तुरंत देख सकते हैं।" },
             ].map((s) => (
               <div
                 key={s.step}
                 className="bg-white rounded-xl p-4 shadow-sm flex gap-3 items-start"
               >
-                <div className="w-7 h-7 bg-indigo-600 text-white font-black rounded-full flex items-center justify-center shrink-0 text-sm">
+                <div
+                  className="w-7 h-7 bg-amber-600 text-white font-black rounded-full flex items-center justify-center shrink-0"
+                  style={{ fontSize: "14px" }}
+                >
                   {s.step}
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">
+                <p
+                  className="text-gray-700 leading-relaxed"
+                  style={{ fontSize: "16px" }}
+                >
                   {s.text}
                 </p>
               </div>
@@ -250,70 +281,21 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Pricing */}
-        <div className="mb-14">
-          <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
-            Pricing
-          </h2>
-          <p className="text-center text-gray-400 text-sm mb-8">
-            7 days completely free — no card required
-          </p>
-          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            <div className="rounded-2xl border-2 border-indigo-600 p-6 text-center shadow-lg relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-sm font-bold px-4 py-1 rounded-full">
-                New Account
-              </div>
-              <h3 className="text-xl font-bold mb-1 text-gray-700 mt-2">
-                First Year
-              </h3>
-              <div className="text-5xl font-extrabold text-indigo-600 mb-1">
-                ₹4,999
-              </div>
-              <p className="text-gray-400 text-sm mb-4">
-                One-time — 1 year included
-              </p>
-              <Link
-                href="/login"
-                className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition mb-3 text-sm"
-              >
-                Try Free for 7 Days
-              </Link>
-              <a
-                href="https://nishantsoftwares.in/school"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-gray-700 transition text-sm"
-              >
-                💳 Buy Now — ₹4,999
-              </a>
-            </div>
-            <div className="rounded-2xl border-2 border-gray-200 p-6 text-center shadow-sm">
-              <h3 className="text-xl font-bold mb-1 text-gray-700 mt-2">
-                Renewal
-              </h3>
-              <div className="text-5xl font-extrabold text-indigo-600 mb-1">
-                ₹2,500
-              </div>
-              <p className="text-gray-400 text-sm mb-4">Per year</p>
-              <a
-                href="https://nishantsoftwares.in/school"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition text-sm"
-              >
-                💳 Renew now
-              </a>
-            </div>
-          </div>
-        </div>
-
         {/* CTA */}
-        <div className="text-center bg-indigo-900 rounded-2xl p-10 text-white">
-          <h2 className="text-2xl font-bold mb-2">Start Today — 7 Days Free</h2>
-          <p className="text-indigo-300 mb-6 text-sm">
-            No card required. No setup fees. Direct support from the developer.
+        <div className="text-center bg-amber-600 rounded-2xl p-10 text-white">
+          <h2 className="font-bold mb-2" style={{ fontSize: "24px" }}>
+            संपर्क करें
+          </h2>
+          <p
+            className="mb-6"
+            style={{ fontSize: "18px", color: "rgba(255,255,255,0.85)" }}
+          >
+            किसी भी सहायता के लिए सीधे संपर्क करें।
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 text-sm text-indigo-300">
+          <div
+            className="flex flex-col sm:flex-row justify-center gap-4"
+            style={{ fontSize: "18px", color: "rgba(255,255,255,0.85)" }}
+          >
             <a href="tel:+919996865069" className="hover:text-white">
               📞 9996865069
             </a>
@@ -335,6 +317,7 @@ export default async function HomePage() {
             </a>
           </div>
         </div>
+
       </div>
     </div>
   );
