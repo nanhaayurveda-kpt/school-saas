@@ -110,7 +110,8 @@ export async function GET(request) {
       user.expiry_date,
     );
 
-    if (user.email === process.env.DEVELOPER_EMAIL) {
+    const devEmails = (process.env.DEVELOPER_EMAIL || "").split(",");
+    if (devEmails.includes(user.email)) {
       return redirectWithCookie(request, "/dashboard", token);
     }
     if (user.status === "active") {
