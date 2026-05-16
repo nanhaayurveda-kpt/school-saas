@@ -301,7 +301,7 @@ export default async function HomePage() {
                 rel="noopener noreferrer"
                 className="block w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition text-sm"
               >
-                💳 Renew Now
+                💳 Renew now
               </a>
             </div>
           </div>
