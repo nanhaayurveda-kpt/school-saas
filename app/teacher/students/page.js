@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { students, teacher_subjects } from "@/lib/schema";
+import { students, teacher_subjects, teachers } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 
@@ -30,7 +30,18 @@ export default async function TeacherStudentsPage() {
 
   const assignedClasses = [...new Set(assignedSubjects.map((s) => s.class))];
 
-  const allStudents = await db.select().from(students);
+  const teacherResult = await db
+    .select()
+    .from(teachers)
+    .where(eq(teachers.id, payload.teacherId));
+  const teacher = teacherResult[0];
+
+  const allStudents = teacher
+    ? await db
+        .select()
+        .from(students)
+        .where(eq(students.user_id, teacher.user_id))
+    : [];
   const myStudents = allStudents.filter((s) =>
     assignedClasses.includes(s.class),
   );

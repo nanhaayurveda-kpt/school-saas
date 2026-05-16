@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 import { fees, students, school_settings, users } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
@@ -10,6 +11,24 @@ export const dynamic = "force-dynamic";
 
 export default async function FeeReceiptPage({ params }) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
+
+  const settingsResult = await db
+    .select()
+    .from(school_settings)
+    .where(eq(school_settings.user_id, user.id));
+  const settings = settingsResult[0] || {};
 
   const [fee] = await db
     .select({
@@ -33,7 +52,7 @@ export default async function FeeReceiptPage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(eq(fees.id, parseInt(id)));
+    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, user.id)));
   const concessionResult = await db
     .select()
     .from(fee_concessions)
@@ -41,21 +60,6 @@ export default async function FeeReceiptPage({ params }) {
   const concession = concessionResult[0] || null;
 
   if (!fee) return <div className="p-8 text-red-500">Receipt not found.</div>;
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  const session = token ? await getSession(token) : null;
-  const userResult = session
-    ? await db.select().from(users).where(eq(users.email, session.email))
-    : [];
-  const user = userResult[0] || null;
-  const settingsResult = user
-    ? await db
-        .select()
-        .from(school_settings)
-        .where(eq(school_settings.user_id, user.id))
-    : [];
-  const settings = settingsResult[0] || {};
 
   const receiptNo = fee.receipt_no || `RCP-${String(fee.id).padStart(5, "0")}`;
   const paidDate = fee.paid_date

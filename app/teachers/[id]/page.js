@@ -2,7 +2,11 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { teachers, teacher_subjects } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { users } from "@/lib/schema";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { addTeacherSubject, deleteTeacherSubject } from "@/app/actions";
@@ -11,11 +15,23 @@ import DeleteTeacher from "./DeleteTeacher";
 
 export default async function TeacherDetailPage({ params }) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
 
   const result = await db
     .select()
     .from(teachers)
-    .where(eq(teachers.id, Number(id)));
+    .where(and(eq(teachers.id, Number(id)), eq(teachers.user_id, user.id)));
   if (result.length === 0) notFound();
 
   const t = result[0];
@@ -43,37 +59,53 @@ export default async function TeacherDetailPage({ params }) {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-2xl">
         <div className="grid grid-cols-2 gap-6">
           <div>
-            <p className="text-xs text-gray-500 uppercase font-medium mb-1">Full Name</p>
+            <p className="text-xs text-gray-500 uppercase font-medium mb-1">
+              Full Name
+            </p>
             <p className="text-gray-900 font-medium">{t.name}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase font-medium mb-1">Qualification</p>
-            <p className="text-gray-900 font-medium">{t.qualification || "—"}</p>
+            <p className="text-xs text-gray-500 uppercase font-medium mb-1">
+              Qualification
+            </p>
+            <p className="text-gray-900 font-medium">
+              {t.qualification || "—"}
+            </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase font-medium mb-1">Phone</p>
+            <p className="text-xs text-gray-500 uppercase font-medium mb-1">
+              Phone
+            </p>
             <p className="text-gray-900 font-medium">{t.phone || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase font-medium mb-1">Email</p>
+            <p className="text-xs text-gray-500 uppercase font-medium mb-1">
+              Email
+            </p>
             <p className="text-gray-900 font-medium">{t.email || "—"}</p>
           </div>
 
           {/* PIN Box */}
           <div className="col-span-2">
-            <p className="text-xs text-gray-500 uppercase font-medium mb-1">Login PIN</p>
+            <p className="text-xs text-gray-500 uppercase font-medium mb-1">
+              Login PIN
+            </p>
             <div className="flex items-center gap-3">
               <span className="text-2xl font-bold tracking-widest text-indigo-700 bg-indigo-50 px-4 py-2 rounded-lg border border-indigo-200">
                 {t.pin || "—"}
               </span>
               {t.pin && <CopyPin pin={t.pin} />}
-              <span className="text-xs text-gray-400">Share this PIN with the teacher</span>
+              <span className="text-xs text-gray-400">
+                Share this PIN with the teacher
+              </span>
             </div>
           </div>
 
           {/* Subjects */}
           <div className="col-span-2">
-            <p className="text-xs text-gray-500 uppercase font-medium mb-1">Assigned Subjects</p>
+            <p className="text-xs text-gray-500 uppercase font-medium mb-1">
+              Assigned Subjects
+            </p>
             {subjects.length > 0 ? (
               <div className="flex flex-wrap gap-2 mt-1">
                 {subjects.map((s) => (
@@ -85,7 +117,12 @@ export default async function TeacherDetailPage({ params }) {
                     {s.section ? `(${s.section})` : ""}
                     <form action={deleteTeacherSubject} className="inline">
                       <input type="hidden" name="id" value={s.id} />
-                      <button type="submit" className="text-red-400 ml-1 font-bold">×</button>
+                      <button
+                        type="submit"
+                        className="text-red-400 ml-1 font-bold"
+                      >
+                        ×
+                      </button>
                     </form>
                   </span>
                 ))}
@@ -99,12 +136,16 @@ export default async function TeacherDetailPage({ params }) {
 
       {/* Assign Subject */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-2xl mt-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Assign Subject</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Assign Subject
+        </h2>
         <form action={addTeacherSubject} className="space-y-4">
           <input type="hidden" name="teacher_id" value={t.id} />
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Subject
+              </label>
               <input
                 type="text"
                 name="subject"
@@ -114,27 +155,51 @@ export default async function TeacherDetailPage({ params }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Class
+              </label>
               <select
                 name="class"
                 required
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">Select...</option>
-                {["Nursery","LKG","UKG","1","2","3","4","5","6","7","8","9","10","11","12"].map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                {[
+                  "Nursery",
+                  "LKG",
+                  "UKG",
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "10",
+                  "11",
+                  "12",
+                ].map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Section
+              </label>
               <select
                 name="section"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">All</option>
-                {["A","B","C","D","E"].map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                {["A", "B", "C", "D", "E"].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
               </select>
             </div>
@@ -150,9 +215,12 @@ export default async function TeacherDetailPage({ params }) {
 
       {/* Delete Teacher */}
       <div className="bg-white rounded-xl shadow-sm border border-red-100 p-8 max-w-2xl mt-6">
-        <h2 className="text-lg font-semibold text-red-600 mb-2">Remove Teacher</h2>
+        <h2 className="text-lg font-semibold text-red-600 mb-2">
+          Remove Teacher
+        </h2>
         <p className="text-sm text-gray-500 mb-4">
-          This will permanently delete <strong>{t.name}</strong> and all their assigned subjects. This cannot be undone.
+          This will permanently delete <strong>{t.name}</strong> and all their
+          assigned subjects. This cannot be undone.
         </p>
         <DeleteTeacher teacherId={t.id} teacherName={t.name} />
       </div>

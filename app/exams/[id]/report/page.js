@@ -6,15 +6,27 @@ import { exams, students, results, school_settings, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function ReportCardPage({ params }) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
 
   const examResult = await db
     .select()
     .from(exams)
-    .where(eq(exams.id, parseInt(id)));
+    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, user.id)));
   if (examResult.length === 0) notFound();
   const exam = examResult[0];
 
@@ -26,19 +38,10 @@ export default async function ReportCardPage({ params }) {
     .select()
     .from(results)
     .where(eq(results.exam_id, parseInt(id)));
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  const session = token ? await getSession(token) : null;
-  const userResult = session
-    ? await db.select().from(users).where(eq(users.email, session.email))
-    : [];
-  const user = userResult[0] || null;
-  const settingsResult = user
-    ? await db
-        .select()
-        .from(school_settings)
-        .where(eq(school_settings.user_id, user.id))
-    : [];
+  const settingsResult = await db
+    .select()
+    .from(school_settings)
+    .where(eq(school_settings.user_id, user.id));
   const settings = settingsResult[0] || {};
 
   const resultsMap = {};

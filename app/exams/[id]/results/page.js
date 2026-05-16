@@ -25,7 +25,7 @@ export default async function MarksEntryPage({ params }) {
   const examResult = await db
     .select()
     .from(exams)
-    .where(eq(exams.id, parseInt(id)));
+    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, user.id)));
   if (examResult.length === 0) notFound();
   const exam = examResult[0];
 

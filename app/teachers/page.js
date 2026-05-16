@@ -29,7 +29,10 @@ export default async function TeachersPage() {
     .from(timetable)
     .where(eq(timetable.user_id, user.id));
 
-  const allSubjects = await db.select().from(teacher_subjects);
+  const allSubjects = await db
+    .select()
+    .from(teacher_subjects)
+    .where(eq(teacher_subjects.user_id, user.id));
   const subjectCount = {};
   allSubjects.forEach((s) => {
     subjectCount[s.subject] = (subjectCount[s.subject] || 0) + 1;

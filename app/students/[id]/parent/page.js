@@ -1,28 +1,50 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { students, parents } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { students, parents, users } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { setFlash } from "@/lib/flash";
-import { saveParent } from '@/app/actions'
+import { saveParent } from "@/app/actions";
 
 export default async function CreateParentPage({ params }) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
 
-  const result = await db.select().from(students).where(eq(students.id, parseInt(id)));
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
+
+  const result = await db
+    .select()
+    .from(students)
+    .where(and(eq(students.id, parseInt(id)), eq(students.user_id, user.id)));
   if (result.length === 0) notFound();
   const student = result[0];
 
-  const parentResult = await db.select().from(parents).where(eq(parents.student_id, student.id));
+  const parentResult = await db
+    .select()
+    .from(parents)
+    .where(eq(parents.student_id, student.id));
   const existingParent = parentResult[0] || null;
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Parent Account</h1>
-        <p className="text-gray-500 text-sm mt-1">{student.name} — {student.class}</p>
+        <p className="text-gray-500 text-sm mt-1">
+          {student.name} — {student.class}
+        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-lg">
@@ -39,45 +61,70 @@ export default async function CreateParentPage({ params }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Parent Name <span className="text-red-500">*</span>
             </label>
-            <input type="text" name="name" required
-              defaultValue={existingParent?.name || student.parent_name || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <input
+              type="text"
+              name="name"
+              required
+              defaultValue={existingParent?.name || student.father_name || ""}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Phone Number <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">(used for login)</span>
+              <span className="text-gray-400 font-normal ml-1">
+                (used for login)
+              </span>
             </label>
-            <input type="tel" name="phone" required
-              defaultValue={existingParent?.phone || student.parent_phone || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            <input
+              type="tel"
+              name="phone"
+              required
+              defaultValue={existingParent?.phone || student.phone || ""}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" name="email"
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
               defaultValue={existingParent?.email || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">(share this with the parent)</span>
+              <span className="text-gray-400 font-normal ml-1">
+                (share this with the parent)
+              </span>
             </label>
-            <input type="text" name="password" required
+            <input
+              type="text"
+              name="password"
+              required
               defaultValue={existingParent?.password || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit"
-              className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium">
+            <button
+              type="submit"
+              className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
+            >
               {existingParent ? "Update Account" : "Create Account"}
             </button>
-            <a href="/students"
-              className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 text-sm font-medium">
+            <a
+              href="/students"
+              className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 text-sm font-medium"
+            >
               Cancel
             </a>
           </div>

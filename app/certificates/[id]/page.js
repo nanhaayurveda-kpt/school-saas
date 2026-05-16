@@ -4,8 +4,8 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { certificates, students, school_settings } from "@/lib/schema";
-import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { eq, and } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
 import PrintButton from "./PrintButton";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
@@ -47,7 +47,7 @@ export default async function CertificatePrintPage({ params }) {
       admission_no: students.admission_no,
       dob: students.dob,
       gender: students.gender,
-      father_name: students.parent_name,
+      father_name: students.father_name,
       mother_name: students.mother_name,
       address: students.address,
       religion: students.religion,
@@ -56,7 +56,9 @@ export default async function CertificatePrintPage({ params }) {
     })
     .from(certificates)
     .leftJoin(students, eq(certificates.student_id, students.id))
-    .where(eq(certificates.id, Number(id)));
+    .where(
+      and(eq(certificates.id, Number(id)), eq(certificates.user_id, user.id)),
+    );
 
   if (rows.length === 0) notFound();
   const c = rows[0];

@@ -1,21 +1,43 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { students } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { students, users } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 import { issueCertificate } from "@/app/actions";
 
 export default async function IssueCertificatePage({ searchParams }) {
   const params = await searchParams;
   const selectedClass = params?.class || "";
 
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
+
   const allStudents = selectedClass
     ? await db
         .select()
         .from(students)
-        .where(eq(students.class, selectedClass))
+        .where(
+          and(eq(students.class, selectedClass), eq(students.user_id, user.id)),
+        )
         .orderBy(students.name)
-    : await db.select().from(students).orderBy(students.name);
+    : await db
+        .select()
+        .from(students)
+        .where(eq(students.user_id, user.id))
+        .orderBy(students.name);
 
   const today = new Date().toISOString().split("T")[0];
   const classes = [

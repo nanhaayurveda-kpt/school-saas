@@ -4,19 +4,35 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { transport, student_transport, students } from "@/lib/schema";
+import { transport, students, users } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 import { assignStudent } from "@/app/actions";
 
 export default async function AssignTransportPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
   const allStudents = await db
     .select()
     .from(students)
+    .where(eq(students.user_id, user.id))
     .orderBy(students.class, students.name);
-
   const allRoutes = await db
     .select()
     .from(transport)
+    .where(eq(transport.user_id, user.id))
     .orderBy(transport.route_name);
 
   const today = new Date().toISOString().split("T")[0];

@@ -1,33 +1,48 @@
-// app/api/certificates/route.js  ← CORRECTED
+// app/api/certificates/route.js
 
 import { db } from "@/lib/db";
-import { certificates } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { certificates, users } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
+import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 
+async function getAuthUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) return null;
+  const session = await getSession(token);
+  if (!session) return null;
+  const userResult = await db.select().from(users).where(eq(users.email, session.email));
+  return userResult[0] || null;
+}
+
 export async function GET(request) {
-  const session = await getSession();
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser();
+  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
   const studentId = searchParams.get("student_id");
 
   let rows;
   if (studentId) {
-    rows = await db
-      .select()
-      .from(certificates)
-      .where(eq(certificates.student_id, Number(studentId)));
+    rows = await db.select().from(certificates).where(
+      and(
+        eq(certificates.student_id, Number(studentId)),
+        eq(certificates.user_id, user.id)
+      )
+    );
   } else {
-    rows = await db.select().from(certificates);
+    rows = await db.select().from(certificates).where(
+      eq(certificates.user_id, user.id)
+    );
   }
 
   return Response.json(rows);
 }
 
 export async function POST(request) {
-  const session = await getSession();
-  if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await getAuthUser();
+  if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json();
   const {
@@ -56,6 +71,7 @@ export async function POST(request) {
     last_exam_passed: last_exam_passed || null,
     conduct: conduct || "Good",
     custom_content: custom_content || null,
+    user_id: user.id,
   });
 
   return Response.json({ success: true });

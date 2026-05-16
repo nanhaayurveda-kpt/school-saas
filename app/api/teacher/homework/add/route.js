@@ -1,5 +1,8 @@
+// app/api/teacher/homework/add/route.js
+
 import { db } from "@/lib/db";
-import { homeworks } from "@/lib/schema";
+import { homeworks, teachers } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
@@ -18,6 +21,10 @@ export async function POST(request) {
   } catch {
     return NextResponse.redirect(new URL("/teacher-login", request.url));
   }
+
+  const teacherResult = await db.select().from(teachers).where(eq(teachers.id, payload.teacherId));
+  const teacher = teacherResult[0];
+  if (!teacher) return NextResponse.redirect(new URL("/teacher-login", request.url));
 
   const formData = await request.formData();
   const subject_class = formData.get("subject_class");
@@ -39,6 +46,7 @@ export async function POST(request) {
     title,
     description,
     due_date,
+    user_id: teacher.user_id,
     created_at: new Date(),
   });
 

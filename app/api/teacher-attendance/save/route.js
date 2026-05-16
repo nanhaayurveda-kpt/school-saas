@@ -1,5 +1,7 @@
+// app/api/teacher-attendance/save/route.js
+
 import { db } from "@/lib/db";
-import { teachers, teacher_attendance } from "@/lib/schema";
+import { teachers, teacher_attendance, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -7,15 +9,21 @@ import { getSession } from "@/lib/session";
 
 export async function POST(request) {
   const cookieStore = await cookies();
-  const session = await getSession(cookieStore.get("session")?.value);
+  const token = cookieStore.get("session")?.value;
+  if (!token) return NextResponse.redirect(new URL("/login", request.url));
+  const session = await getSession(token);
   if (!session) return NextResponse.redirect(new URL("/login", request.url));
+
+  const userResult = await db.select().from(users).where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) return NextResponse.redirect(new URL("/login", request.url));
 
   const formData = await request.formData();
   const date = formData.get("date");
 
   if (!date) return NextResponse.redirect(new URL("/teacher-attendance", request.url));
 
-  const allTeachers = await db.select().from(teachers);
+  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, user.id));
 
   for (const t of allTeachers) {
     const status = formData.get(`status_${t.id}`) || "present";
@@ -47,6 +55,7 @@ export async function POST(request) {
         date,
         status,
         note,
+        user_id: user.id,
         created_at: new Date(),
       });
     }

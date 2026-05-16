@@ -1,28 +1,35 @@
+// app/teacher-attendance/page.js
 export const dynamic = "force-dynamic";
 
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { teachers, teacher_attendance } from "@/lib/schema";
+import { teachers, teacher_attendance, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
 
 export default async function TeacherAttendancePage({ searchParams }) {
   const cookieStore = await cookies();
-  const session = await getSession(cookieStore.get("session")?.value);
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
   if (!session) redirect("/login");
+
+  const userResult = await db.select().from(users).where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
 
   const params = await searchParams;
   const today = new Date().toISOString().split("T")[0];
   const selectedDate = params?.date || today;
 
-  const allTeachers = await db.select().from(teachers);
+  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, user.id));
 
   const existing = await db
     .select()
     .from(teacher_attendance)
-    .where(eq(teacher_attendance.date, selectedDate));
+    .where(and(eq(teacher_attendance.date, selectedDate), eq(teacher_attendance.user_id, user.id)));
 
   const attendanceMap = {};
   existing.forEach((a) => {
@@ -43,7 +50,6 @@ export default async function TeacherAttendancePage({ searchParams }) {
         </Link>
       </div>
 
-      {/* Date Filter */}
       <form className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-5">
         <div className="flex gap-3 items-end">
           <div className="flex-1">
@@ -84,52 +90,34 @@ export default async function TeacherAttendancePage({ searchParams }) {
                     </div>
                     <div className="flex gap-2">
                       <label className="flex items-center gap-1 text-xs">
-                        <input
-                          type="radio"
-                          name={`status_${t.id}`}
-                          value="present"
+                        <input type="radio" name={`status_${t.id}`} value="present"
                           defaultChecked={!current || current.status === "present"}
-                          className="accent-green-600"
-                        />
+                          className="accent-green-600" />
                         <span className="text-green-700 font-medium">Present</span>
                       </label>
                       <label className="flex items-center gap-1 text-xs">
-                        <input
-                          type="radio"
-                          name={`status_${t.id}`}
-                          value="absent"
+                        <input type="radio" name={`status_${t.id}`} value="absent"
                           defaultChecked={current?.status === "absent"}
-                          className="accent-red-600"
-                        />
+                          className="accent-red-600" />
                         <span className="text-red-600 font-medium">Absent</span>
                       </label>
                       <label className="flex items-center gap-1 text-xs">
-                        <input
-                          type="radio"
-                          name={`status_${t.id}`}
-                          value="half_day"
+                        <input type="radio" name={`status_${t.id}`} value="half_day"
                           defaultChecked={current?.status === "half_day"}
-                          className="accent-yellow-500"
-                        />
+                          className="accent-yellow-500" />
                         <span className="text-yellow-600 font-medium">Half</span>
                       </label>
                     </div>
                   </div>
-                  <input
-                    type="text"
-                    name={`note_${t.id}`}
-                    defaultValue={current?.note || ""}
+                  <input type="text" name={`note_${t.id}`} defaultValue={current?.note || ""}
                     placeholder="Note (optional)"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                  />
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400" />
                 </div>
               );
             })}
           </div>
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition text-sm"
-          >
+          <button type="submit"
+            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition text-sm">
             Save Attendance
           </button>
         </form>

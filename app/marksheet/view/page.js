@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { exams, students, results, school_settings, users } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
@@ -20,17 +20,21 @@ export default async function MarksheetViewPage({ searchParams }) {
 
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
-  const session = token ? await getSession(token) : null;
-  const userResult = session
-    ? await db.select().from(users).where(eq(users.email, session.email))
-    : [];
-  const user = userResult[0] || null;
-  const settingsRows = user
-    ? await db
-        .select()
-        .from(school_settings)
-        .where(eq(school_settings.user_id, user.id))
-    : [];
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
+
+  const settingsRows = await db
+    .select()
+    .from(school_settings)
+    .where(eq(school_settings.user_id, user.id));
   const school = settingsRows[0] || {};
 
   const classStudents = await db

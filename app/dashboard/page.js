@@ -40,19 +40,29 @@ export default async function DashboardPage() {
   const [pendingFees] = await db
     .select({ total: sql`SUM(amount)`, count: sql`COUNT(*)` })
     .from(fees)
-    .where(sql`status = 'pending'`);
+    .where(and(sql`status = 'pending'`, eq(fees.user_id, user.id)));
   const [paidFees] = await db
     .select({ total: sql`SUM(amount)` })
     .from(fees)
-    .where(sql`status = 'paid'`);
+    .where(and(sql`status = 'paid'`, eq(fees.user_id, user.id)));
   const [todayPresent] = await db
     .select({ count: sql`COUNT(*)` })
     .from(attendance)
-    .where(sql`date = ${today} AND status = 'present'`);
+    .where(
+      and(
+        eq(attendance.user_id, user.id),
+        sql`date = ${today} AND status = 'present'`,
+      ),
+    );
   const [todayAbsent] = await db
     .select({ count: sql`COUNT(*)` })
     .from(attendance)
-    .where(sql`date = ${today} AND status = 'absent'`);
+    .where(
+      and(
+        eq(attendance.user_id, user.id),
+        sql`date = ${today} AND status = 'absent'`,
+      ),
+    );
   const [examCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(exams)

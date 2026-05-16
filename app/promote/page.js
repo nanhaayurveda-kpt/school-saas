@@ -2,13 +2,31 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { students } from "@/lib/schema";
+import { students, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 import { promoteStudents } from "@/app/actions";
 
 export default async function PromotePage() {
-  const allStudents = await db.select().from(students);
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) redirect("/login");
+  const session = await getSession(token);
+  if (!session) redirect("/login");
+
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
+
+  const allStudents = await db
+    .select()
+    .from(students)
+    .where(eq(students.user_id, user.id));
   const classes = [
     "Nursery",
     "LKG",

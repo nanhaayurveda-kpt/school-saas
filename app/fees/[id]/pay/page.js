@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { fees, students } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { fees, students, users } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
@@ -15,6 +15,12 @@ export default async function PayFeePage({ params }) {
   const token = cookieStore.get("session")?.value;
   const session = token ? await getSession(token) : null;
   if (!session) redirect("/login");
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
+  const user = userResult[0];
+  if (!user) redirect("/login");
 
   const result = await db
     .select({
@@ -33,7 +39,7 @@ export default async function PayFeePage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(eq(fees.id, parseInt(id)));
+    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, user.id)));
 
   if (result.length === 0) notFound();
   const fee = result[0];

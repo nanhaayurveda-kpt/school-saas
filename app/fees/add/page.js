@@ -31,7 +31,10 @@ export default async function AddFeePage() {
     .from(fee_structures)
     .where(eq(fee_structures.user_id, user.id));
 
-  const allConcessions = await db.select().from(fee_concessions);
+  const allConcessions = await db
+    .select()
+    .from(fee_concessions)
+    .where(eq(fee_concessions.user_id, user.id));
   const studentIds = allStudents.map((s) => s.id);
   const concessions = allConcessions.filter((c) =>
     studentIds.includes(c.student_id),
