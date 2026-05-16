@@ -375,7 +375,7 @@ export async function saveAttendance(formData) {
       .from(schema.users)
       .where(eq(schema.users.email, session.email));
     userId = userResult[0]?.id;
-   else if (teacherToken) {
+  } else if (teacherToken) {
     const teacherSession = await getSession(teacherToken);
     if (!teacherSession) redirect("/teacher-login");
     const teacherResult = await db

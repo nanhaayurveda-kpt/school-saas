@@ -1,11 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { students } from "@/lib/schema";
+import { students, users } from "@/lib/schema";
 import { desc, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
-import { students, users } from "@/lib/schema";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
