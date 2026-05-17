@@ -290,7 +290,7 @@ export default async function HomePage() {
             className="mb-6"
             style={{ fontSize: "18px", color: "rgba(255,255,255,0.85)" }}
           >
-            किसी भी सहायता के लिए सीधे संपर्क करें।
+            किसी भी तरह की मदद के लिए सीधे संपर्क करें।
           </p>
           <div
             className="flex flex-col sm:flex-row justify-center gap-4"
