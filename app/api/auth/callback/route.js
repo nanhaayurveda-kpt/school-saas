@@ -27,12 +27,10 @@ export async function GET(request) {
   const storedState = cookieStore.get("oauth_state")?.value;
   const codeVerifier = cookieStore.get("code_verifier")?.value;
 
-  // ✅ Fix 2: !state भी check करो
   if (!code || !state || state !== storedState) {
     return NextResponse.redirect(new URL("/login?error=invalid", request.url));
   }
 
-  // ✅ Fix 1: पूरा logic try/catch में
   try {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier);
     const accessToken = tokens.accessToken();
@@ -50,6 +48,20 @@ export async function GET(request) {
       );
     }
 
+    // ✅ Email whitelist — सिर्फ DEVELOPER_EMAIL में listed emails login कर सकें
+    const allowedEmails = (process.env.DEVELOPER_EMAIL || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    const userEmail = googleUser.email.toLowerCase();
+
+    if (!allowedEmails.includes(userEmail)) {
+      return NextResponse.redirect(
+        new URL("/login?error=unauthorized", request.url),
+      );
+    }
+
     let existing = await db
       .select()
       .from(users)
@@ -57,7 +69,6 @@ export async function GET(request) {
     let user;
 
     if (existing.length === 0) {
-      // नया user — trial पर insert करो
       const expiry = new Date();
       expiry.setDate(expiry.getDate() + 7);
 
@@ -69,7 +80,6 @@ export async function GET(request) {
         reminder_sent: 0,
       });
 
-      // ✅ Fix 4: preActivation सिर्फ नए user के लिए
       const preAct = await db
         .select()
         .from(preActivations)
@@ -110,10 +120,11 @@ export async function GET(request) {
       user.expiry_date,
     );
 
-    const devEmails = (process.env.DEVELOPER_EMAIL || "").split(",");
-    if (devEmails.includes(user.email)) {
+    // prasad.kamta@gmail.com को हमेशा dashboard — कोई expiry नहीं
+    if (userEmail === "prasad.kamta@gmail.com") {
       return redirectWithCookie(request, "/dashboard", token);
     }
+
     if (user.status === "active") {
       return redirectWithCookie(request, "/dashboard", token);
     }
