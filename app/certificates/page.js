@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { users } from "@/lib/schema";
+import DeleteCertificate from "./DeleteCertificate";
 
 const CERT_LABELS = {
   tc: "Transfer Certificate",
@@ -39,22 +40,10 @@ export default async function CertificatesPage({ searchParams }) {
   const filterClass = params?.class || "";
 
   const classes = [
-    "Nursery",
-    "LKG",
-    "UKG",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
+    "Nursery", "LKG", "UKG",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
   ];
+
   const allCerts = await db
     .select({
       id: certificates.id,
@@ -90,7 +79,6 @@ export default async function CertificatesPage({ searchParams }) {
 
   return (
     <div>
-      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Certificates</h1>
@@ -106,7 +94,6 @@ export default async function CertificatesPage({ searchParams }) {
         </Link>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-2 mb-4">
         <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-center">
           <p className="text-lg font-bold text-red-600">{counts.tc}</p>
@@ -126,7 +113,6 @@ export default async function CertificatesPage({ searchParams }) {
         </div>
       </div>
 
-      {/* Type Filter Tabs */}
       <div className="flex gap-2 flex-wrap mb-3">
         {[
           { val: "", label: "All" },
@@ -149,7 +135,6 @@ export default async function CertificatesPage({ searchParams }) {
         ))}
       </div>
 
-      {/* Class Filter */}
       <form method="GET" action="/certificates" className="flex gap-2 mb-4">
         <input type="hidden" name="type" value={filterType} />
         <select
@@ -180,7 +165,6 @@ export default async function CertificatesPage({ searchParams }) {
         )}
       </form>
 
-      {/* Certificate List */}
       {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-400 text-sm">
           No certificates issued yet.
@@ -214,13 +198,24 @@ export default async function CertificatesPage({ searchParams }) {
                   {cert.serial_no ? ` · Serial: ${cert.serial_no}` : ""}
                 </p>
               </div>
-              <div className="ml-3 shrink-0">
+              <div className="ml-3 shrink-0 flex flex-col gap-1.5 items-end">
                 <Link
                   href={`/certificates/${cert.id}`}
                   className="text-xs text-indigo-600 font-medium bg-indigo-50 px-3 py-1.5 rounded-lg"
                 >
                   🖨️ Print
                 </Link>
+                <Link
+                  href={`/certificates/${cert.id}/edit`}
+                  className="text-xs text-gray-700 font-medium bg-gray-100 px-3 py-1.5 rounded-lg"
+                >
+                  ✎ Edit
+                </Link>
+                <DeleteCertificate
+                  certId={cert.id}
+                  studentName={cert.student_name}
+                  certType={CERT_LABELS[cert.cert_type] || cert.cert_type}
+                />
               </div>
             </div>
           ))}

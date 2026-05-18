@@ -6,7 +6,6 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { issueCertificate } from "@/app/actions";
 
 export default async function IssueCertificatePage({ searchParams }) {
   const params = await searchParams;
@@ -41,21 +40,8 @@ export default async function IssueCertificatePage({ searchParams }) {
 
   const today = new Date().toISOString().split("T")[0];
   const classes = [
-    "Nursery",
-    "LKG",
-    "UKG",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
+    "Nursery", "LKG", "UKG",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
   ];
 
   return (
@@ -67,7 +53,6 @@ export default async function IssueCertificatePage({ searchParams }) {
         </p>
       </div>
 
-      {/* Class Filter — separate GET form */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
         <form method="GET" action="/certificates/issue" className="flex gap-3">
           <select
@@ -92,7 +77,11 @@ export default async function IssueCertificatePage({ searchParams }) {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <form action={issueCertificate} className="space-y-4">
+        <form
+          action="/api/certificates/issue"
+          method="POST"
+          className="space-y-4"
+        >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Student <span className="text-red-500">*</span>
@@ -155,12 +144,15 @@ export default async function IssueCertificatePage({ searchParams }) {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Serial No
+                Serial No{" "}
+                <span className="text-gray-400 font-normal text-xs">
+                  (auto if blank)
+                </span>
               </label>
               <input
                 type="text"
                 name="serial_no"
-                placeholder="e.g. TC/2024/001"
+                placeholder="Auto-generated"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
