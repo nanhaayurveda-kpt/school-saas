@@ -13,7 +13,7 @@ import {
   homeworks,
   teachers
 } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import Link from "next/link";
 
 export default async function StudentDashboardPage() {
