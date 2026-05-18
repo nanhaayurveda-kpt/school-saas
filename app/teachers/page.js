@@ -133,7 +133,11 @@ export default async function TeachersPage() {
                       <p className="text-gray-400 text-xs">{teacher.email}</p>
                     )}
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {subjectsAssigned} subjects · {periods.length} periods
+                      {subjectsAssigned > 0
+                        ? `Teaches ${subjectsAssigned} ${
+                            subjectsAssigned === 1 ? "class" : "classes"
+                          }`
+                        : "No classes assigned yet"}
                     </p>
                   </div>
                   <div className="ml-3 shrink-0 flex flex-col gap-1 items-end">
