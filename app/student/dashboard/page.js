@@ -6,12 +6,11 @@ import { db } from "@/lib/db";
 import {
   students,
   attendance,
-  fees,
   results,
   exams,
   notices,
   homeworks,
-  teachers
+  teachers,
 } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
@@ -39,12 +38,6 @@ export default async function StudentDashboardPage() {
   ).length;
   const attendancePercent =
     totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(1) : 0;
-
-  const feeRecords = await db
-    .select()
-    .from(fees)
-    .where(eq(fees.student_id, student.id));
-  const pendingFees = feeRecords.filter((f) => f.status === "pending");
 
   const allNotices = await db
     .select()
@@ -76,6 +69,12 @@ export default async function StudentDashboardPage() {
       ),
     )
     .orderBy(homeworks.created_at);
+
+  // Pending = due_date today ya future
+  const today = new Date().toISOString().slice(0, 10);
+  const pendingHomeworks = myHomeworks.filter(
+    (hw) => hw.homeworks.due_date && hw.homeworks.due_date >= today,
+  );
 
   const recentHomeworks = myHomeworks.slice(0, 5);
 
@@ -129,9 +128,9 @@ export default async function StudentDashboardPage() {
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
             <div className="text-3xl font-bold text-yellow-500">
-              {pendingFees.length}
+              {pendingHomeworks.length}
             </div>
-            <div className="text-sm text-gray-500 mt-1">Pending Fees</div>
+            <div className="text-sm text-gray-500 mt-1">Pending Homework</div>
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
             <div className="text-3xl font-bold text-green-600">
@@ -155,26 +154,28 @@ export default async function StudentDashboardPage() {
             <div className="divide-y divide-gray-100">
               {recentHomeworks.map((hw) => (
                 <div
-                  key={hw.id}
+                  key={hw.homeworks.id}
                   className="px-6 py-4 flex justify-between items-start"
                 >
                   <div>
                     <div className="font-medium text-gray-900 text-sm">
-                      {hw.title}
+                      {hw.homeworks.title}
                     </div>
                     <div className="text-indigo-600 text-xs mt-1">
-                      {hw.subject}
-                      {hw.section ? ` (${hw.section})` : ""}
+                      {hw.homeworks.subject}
+                      {hw.homeworks.section ? ` (${hw.homeworks.section})` : ""}
                     </div>
-                    {hw.description && (
+                    {hw.homeworks.description && (
                       <div className="text-gray-500 text-xs mt-1">
-                        {hw.description}
+                        {hw.homeworks.description}
                       </div>
                     )}
                   </div>
-                  <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg whitespace-nowrap ml-4">
-                    Due: {hw.due_date}
-                  </span>
+                  {hw.homeworks.due_date && (
+                    <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg whitespace-nowrap ml-4">
+                      Due: {hw.homeworks.due_date}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
