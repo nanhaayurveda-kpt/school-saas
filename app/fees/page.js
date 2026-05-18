@@ -25,6 +25,7 @@ export default async function FeesPage({ searchParams }) {
     .select({
       id: fees.id,
       amount: fees.amount,
+      paid_amount: fees.paid_amount,
       due_date: fees.due_date,
       paid_date: fees.paid_date,
       status: fees.status,
@@ -263,12 +264,16 @@ export default async function FeesPage({ searchParams }) {
             sortedClasses.map((cls) => {
               const sections = Object.keys(grouped[cls]).sort();
               const classAllFees = sections.flatMap((s) => grouped[cls][s]);
-              const classPaid = classAllFees
-                .filter((f) => f.status === "paid")
-                .reduce((s, f) => s + (f.amount || 0), 0);
+              const classPaid = classAllFees.reduce(
+                (s, f) => s + (f.paid_amount || 0),
+                0,
+              );
               const classPending = classAllFees
-                .filter((f) => f.status === "pending")
-                .reduce((s, f) => s + (f.amount || 0), 0);
+                .filter((f) => f.status !== "paid")
+                .reduce(
+                  (s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)),
+                  0,
+                );
               return (
                 <div
                   key={cls}
@@ -285,12 +290,16 @@ export default async function FeesPage({ searchParams }) {
                   </div>
                   {sections.map((sec) => {
                     const secFees = grouped[cls][sec];
-                    const secPaid = secFees
-                      .filter((f) => f.status === "paid")
-                      .reduce((s, f) => s + (f.amount || 0), 0);
+                  const secPaid = secFees.reduce(
+                      (s, f) => s + (f.paid_amount || 0),
+                      0,
+                    );
                     const secPending = secFees
-                      .filter((f) => f.status === "pending")
-                      .reduce((s, f) => s + (f.amount || 0), 0);
+                      .filter((f) => f.status !== "paid")
+                      .reduce(
+                        (s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)),
+                        0,
+                      );
                     return (
                       <div key={sec} className="border-t border-gray-100">
                         <div className="bg-indigo-50 px-4 py-2 flex justify-between items-center">
@@ -360,8 +369,13 @@ export default async function FeesPage({ searchParams }) {
                       </div>
                       <div className="ml-3 shrink-0 text-right space-y-1">
                         <p className="text-sm font-bold text-red-600">
-                          ₹{fee.amount}
+                          ₹{balance}
                         </p>
+                        {overdueFlag && (
+                          <span className="inline-block text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
+                            Overdue
+                          </span>
+                        )}
                         <Link
                           href={`/fees/${fee.id}/pay`}
                           className="block text-xs font-medium text-indigo-600"
@@ -398,9 +412,23 @@ export default async function FeesPage({ searchParams }) {
           ) : (
             allFees.map((fee) => {
               const phone = fee.parent_phone?.replace(/\D/g, "") || "";
-              const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
+              const fullPhone = phone.startsWith("91")
+                ? phone
+                : `91${phone}`;
+              const overdueFlag = isOverdue(fee);
+              const displayStatus =
+                fee.status === "paid"
+                  ? "paid"
+                  : fee.status === "partial"
+                  ? overdueFlag
+                    ? "overdue"
+                    : "partial"
+                  : overdueFlag
+                  ? "overdue"
+                  : "pending";
+              const balance = (fee.amount || 0) - (fee.paid_amount || 0);
               const msg = encodeURIComponent(
-                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`,
+                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending.\n\n— School`
               );
               return (
                 <div
@@ -415,16 +443,16 @@ export default async function FeesPage({ searchParams }) {
                         </p>
                         <span
                           className={`shrink-0 px-2 py-0.5 text-xs rounded-full font-medium ${
-                            fee.status === "paid"
+                            displayStatus === "paid"
                               ? "bg-green-100 text-green-700"
-                              : fee.status === "overdue"
-                                ? "bg-red-100 text-red-700"
-                                : fee.status === "partial"
-                                  ? "bg-orange-100 text-orange-700"
-                                  : "bg-yellow-100 text-yellow-700"
+                              : displayStatus === "overdue"
+                              ? "bg-red-100 text-red-700"
+                              : displayStatus === "partial"
+                              ? "bg-orange-100 text-orange-700"
+                              : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
-                          {fee.status}
+                          {displayStatus}
                         </span>
                       </div>
                       <p className="text-gray-500 text-xs">
@@ -443,7 +471,7 @@ export default async function FeesPage({ searchParams }) {
                       <p className="text-sm font-bold text-gray-900">
                         ₹{fee.amount}
                       </p>
-                      {fee.status === "paid" && (
+                      {displayStatus === "paid" && (
                         <Link
                           href={`/fees/${fee.id}/receipt`}
                           className="text-xs text-green-600 font-medium"
@@ -451,10 +479,8 @@ export default async function FeesPage({ searchParams }) {
                           🖨️ Receipt
                         </Link>
                       )}
-                      {(fee.status === "pending" ||
-                        fee.status === "partial" ||
-                        fee.status === "overdue") && (
-                        <div className="flex flex-col gap-0.5 items-end">
+                      {displayStatus !== "paid" && (
+                       <div className="flex flex-col gap-0.5 items-end">
                           <Link
                             href={`/fees/${fee.id}/pay`}
                             className="text-xs text-indigo-600 font-medium"

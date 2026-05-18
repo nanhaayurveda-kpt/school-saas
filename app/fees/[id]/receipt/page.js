@@ -1,7 +1,13 @@
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { fees, students, school_settings, users } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import {
+  fees,
+  students,
+  school_settings,
+  users,
+  fee_payments,
+} from "@/lib/schema";
+import { eq, and, asc } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
@@ -62,8 +68,13 @@ export default async function FeeReceiptPage({ params }) {
     : [];
   const concession = concessionResult[0] || null;
 
-  if (!fee) return <div className="p-8 text-red-500">Receipt not found.</div>;
+  const payments = await db
+    .select()
+    .from(fee_payments)
+    .where(eq(fee_payments.fee_id, parseInt(id)))
+    .orderBy(asc(fee_payments.paid_date));
 
+  if (!fee) return <div className="p-8 text-red-500">Receipt not found.</div>;
   const receiptNo = fee.receipt_no || `RCP-${String(fee.id).padStart(5, "0")}`;
   const paidDate = fee.paid_date
     ? new Date(fee.paid_date).toLocaleDateString("en-IN", {
@@ -267,6 +278,53 @@ export default async function FeeReceiptPage({ params }) {
               </tbody>
             </table>
           </div>
+
+          {/* Payment History */}
+          {payments.length > 0 && (
+            <div className="border border-gray-200 rounded-lg overflow-hidden mb-5">
+              <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                <h3 className="text-xs font-bold text-indigo-600 uppercase">
+                  Payment History
+                </h3>
+              </div>
+              <table className="min-w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Date
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Mode
+                    </th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Receipt
+                    </th>
+                    <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
+                      Amount
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((p) => (
+                    <tr key={p.id} className="border-t border-gray-100">
+                      <td className="px-4 py-2 text-sm text-gray-700">
+                        {new Date(p.paid_date).toLocaleDateString("en-IN")}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-700 uppercase">
+                        {p.payment_mode}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-500">
+                        {p.receipt_no || "—"}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-green-700 text-right font-semibold">
+                        ₹{p.amount}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Status */}
           <div className="flex justify-center mb-6">
