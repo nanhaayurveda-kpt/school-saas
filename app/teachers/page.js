@@ -38,6 +38,13 @@ export default async function TeachersPage() {
     subjectCount[s.subject] = (subjectCount[s.subject] || 0) + 1;
   });
 
+  // teacher-wise subject count
+  const teacherSubjectCount = {};
+  allSubjects.forEach((s) => {
+    teacherSubjectCount[s.teacher_id] =
+      (teacherSubjectCount[s.teacher_id] || 0) + 1;
+  });
+
   const teacherPeriods = {};
   allPeriods.forEach((p) => {
     if (!p.teacher_name) return;
@@ -90,6 +97,7 @@ export default async function TeachersPage() {
         <div className="space-y-3">
           {allTeachers.map((teacher) => {
             const periods = teacherPeriods[teacher.name] || [];
+            const subjectsAssigned = teacherSubjectCount[teacher.id] || 0;
             const byDay = {};
             periods.forEach((p) => {
               if (!byDay[p.day]) byDay[p.day] = [];
@@ -125,7 +133,7 @@ export default async function TeachersPage() {
                       <p className="text-gray-400 text-xs">{teacher.email}</p>
                     )}
                     <p className="text-xs text-gray-400 mt-0.5">
-                      {periods.length} periods assigned
+                      {subjectsAssigned} subjects · {periods.length} periods
                     </p>
                   </div>
                   <div className="ml-3 shrink-0 flex flex-col gap-1 items-end">
