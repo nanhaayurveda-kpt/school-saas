@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { users } from "@/lib/schema";
+import DeleteExam from "./DeleteExam";
 
 export default async function ExamsPage({ searchParams }) {
   const cookieStore = await cookies();
@@ -64,9 +65,13 @@ export default async function ExamsPage({ searchParams }) {
     return matchClass && matchType;
   });
 
-  // Completed = results entered, Upcoming = no results yet
-  const upcoming = allExams.filter((e) => Number(e.result_count) === 0);
-  const past = allExams.filter((e) => Number(e.result_count) > 0);
+  const today = new Date().toISOString().split("T")[0];
+  // Completed = date past AND at least one result entered
+  // Upcoming = date today or future (regardless of results)
+  const upcoming = allExams.filter((e) => e.exam_date >= today);
+  const past = allExams.filter(
+    (e) => e.exam_date < today && Number(e.result_count) > 0,
+  );
 
   const TYPE_LABELS = {
     unit: "Unit Test",
@@ -174,7 +179,9 @@ export default async function ExamsPage({ searchParams }) {
       ) : (
         <div className="space-y-3">
           {filtered.map((exam) => {
+            const isUpcoming = exam.exam_date >= today;
             const hasResults = Number(exam.result_count) > 0;
+            const isCompleted = !isUpcoming && hasResults;
             return (
               <div
                 key={exam.id}
@@ -193,13 +200,17 @@ export default async function ExamsPage({ searchParams }) {
                           {TYPE_LABELS[exam.exam_type] || exam.exam_type}
                         </span>
                       )}
-                      {hasResults ? (
+                      {isUpcoming ? (
+                        <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-indigo-100 text-indigo-700">
+                          Upcoming
+                        </span>
+                      ) : isCompleted ? (
                         <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-gray-100 text-gray-500">
                           Completed
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-indigo-100 text-indigo-700">
-                          Upcoming
+                        <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-orange-100 text-orange-700">
+                          Pending Results
                         </span>
                       )}
                     </div>
@@ -230,6 +241,7 @@ export default async function ExamsPage({ searchParams }) {
                     >
                       📊 Report
                     </Link>
+                    <DeleteExam examId={exam.id} examName={exam.name} />
                   </div>
                 </div>
               </div>
