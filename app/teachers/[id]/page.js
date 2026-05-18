@@ -42,12 +42,18 @@ export default async function TeacherDetailPage({ params }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Teacher Details</h1>
           <p className="text-gray-500 text-sm mt-1">{t.name}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Link
+            href={`/teachers/${t.id}/timetable`}
+            className="bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 text-sm font-medium"
+          >
+            📅 Timetable
+          </Link>
           <Link
             href={`/teachers/${t.id}/edit`}
             className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
