@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { markFeePaid } from "@/app/actions";
-import { fees, students, users, school_settings } from "@/lib/schema";
+import { fees, students, users } from "@/lib/schema";
 
 export default async function PayFeePage({ params }) {
   const { id } = await params;
@@ -22,12 +22,6 @@ export default async function PayFeePage({ params }) {
     .where(eq(users.email, session.email));
   const user = userResult[0];
   if (!user) redirect("/login");
-
-  const settingsResult = await db
-    .select()
-    .from(school_settings)
-    .where(eq(school_settings.user_id, user.id));
-  const settings = settingsResult[0] || {};
 
   const result = await db
     .select({
@@ -64,26 +58,6 @@ export default async function PayFeePage({ params }) {
           {fee.student_name} — Class {fee.student_class}
         </p>
       </div>
-
-      {(settings.qr_code_url || settings.upi_id) && (
-        <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 mb-6 text-center">
-          {settings.qr_code_url && (
-            <img
-              src={settings.qr_code_url}
-              alt="UPI QR Code"
-              className="w-48 mx-auto rounded-lg mb-2"
-            />
-          )}
-          {settings.upi_id && (
-            <p className="text-sm font-semibold text-gray-700">
-              UPI ID: {settings.upi_id}
-            </p>
-          )}
-          <p className="text-xs text-gray-400 mt-1">
-            Collect payment from student, then enter below
-          </p>
-        </div>
-      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-md">
         <div className="space-y-3 mb-6">
