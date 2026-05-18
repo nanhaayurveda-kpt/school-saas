@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { cookies } from "next/headers";
 import { saveSettings } from "@/app/actions";
+import Link from "next/link";
 
 export default async function SettingsPage() {
   const cookieStore = await cookies();
@@ -25,9 +26,29 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">School Settings</h1>
         <p className="text-gray-500 text-sm mt-1">This information will appear on receipts and report cards</p>
+      </div>
+
+      {/* Quick Links */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 max-w-2xl">
+        <p className="text-xs text-gray-500 uppercase font-medium mb-3">Other Settings</p>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/settings/periods"
+            className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 border border-indigo-100 px-4 py-2 rounded-lg hover:bg-indigo-100 text-sm font-medium"
+          >
+            ⏱ Period Timings
+            <span className="text-xs text-indigo-400">School-wide schedule</span>
+          </Link>
+          <Link
+            href="/fees/structure"
+            className="inline-flex items-center gap-2 bg-gray-50 text-gray-700 border border-gray-100 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium"
+          >
+            💰 Fee Structure
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 max-w-2xl">
