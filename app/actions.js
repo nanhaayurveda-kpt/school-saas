@@ -434,6 +434,26 @@ export async function saveAttendance(formData) {
   redirect("/attendance");
 }
 
+export async function addPeriod(formData) {
+  const user = await getAuthUser();
+
+  const className = formData.get("class");
+
+  await db.insert(schema.timetable).values({
+    class: className,
+    day: formData.get("day"),
+    period: parseInt(formData.get("period")),
+    subject: formData.get("subject"),
+    teacher_name: formData.get("teacher_name"),
+    start_time: formData.get("start_time"),
+    end_time: formData.get("end_time"),
+    user_id: user.id,
+  });
+
+  await setFlash("success", "Period added successfully!");
+  redirect(`/timetable?class=${className}`);
+}
+
 export async function createExam(formData) {
   const user = await getAuthUser();
 
