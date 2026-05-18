@@ -64,9 +64,9 @@ export default async function ExamsPage({ searchParams }) {
     return matchClass && matchType;
   });
 
-  const today = new Date().toISOString().split("T")[0];
-  const upcoming = allExams.filter((e) => e.exam_date >= today);
-  const past = allExams.filter((e) => e.exam_date < today);
+  // Completed = results entered, Upcoming = no results yet
+  const upcoming = allExams.filter((e) => Number(e.result_count) === 0);
+  const past = allExams.filter((e) => Number(e.result_count) > 0);
 
   const TYPE_LABELS = {
     unit: "Unit Test",
@@ -89,7 +89,7 @@ export default async function ExamsPage({ searchParams }) {
           <h1 className="text-xl font-bold text-gray-900">Exams & Results</h1>
           <p className="text-gray-500 text-xs mt-0.5">
             {allExams.length} total · {upcoming.length} upcoming · {past.length}{" "}
-            past
+            completed
           </p>
         </div>
         <Link
@@ -174,7 +174,6 @@ export default async function ExamsPage({ searchParams }) {
       ) : (
         <div className="space-y-3">
           {filtered.map((exam) => {
-            const isUpcoming = exam.exam_date >= today;
             const hasResults = Number(exam.result_count) > 0;
             return (
               <div
@@ -194,13 +193,13 @@ export default async function ExamsPage({ searchParams }) {
                           {TYPE_LABELS[exam.exam_type] || exam.exam_type}
                         </span>
                       )}
-                      {isUpcoming ? (
-                        <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-indigo-100 text-indigo-700">
-                          Upcoming
-                        </span>
-                      ) : (
+                      {hasResults ? (
                         <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-gray-100 text-gray-500">
                           Completed
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-indigo-100 text-indigo-700">
+                          Upcoming
                         </span>
                       )}
                     </div>
