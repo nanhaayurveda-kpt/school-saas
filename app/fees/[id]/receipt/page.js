@@ -54,10 +54,12 @@ export default async function FeeReceiptPage({ params }) {
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
     .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, user.id)));
-  const concessionResult = await db
-    .select()
-    .from(fee_concessions)
-    .where(eq(fee_concessions.student_id, fee.student_id));
+  const concessionResult = fee.student_id
+    ? await db
+        .select()
+        .from(fee_concessions)
+        .where(eq(fee_concessions.student_id, fee.student_id))
+    : [];
   const concession = concessionResult[0] || null;
 
   if (!fee) return <div className="p-8 text-red-500">Receipt not found.</div>;
