@@ -1,14 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { timetable } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { timetable, period_timings, users } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { users } from "@/lib/schema";
-import { and } from "drizzle-orm";
 
 export default async function TimetablePage({ searchParams }) {
   const cookieStore = await cookies();
@@ -19,12 +17,15 @@ export default async function TimetablePage({ searchParams }) {
     .from(users)
     .where(eq(users.email, session.email));
   const user = userResult[0];
+  if (!user) redirect("/login");
+
   const params = await searchParams;
   const selectedClass = params?.class || "";
 
   const classes = [
     "Nursery",
-    "KG",
+    "LKG",
+    "UKG",
     "1",
     "2",
     "3",
@@ -48,16 +49,27 @@ export default async function TimetablePage({ searchParams }) {
     "Saturday",
   ];
 
-  let schedule = [];
-  if (selectedClass) {
-    schedule = await db
+  // Parallel fetch: schedule (if class selected) + period timings
+  const [schedule, timings] = await Promise.all([
+    selectedClass
+      ? db
+          .select()
+          .from(timetable)
+          .where(
+            and(
+              eq(timetable.class, selectedClass),
+              eq(timetable.user_id, user.id),
+            ),
+          )
+      : Promise.resolve([]),
+    db
       .select()
-      .from(timetable)
-      .where(
-        and(eq(timetable.class, selectedClass), eq(timetable.user_id, user.id)),
-      );
-  }
+      .from(period_timings)
+      .where(eq(period_timings.user_id, user.id))
+      .orderBy(period_timings.period_no),
+  ]);
 
+  // Build schedule map: day -> period -> entry
   const scheduleMap = {};
   days.forEach((day) => {
     scheduleMap[day] = {};
@@ -67,27 +79,59 @@ export default async function TimetablePage({ searchParams }) {
     scheduleMap[entry.day][entry.period] = entry;
   });
 
-  const maxPeriods =
-    schedule.length > 0 ? Math.max(...schedule.map((s) => s.period)) : 8;
+  // Build timing map: period_no -> {start, end}
+  const timingMap = {};
+  timings.forEach((t) => {
+    timingMap[t.period_no] = { start: t.start_time, end: t.end_time };
+  });
+
+  // Total periods comes from period_timings table (single source of truth).
+  // Fallback: if not set, use highest period in schedule, else 8.
+  let totalPeriods = timings.length;
+  if (totalPeriods === 0 && schedule.length > 0) {
+    totalPeriods = Math.max(...schedule.map((s) => s.period));
+  }
+  if (totalPeriods === 0) totalPeriods = 8;
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Timetable</h1>
           <p className="text-gray-500 text-sm mt-1">
             Class-wise weekly schedule
           </p>
         </div>
-        {selectedClass && (
+        <div className="flex gap-2 flex-wrap">
           <Link
-            href={`/timetable/add?class=${selectedClass}`}
-            className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition text-sm font-medium shadow-sm"
+            href="/settings/periods"
+            className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-200 text-sm font-medium"
           >
-            + Add Period
+            ⏱ Period Timings
           </Link>
-        )}
+          {selectedClass && (
+            <Link
+              href={`/timetable/add?class=${selectedClass}`}
+              className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
+            >
+              + Add Period
+            </Link>
+          )}
+        </div>
       </div>
+
+      {timings.length === 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5 text-sm text-yellow-800">
+          ⚠ Period timings not configured yet.{" "}
+          <Link
+            href="/settings/periods"
+            className="underline font-medium"
+          >
+            Set them now
+          </Link>{" "}
+          — one-time setup, applies to whole school.
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <form className="flex gap-4 items-end">
@@ -123,13 +167,18 @@ export default async function TimetablePage({ searchParams }) {
         </div>
       ) : schedule.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center text-gray-400">
-          No timetable found for {selectedClass}.{" "}
+          No timetable found for class {selectedClass}.{" "}
           <Link
             href={`/timetable/add?class=${selectedClass}`}
             className="text-indigo-600 hover:underline"
           >
             Add periods
+          </Link>{" "}
+          or set a teacher's weekly schedule from{" "}
+          <Link href="/teachers" className="text-indigo-600 hover:underline">
+            Teachers
           </Link>
+          .
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
@@ -139,14 +188,23 @@ export default async function TimetablePage({ searchParams }) {
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Day
                 </th>
-                {Array.from({ length: maxPeriods }, (_, i) => (
-                  <th
-                    key={i + 1}
-                    className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase"
-                  >
-                    Period {i + 1}
-                  </th>
-                ))}
+                {Array.from({ length: totalPeriods }, (_, i) => {
+                  const p = i + 1;
+                  const timing = timingMap[p];
+                  return (
+                    <th
+                      key={p}
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase"
+                    >
+                      <div>Period {p}</div>
+                      {timing && (
+                        <div className="text-[10px] font-normal text-gray-400 mt-0.5 normal-case">
+                          {timing.start}–{timing.end}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -155,10 +213,11 @@ export default async function TimetablePage({ searchParams }) {
                   <td className="px-4 py-3 text-sm font-semibold text-gray-700">
                     {day}
                   </td>
-                  {Array.from({ length: maxPeriods }, (_, i) => {
-                    const entry = scheduleMap[day]?.[i + 1];
+                  {Array.from({ length: totalPeriods }, (_, i) => {
+                    const p = i + 1;
+                    const entry = scheduleMap[day]?.[p];
                     return (
-                      <td key={i + 1} className="px-4 py-3 text-center">
+                      <td key={p} className="px-4 py-3 text-center">
                         {entry ? (
                           <div className="bg-indigo-50 rounded-lg p-2">
                             <div className="text-xs font-semibold text-indigo-700">
@@ -166,9 +225,6 @@ export default async function TimetablePage({ searchParams }) {
                             </div>
                             <div className="text-xs text-gray-500 mt-0.5">
                               {entry.teacher_name}
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              {entry.start_time}–{entry.end_time}
                             </div>
                           </div>
                         ) : (
