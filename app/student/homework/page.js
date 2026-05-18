@@ -52,30 +52,41 @@ export default async function StudentHomeworkPage() {
           </p>
         ) : (
           <div className="space-y-3 mt-4">
-            {myHomeworks.map((hw) => (
-              <div
-                key={hw.id}
-                className="bg-white rounded-xl border border-indigo-100 p-4 shadow-sm"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-bold text-gray-800">{hw.title}</p>
-                    <p className="text-xs text-indigo-600 mt-1">
-                      {hw.subject}
-                      {hw.section ? ` (${hw.section})` : ""}
-                    </p>
-                    {hw.description && (
-                      <p className="text-sm text-gray-600 mt-2">
-                        {hw.description}
+            {myHomeworks.map((hw) => {
+              const h = hw.homeworks;
+              const t = hw.teachers;
+              return (
+                <div
+                  key={h.id}
+                  className="bg-white rounded-xl border border-indigo-100 p-4 shadow-sm"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-bold text-gray-800">{h.title}</p>
+                      <p className="text-xs text-indigo-600 mt-1">
+                        {h.subject}
+                        {h.section ? ` (${h.section})` : ""}
                       </p>
+                      {t?.name && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          — {t.name}
+                        </p>
+                      )}
+                      {h.description && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          {h.description}
+                        </p>
+                      )}
+                    </div>
+                    {h.due_date && (
+                      <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg whitespace-nowrap ml-4">
+                        Due: {h.due_date}
+                      </span>
                     )}
                   </div>
-                  <span className="text-xs bg-indigo-50 text-indigo-700 px-2 py-1 rounded-lg whitespace-nowrap ml-4">
-                    Due: {hw.due_date}
-                  </span>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

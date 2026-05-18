@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function StudentLoginPage() {
-  const [form, setForm] = useState({ roll_number: "", phone: "" });
+  const [form, setForm] = useState({ phone: "", password: "" });
   const [error, setError] = useState("");
   const router = useRouter();
 
   async function handleLogin(e) {
     e.preventDefault();
+    setError("");
     const res = await fetch("/api/student/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,28 +41,42 @@ export default function StudentLoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Roll Number
+              Mobile Number
             </label>
             <input
-              type="text"
+              type="tel"
               required
-              value={form.roll_number}
-              onChange={(e) => setForm({ ...form, roll_number: e.target.value })}
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              value={form.phone}
+              onChange={(e) =>
+                setForm({ ...form, phone: e.target.value.replace(/\D/g, "") })
+              }
+              placeholder="10-digit registered mobile"
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
+              Password
             </label>
             <input
-              type="tel"
+              type="password"
               required
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              placeholder="Registered mobile number"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={form.password}
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value.replace(/\D/g, "") })
+              }
+              placeholder="Last 6 digits of mobile number"
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+            <p className="text-xs text-gray-400 mt-1">
+              Hint: your password is the last 6 digits of your mobile number
+            </p>
           </div>
           <button
             type="submit"
