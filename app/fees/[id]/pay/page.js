@@ -15,10 +15,8 @@ export default async function PayFeePage({ params }) {
   const token = cookieStore.get("session")?.value;
   const session = token ? await getSession(token) : null;
   if (!session) redirect("/login");
-  const userResult = await db
-    .select()
-    .from(users)
-    .where(eq(users.email, session.email));
+
+  const userResult = await db.select().from(users).where(eq(users.email, session.email));
   const user = userResult[0];
   if (!user) redirect("/login");
 
@@ -58,13 +56,25 @@ export default async function PayFeePage({ params }) {
         </p>
       </div>
 
+      <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 mb-6 text-center">
+        <img
+          src="/QR_.jpeg"
+          alt="UPI QR Code"
+          className="w-48 mx-auto rounded-lg mb-2"
+        />
+        <p className="text-sm font-semibold text-gray-700">
+          UPI ID: boism-8840202071@boi
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          Collect payment from student, then enter below
+        </p>
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-md">
         <div className="space-y-3 mb-6">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Student</span>
-            <span className="font-medium text-gray-900">
-              {fee.student_name}
-            </span>
+            <span className="font-medium text-gray-900">{fee.student_name}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Class</span>
@@ -74,9 +84,7 @@ export default async function PayFeePage({ params }) {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Fee Type</span>
-            <span className="font-medium text-gray-900">
-              {fee.fee_type || "Monthly Fee"}
-            </span>
+            <span className="font-medium text-gray-900">{fee.fee_type || "Monthly Fee"}</span>
           </div>
           {fee.month && (
             <div className="flex justify-between text-sm">
@@ -86,16 +94,12 @@ export default async function PayFeePage({ params }) {
           )}
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Amount</span>
-            <span className="font-bold text-indigo-600 text-lg">
-              ₹{fee.amount}
-            </span>
+            <span className="font-bold text-indigo-600 text-lg">₹{fee.amount}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Due Date</span>
             <span className="font-medium text-gray-900">
-              {fee.due_date
-                ? new Date(fee.due_date).toLocaleDateString("en-IN")
-                : "—"}
+              {fee.due_date ? new Date(fee.due_date).toLocaleDateString("en-IN") : "—"}
             </span>
           </div>
         </div>
@@ -115,8 +119,7 @@ export default async function PayFeePage({ params }) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Total: ₹{fee.amount} · Already paid: ₹{fee.paid_amount || 0} ·
-              Balance: ₹{fee.amount - (fee.paid_amount || 0)}
+              Total: ₹{fee.amount} · Already paid: ₹{fee.paid_amount || 0} · Balance: ₹{fee.amount - (fee.paid_amount || 0)}
             </p>
           </div>
           <div>
@@ -147,7 +150,7 @@ export default async function PayFeePage({ params }) {
               type="submit"
               className="flex-1 bg-green-600 text-white py-2.5 rounded-lg text-sm font-medium"
             >
-              ✅ Mark as Paid
+              Mark as Paid
             </button>
             <a
               href="/fees"
