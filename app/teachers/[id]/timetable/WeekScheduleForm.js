@@ -3,6 +3,18 @@
 import { useState, useMemo } from "react";
 import { saveTeacherWeekSchedule } from "@/app/actions";
 
+const NON_TEACHING_LABELS = {
+  lunch: "🍱 Lunch Break",
+  misc: "🎯 Misc / Activity",
+  assembly: "📢 Assembly",
+  break: "☕ Short Break",
+};
+
+function isTeachingPeriod(timing) {
+  const lbl = timing?.label || "teaching";
+  return lbl === "teaching";
+}
+
 export default function WeekScheduleForm({
   teacherId,
   timings,
@@ -20,7 +32,6 @@ export default function WeekScheduleForm({
     if (day === "Monday") return false;
     const monday = dayPeriodMap["Monday"] || {};
     const other = dayPeriodMap[day] || {};
-    // If "other" day has no entries at all AND Monday has, default to "same"
     if (Object.keys(other).length === 0 && Object.keys(monday).length > 0) {
       return true;
     }
@@ -39,7 +50,6 @@ export default function WeekScheduleForm({
     return true;
   };
 
-  // Initial "same as Monday" flags
   const initialSame = useMemo(() => {
     const map = {};
     days.forEach((d) => {
@@ -132,6 +142,34 @@ export default function WeekScheduleForm({
                     {timings.map((t) => {
                       const p = t.period_no;
                       const cell = existing[p] || {};
+                      const teaching = isTeachingPeriod(t);
+                      const nonTeachLabel =
+                        NON_TEACHING_LABELS[t.label] || "Break";
+
+                      if (!teaching) {
+                        return (
+                          <div
+                            key={`${day}_${p}`}
+                            className="grid grid-cols-12 gap-3 items-center py-2 bg-gray-50 rounded-lg px-2 border border-gray-100"
+                          >
+                            <div className="col-span-12 md:col-span-2">
+                              <div className="text-sm font-semibold text-gray-500">
+                                P{p}
+                              </div>
+                              <div className="text-xs text-gray-400">
+                                {t.start_time}–{t.end_time}
+                              </div>
+                            </div>
+                            <div className="col-span-12 md:col-span-10 text-sm text-gray-600 font-medium">
+                              {nonTeachLabel}
+                              <span className="ml-2 text-xs text-gray-400 font-normal">
+                                (school-wide — no entry needed)
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+
                       return (
                         <div
                           key={`${day}_${p}`}
@@ -209,8 +247,8 @@ export default function WeekScheduleForm({
             Save Weekly Schedule
           </button>
           <p className="text-xs text-gray-500 self-center">
-            Days with "Same as Monday" checked will auto-copy Monday's
-            schedule.
+            Lunch/Misc periods are auto-managed school-wide. Days marked "Same as
+            Monday" auto-copy.
           </p>
         </div>
       </form>

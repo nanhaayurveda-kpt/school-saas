@@ -8,10 +8,18 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
+const NON_TEACHING_LABELS = {
+  lunch: "🍱 Lunch Break",
+  misc: "🎯 Misc / Activity",
+  assembly: "📢 Assembly",
+  break: "☕ Short Break",
+};
+
 export default async function TimetablePage({ searchParams }) {
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("session")?.value);
   if (!session) redirect("/login");
+
   const userResult = await db
     .select()
     .from(users)
@@ -49,7 +57,7 @@ export default async function TimetablePage({ searchParams }) {
     "Saturday",
   ];
 
-  // Parallel fetch: schedule (if class selected) + period timings
+  // Parallel fetch: schedule + period timings
   const [schedule, timings] = await Promise.all([
     selectedClass
       ? db
@@ -69,7 +77,7 @@ export default async function TimetablePage({ searchParams }) {
       .orderBy(period_timings.period_no),
   ]);
 
-  // Build schedule map: day -> period -> entry
+  // schedule: day -> period -> entry
   const scheduleMap = {};
   days.forEach((day) => {
     scheduleMap[day] = {};
@@ -79,14 +87,16 @@ export default async function TimetablePage({ searchParams }) {
     scheduleMap[entry.day][entry.period] = entry;
   });
 
-  // Build timing map: period_no -> {start, end}
+  // timings: period_no -> {start, end, label}
   const timingMap = {};
   timings.forEach((t) => {
-    timingMap[t.period_no] = { start: t.start_time, end: t.end_time };
+    timingMap[t.period_no] = {
+      start: t.start_time,
+      end: t.end_time,
+      label: t.label || "teaching",
+    };
   });
 
-  // Total periods comes from period_timings table (single source of truth).
-  // Fallback: if not set, use highest period in schedule, else 8.
   let totalPeriods = timings.length;
   if (totalPeriods === 0 && schedule.length > 0) {
     totalPeriods = Math.max(...schedule.map((s) => s.period));
@@ -123,13 +133,10 @@ export default async function TimetablePage({ searchParams }) {
       {timings.length === 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5 text-sm text-yellow-800">
           ⚠ Period timings not configured yet.{" "}
-          <Link
-            href="/settings/periods"
-            className="underline font-medium"
-          >
+          <Link href="/settings/periods" className="underline font-medium">
             Set them now
           </Link>{" "}
-          — one-time setup, applies to whole school.
+          — one-time setup, applies school-wide.
         </div>
       )}
 
@@ -191,10 +198,14 @@ export default async function TimetablePage({ searchParams }) {
                 {Array.from({ length: totalPeriods }, (_, i) => {
                   const p = i + 1;
                   const timing = timingMap[p];
+                  const isNonTeaching =
+                    timing && timing.label && timing.label !== "teaching";
                   return (
                     <th
                       key={p}
-                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase"
+                      className={`px-4 py-3 text-center text-xs font-medium uppercase ${
+                        isNonTeaching ? "text-gray-400" : "text-gray-500"
+                      }`}
                     >
                       <div>Period {p}</div>
                       {timing && (
@@ -215,6 +226,25 @@ export default async function TimetablePage({ searchParams }) {
                   </td>
                   {Array.from({ length: totalPeriods }, (_, i) => {
                     const p = i + 1;
+                    const timing = timingMap[p];
+                    const isNonTeaching =
+                      timing && timing.label && timing.label !== "teaching";
+
+                    if (isNonTeaching) {
+                      const label =
+                        NON_TEACHING_LABELS[timing.label] || "Break";
+                      return (
+                        <td
+                          key={p}
+                          className="px-2 py-3 text-center bg-gray-50"
+                        >
+                          <div className="text-xs text-gray-500 font-medium">
+                            {label}
+                          </div>
+                        </td>
+                      );
+                    }
+
                     const entry = scheduleMap[day]?.[p];
                     return (
                       <td key={p} className="px-4 py-3 text-center">

@@ -524,24 +524,42 @@ export async function createNotice(formData) {
 
 // ─── Timetable ────────────────────────────────────────────────────────────────
 
-export async function addPeriod(formData) {
+export async function savePeriodTimings(formData) {
   const user = await getAuthUser();
 
-  const className = formData.get("class");
+  const totalPeriods = parseInt(formData.get("total_periods"));
+  if (!totalPeriods || totalPeriods < 1) {
+    await setFlash("error", "Invalid number of periods");
+    redirect("/settings/periods");
+  }
 
-  await db.insert(schema.timetable).values({
-    class: className,
-    day: formData.get("day"),
-    period: parseInt(formData.get("period")),
-    subject: formData.get("subject"),
-    teacher_name: formData.get("teacher_name"),
-    start_time: formData.get("start_time"),
-    end_time: formData.get("end_time"),
-    user_id: user.id,
-  });
+  // Delete all existing timings first (re-save support)
+  await db
+    .delete(schema.period_timings)
+    .where(eq(schema.period_timings.user_id, user.id));
 
-  await setFlash("success", "Period added successfully!");
-  redirect(`/timetable?class=${className}`);
+  // Insert new timings
+  const rows = [];
+  for (let i = 1; i <= totalPeriods; i++) {
+    const start = formData.get(`start_${i}`);
+    const end = formData.get(`end_${i}`);
+    const label = formData.get(`label_${i}`) || "teaching";
+    if (!start || !end) continue;
+    rows.push({
+      user_id: user.id,
+      period_no: i,
+      start_time: start,
+      end_time: end,
+      label,
+    });
+  }
+
+  if (rows.length > 0) {
+    await db.insert(schema.period_timings).values(rows);
+  }
+
+  await setFlash("success", "Period timings saved!");
+  redirect("/settings/periods");
 }
 
 export async function saveTeacherWeekSchedule(formData) {
