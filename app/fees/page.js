@@ -40,23 +40,27 @@ export default async function FeesPage({ searchParams }) {
     .where(eq(students.user_id, user.id))
     .orderBy(fees.due_date);
 
+  const todayDate = new Date();
+  const isOverdue = (f) =>
+    f.status !== "paid" && f.due_date && new Date(f.due_date) < todayDate;
+
   const summary = {
-    pending_count: allFees.filter((f) => f.status === "pending").length,
+    pending_count: allFees.filter(
+      (f) => f.status === "pending" && !isOverdue(f),
+    ).length,
     partial_count: allFees.filter((f) => f.status === "partial").length,
     paid_count: allFees.filter((f) => f.status === "paid").length,
-    overdue_count: allFees.filter((f) => f.status === "overdue").length,
+    overdue_count: allFees.filter(isOverdue).length,
     total_pending: allFees
-      .filter((f) => f.status === "pending")
-      .reduce((s, f) => s + (f.amount || 0), 0),
+      .filter((f) => f.status !== "paid" && !isOverdue(f))
+      .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
     total_partial: allFees
       .filter((f) => f.status === "partial")
       .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
-    total_collected: allFees
-      .filter((f) => f.status === "paid")
-      .reduce((s, f) => s + (f.amount || 0), 0),
+    total_collected: allFees.reduce((s, f) => s + (f.paid_amount || 0), 0),
     total_overdue: allFees
-      .filter((f) => f.status === "overdue")
-      .reduce((s, f) => s + (f.amount || 0), 0),
+      .filter(isOverdue)
+      .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
   };
 
   const grouped = {};
@@ -68,18 +72,25 @@ export default async function FeesPage({ searchParams }) {
     grouped[cls][sec].push(fee);
   });
   const sortedClasses = Object.keys(grouped).sort();
-  const defaulters = allFees.filter(
-    (f) =>
-      f.status === "pending" ||
-      f.status === "partial" ||
-      f.status === "overdue"
-  );
+  const defaulters = allFees.filter((f) => f.status !== "paid");
 
   const FeeRow = ({ fee }) => {
     const phone = fee.parent_phone?.replace(/\D/g, "") || "";
     const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
+    const overdueFlag = isOverdue(fee);
+    const displayStatus =
+      fee.status === "paid"
+        ? "paid"
+        : fee.status === "partial"
+          ? overdueFlag
+            ? "overdue"
+            : "partial"
+          : overdueFlag
+            ? "overdue"
+            : "pending";
+    const balance = (fee.amount || 0) - (fee.paid_amount || 0);
     const msg = encodeURIComponent(
-      `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending. Please pay at the earliest.\n\n— School`
+      `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending. Please pay at the earliest.\n\n— School`,
     );
     return (
       <div className="px-4 py-3 flex justify-between items-center">
@@ -90,22 +101,22 @@ export default async function FeesPage({ searchParams }) {
             </p>
             <span
               className={`shrink-0 px-1.5 py-0.5 text-xs rounded-full font-medium ${
-                fee.status === "paid"
+                displayStatus === "paid"
                   ? "bg-green-100 text-green-700"
-                  : fee.status === "partial"
-                  ? "bg-orange-100 text-orange-700"
-                  : fee.status === "overdue"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-yellow-100 text-yellow-700"
+                  : displayStatus === "partial"
+                    ? "bg-orange-100 text-orange-700"
+                    : displayStatus === "overdue"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-yellow-100 text-yellow-700"
               }`}
             >
-              {fee.status === "paid"
+              {displayStatus === "paid"
                 ? "Paid"
-                : fee.status === "partial"
-                ? "Partial"
-                : fee.status === "overdue"
-                ? "Overdue"
-                : "Pending"}
+                : displayStatus === "partial"
+                  ? `Partial · ₹${balance}`
+                  : displayStatus === "overdue"
+                    ? "Overdue"
+                    : "Pending"}
             </span>
           </div>
           <p className="text-xs text-gray-400">
@@ -116,9 +127,7 @@ export default async function FeesPage({ searchParams }) {
         </div>
         <div className="ml-3 shrink-0 text-right">
           <p className="text-sm font-bold text-gray-900">₹{fee.amount}</p>
-          {(fee.status === "pending" ||
-            fee.status === "partial" ||
-            fee.status === "overdue") && (
+          {displayStatus !== "paid" && (
             <div className="flex flex-col gap-0.5 items-end">
               <Link
                 href={`/fees/${fee.id}/pay`}
@@ -127,7 +136,7 @@ export default async function FeesPage({ searchParams }) {
                 Mark Paid
               </Link>
               {fee.parent_phone && (
-                <a
+                
                   href={`https://wa.me/${fullPhone}?text=${msg}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -138,7 +147,7 @@ export default async function FeesPage({ searchParams }) {
               )}
             </div>
           )}
-          {fee.status === "paid" && (
+          {displayStatus === "paid" && (
             <Link
               href={`/fees/${fee.id}/receipt`}
               className="text-xs text-green-600 font-medium"
@@ -326,8 +335,10 @@ export default async function FeesPage({ searchParams }) {
                 const fullPhone = phone.startsWith("91")
                   ? phone
                   : `91${phone}`;
+                const overdueFlag = isOverdue(fee);
+                const balance = (fee.amount || 0) - (fee.paid_amount || 0);
                 const msg = encodeURIComponent(
-                  `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`
+                  `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending.\n\n— School`
                 );
                 return (
                   <div
@@ -387,11 +398,9 @@ export default async function FeesPage({ searchParams }) {
           ) : (
             allFees.map((fee) => {
               const phone = fee.parent_phone?.replace(/\D/g, "") || "";
-              const fullPhone = phone.startsWith("91")
-                ? phone
-                : `91${phone}`;
+              const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
               const msg = encodeURIComponent(
-                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`
+                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${fee.amount} for ${fee.student_name} is pending.\n\n— School`,
               );
               return (
                 <div
@@ -409,10 +418,10 @@ export default async function FeesPage({ searchParams }) {
                             fee.status === "paid"
                               ? "bg-green-100 text-green-700"
                               : fee.status === "overdue"
-                              ? "bg-red-100 text-red-700"
-                              : fee.status === "partial"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-yellow-100 text-yellow-700"
+                                ? "bg-red-100 text-red-700"
+                                : fee.status === "partial"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
                           {fee.status}
@@ -426,7 +435,7 @@ export default async function FeesPage({ searchParams }) {
                         {new Date(fee.due_date).toLocaleDateString("en-IN")}
                         {fee.paid_date &&
                           ` · Paid: ${new Date(
-                            fee.paid_date
+                            fee.paid_date,
                           ).toLocaleDateString("en-IN")}`}
                       </p>
                     </div>

@@ -1,7 +1,4 @@
 export const dynamic = "force-dynamic";
-
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import {
   students,
@@ -11,8 +8,12 @@ import {
   notices,
   homeworks,
   teachers,
+  fees,
+  fee_payments,
 } from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default async function StudentDashboardPage() {
@@ -69,6 +70,33 @@ export default async function StudentDashboardPage() {
       ),
     )
     .orderBy(homeworks.created_at);
+
+  const myFees = await db
+    .select()
+    .from(fees)
+    .where(eq(fees.student_id, student.id))
+    .orderBy(fees.due_date);
+
+  const myPayments = await db
+    .select()
+    .from(fee_payments)
+    .where(eq(fee_payments.student_id, student.id))
+    .orderBy(desc(fee_payments.paid_date));
+
+  const todayDate = new Date();
+  const feeSummary = {
+    total: myFees.reduce((s, f) => s + (f.amount || 0), 0),
+    paid: myFees.reduce((s, f) => s + (f.paid_amount || 0), 0),
+    pending: myFees
+      .filter((f) => f.status !== "paid")
+      .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
+    overdue: myFees
+      .filter(
+        (f) =>
+          f.status !== "paid" && f.due_date && new Date(f.due_date) < todayDate,
+      )
+      .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
+  };
 
   // Pending = due_date today ya future
   const today = new Date().toISOString().slice(0, 10);
@@ -139,6 +167,131 @@ export default async function StudentDashboardPage() {
             <div className="text-sm text-gray-500 mt-1">Exams Appeared</div>
           </div>
         </div>
+
+        {myFees.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-800">💰 Fees Status</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100">
+              <div className="bg-white px-4 py-4 text-center">
+                <div className="text-xs text-gray-500">Total</div>
+                <div className="text-lg font-bold text-gray-900 mt-1">
+                  ₹{feeSummary.total}
+                </div>
+              </div>
+              <div className="bg-white px-4 py-4 text-center">
+                <div className="text-xs text-green-600">Paid</div>
+                <div className="text-lg font-bold text-green-700 mt-1">
+                  ₹{feeSummary.paid}
+                </div>
+              </div>
+              <div className="bg-white px-4 py-4 text-center">
+                <div className="text-xs text-orange-600">Pending</div>
+                <div className="text-lg font-bold text-orange-600 mt-1">
+                  ₹{feeSummary.pending}
+                </div>
+              </div>
+              <div className="bg-white px-4 py-4 text-center">
+                <div className="text-xs text-red-600">Overdue</div>
+                <div className="text-lg font-bold text-red-600 mt-1">
+                  ₹{feeSummary.overdue}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100">
+              <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                Fee Records
+              </h3>
+              <div className="space-y-2">
+                {myFees.map((f) => {
+                  const balance = (f.amount || 0) - (f.paid_amount || 0);
+                  const isOverdue =
+                    f.status !== "paid" &&
+                    f.due_date &&
+                    new Date(f.due_date) < todayDate;
+                  return (
+                    <div
+                      key={f.id}
+                      className="flex justify-between items-center text-sm border border-gray-100 rounded-lg px-3 py-2"
+                    >
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {f.fee_type}
+                          {f.month ? ` · ${f.month}` : ""}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          Due:{" "}
+                          {f.due_date
+                            ? new Date(f.due_date).toLocaleDateString("en-IN")
+                            : "—"}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-gray-900">
+                          ₹{f.amount}
+                        </div>
+                        <span
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                            f.status === "paid"
+                              ? "bg-green-100 text-green-700"
+                              : isOverdue
+                                ? "bg-red-100 text-red-700"
+                                : f.status === "partial"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {f.status === "paid"
+                            ? "Paid"
+                            : isOverdue
+                              ? "Overdue"
+                              : f.status === "partial"
+                                ? `Partial · ₹${balance} due`
+                                : "Pending"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {myPayments.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-100">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                  Payment History
+                </h3>
+                <div className="space-y-2">
+                  {myPayments.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex justify-between items-center text-sm"
+                    >
+                      <div>
+                        <div className="text-gray-700">
+                          {new Date(p.paid_date).toLocaleDateString("en-IN")}
+                          <span className="text-xs text-gray-400 ml-2 uppercase">
+                            {p.payment_mode}
+                          </span>
+                        </div>
+                        {p.receipt_no && (
+                          <div className="text-xs text-gray-400">
+                            Receipt: {p.receipt_no}
+                          </div>
+                        )}
+                      </div>
+                      <div className="font-bold text-green-700">
+                        ₹{p.amount}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {recentHomeworks.length > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

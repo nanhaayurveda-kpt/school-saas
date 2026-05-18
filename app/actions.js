@@ -351,13 +351,33 @@ export async function addPayment(formData) {
     due_date: new Date(parsed.data.due_date),
     paid_date: paidDate ? new Date(paidDate) : null,
     status: paidDate ? "paid" : "pending",
-    paid_amount: paidDate ? parseFloat(parsed.data.amount) : 0,
+    paid_amount: paidDate ? net_amount : 0,
     fee_type: parsed.data.fee_type || "tuition",
     academic_year: parsed.data.academic_year || null,
     month: parsed.data.month || null,
     receipt_no: parsed.data.receipt_no || null,
     user_id: user.id,
   });
+
+  if (paidDate) {
+    const insertedFee = await db
+      .select()
+      .from(schema.fees)
+      .where(eq(schema.fees.user_id, user.id))
+      .orderBy(schema.fees.id);
+    const lastFee = insertedFee[insertedFee.length - 1];
+    if (lastFee) {
+      await db.insert(schema.fee_payments).values({
+        fee_id: lastFee.id,
+        student_id: parseInt(parsed.data.student_id),
+        user_id: user.id,
+        amount: net_amount,
+        payment_mode: formData.get("payment_mode") || "cash",
+        paid_date: new Date(paidDate),
+        receipt_no: parsed.data.receipt_no || null,
+      });
+    }
+  }
 
   await setFlash("success", "Fee record saved successfully!");
   redirect("/fees");
@@ -715,6 +735,8 @@ const settingsSchema = z.object({
   affiliation_no: z.string().optional(),
   school_code: z.string().optional(),
   logo_url: z.string().optional(),
+  upi_id: z.string().optional(),
+  qr_code_url: z.string().optional(),
 });
 
 export async function saveSettings(formData) {
@@ -741,6 +763,22 @@ export async function saveSettings(formData) {
     const data = await res.json();
     logo_url = data.secure_url;
   }
+  let qr_code_url = current.qr_code_url || null;
+  const qrFile = formData.get("qr_code");
+  if (qrFile && qrFile.size > 0) {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const fd = new FormData();
+    fd.append("file", qrFile);
+
+    fd.append("upload_preset", uploadPreset);
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: "POST", body: fd },
+    );
+    const data = await res.json();
+    qr_code_url = data.secure_url;
+  }
 
   const raw = {
     school_name: formData.get("school_name"),
@@ -750,6 +788,7 @@ export async function saveSettings(formData) {
     principal_name: formData.get("principal_name") || undefined,
     affiliation_no: formData.get("affiliation_no") || undefined,
     school_code: formData.get("school_code") || undefined,
+    upi_id: formData.get("upi_id") || undefined,
   };
 
   const parsed = settingsSchema.safeParse(raw);
@@ -765,6 +804,7 @@ export async function saveSettings(formData) {
     user_id: user.id,
     ...parsed.data,
     logo_url,
+    qr_code_url,
     updated_at: new Date(),
   };
 
@@ -913,17 +953,30 @@ export async function deleteTeacherSubject(formData) {
 }
 
 export async function markFeePaid(formData) {
-  await getAuthUser();
+  const user = await getAuthUser();
   const fee_id = parseInt(formData.get("fee_id"));
   const paid_date = formData.get("paid_date");
   const receipt_no = formData.get("receipt_no") || null;
-
+  const payment_mode = formData.get("payment_mode") || "cash";
   const paid_amount = parseInt(formData.get("paid_amount"));
+
   const feeResult = await db
     .select()
     .from(schema.fees)
     .where(eq(schema.fees.id, fee_id));
   const fee = feeResult[0];
+  if (!fee) redirect("/fees");
+
+  await db.insert(schema.fee_payments).values({
+    fee_id,
+    student_id: fee.student_id,
+    user_id: user.id,
+    amount: paid_amount,
+    payment_mode,
+    paid_date: new Date(paid_date),
+    receipt_no,
+  });
+
   const newPaidAmount = (fee.paid_amount || 0) + paid_amount;
   const newStatus = newPaidAmount >= fee.amount ? "paid" : "partial";
 
@@ -937,7 +990,7 @@ export async function markFeePaid(formData) {
     })
     .where(eq(schema.fees.id, fee_id));
 
-  await setFlash("success", "Fee marked as paid!");
+  await setFlash("success", "Payment recorded!");
   redirect(`/fees/${fee_id}/receipt`);
 }
 

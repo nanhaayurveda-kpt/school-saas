@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { fees, students, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { markFeePaid } from "@/app/actions";
+import { fees, students, users, school_settings } from "@/lib/schema";
 
 export default async function PayFeePage({ params }) {
   const { id } = await params;
@@ -16,9 +16,18 @@ export default async function PayFeePage({ params }) {
   const session = token ? await getSession(token) : null;
   if (!session) redirect("/login");
 
-  const userResult = await db.select().from(users).where(eq(users.email, session.email));
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
   const user = userResult[0];
   if (!user) redirect("/login");
+
+  const settingsResult = await db
+    .select()
+    .from(school_settings)
+    .where(eq(school_settings.user_id, user.id));
+  const settings = settingsResult[0] || {};
 
   const result = await db
     .select({
@@ -56,25 +65,33 @@ export default async function PayFeePage({ params }) {
         </p>
       </div>
 
-      <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 mb-6 text-center">
-        <img
-          src="/QR.jpeg"
-          alt="UPI QR Code"
-          className="w-48 mx-auto rounded-lg mb-2"
-        />
-        <p className="text-sm font-semibold text-gray-700">
-          UPI ID: boism-8840202071@boi
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Collect payment from student, then enter below
-        </p>
-      </div>
+      {(settings.qr_code_url || settings.upi_id) && (
+        <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 mb-6 text-center">
+          {settings.qr_code_url && (
+            <img
+              src={settings.qr_code_url}
+              alt="UPI QR Code"
+              className="w-48 mx-auto rounded-lg mb-2"
+            />
+          )}
+          {settings.upi_id && (
+            <p className="text-sm font-semibold text-gray-700">
+              UPI ID: {settings.upi_id}
+            </p>
+          )}
+          <p className="text-xs text-gray-400 mt-1">
+            Collect payment from student, then enter below
+          </p>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-md">
         <div className="space-y-3 mb-6">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Student</span>
-            <span className="font-medium text-gray-900">{fee.student_name}</span>
+            <span className="font-medium text-gray-900">
+              {fee.student_name}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Class</span>
@@ -84,7 +101,9 @@ export default async function PayFeePage({ params }) {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Fee Type</span>
-            <span className="font-medium text-gray-900">{fee.fee_type || "Monthly Fee"}</span>
+            <span className="font-medium text-gray-900">
+              {fee.fee_type || "Monthly Fee"}
+            </span>
           </div>
           {fee.month && (
             <div className="flex justify-between text-sm">
@@ -94,12 +113,16 @@ export default async function PayFeePage({ params }) {
           )}
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Amount</span>
-            <span className="font-bold text-indigo-600 text-lg">₹{fee.amount}</span>
+            <span className="font-bold text-indigo-600 text-lg">
+              ₹{fee.amount}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Due Date</span>
             <span className="font-medium text-gray-900">
-              {fee.due_date ? new Date(fee.due_date).toLocaleDateString("en-IN") : "—"}
+              {fee.due_date
+                ? new Date(fee.due_date).toLocaleDateString("en-IN")
+                : "—"}
             </span>
           </div>
         </div>
@@ -119,8 +142,32 @@ export default async function PayFeePage({ params }) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Total: ₹{fee.amount} · Already paid: ₹{fee.paid_amount || 0} · Balance: ₹{fee.amount - (fee.paid_amount || 0)}
+              Total: ₹{fee.amount} · Already paid: ₹{fee.paid_amount || 0} ·
+              Balance: ₹{fee.amount - (fee.paid_amount || 0)}
             </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Payment Mode <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {["cash", "online", "upi", "cheque"].map((mode) => (
+                <label
+                  key={mode}
+                  className="flex items-center justify-center border border-gray-300 rounded-lg px-2 py-2 text-xs font-medium cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"
+                >
+                  <input
+                    type="radio"
+                    name="payment_mode"
+                    value={mode}
+                    required
+                    defaultChecked={mode === "cash"}
+                    className="sr-only"
+                  />
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </label>
+              ))}
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
