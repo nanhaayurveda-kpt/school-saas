@@ -58,7 +58,7 @@ export default async function PayFeePage({ params }) {
 
       <div className="bg-blue-50 rounded-xl border border-blue-100 p-4 mb-6 text-center">
         <img
-          src="/QR_.jpeg"
+          src="/QR.jpeg"
           alt="UPI QR Code"
           className="w-48 mx-auto rounded-lg mb-2"
         />
