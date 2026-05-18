@@ -83,24 +83,13 @@ export default async function TeacherStudentsPage() {
             {myStudents.map((s) => (
               <div
                 key={s.id}
-                className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex justify-between items-center"
+                className="bg-white rounded-xl border border-gray-100 px-4 py-3"
               >
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                  <p className="text-xs text-gray-400">
-                    Class {s.class} {s.section ? `— ${s.section}` : ""} · Roll{" "}
-                    {s.roll_number || "—"}
-                  </p>
-                </div>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    s.fee_status === "paid"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {s.fee_status === "paid" ? "Paid" : "Pending"}
-                </span>
+                <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                <p className="text-xs text-gray-400">
+                  Class {s.class} {s.section ? `— ${s.section}` : ""} · Roll{" "}
+                  {s.roll_number || "—"}
+                </p>
               </div>
             ))}
           </div>
