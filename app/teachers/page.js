@@ -38,7 +38,6 @@ export default async function TeachersPage() {
     subjectCount[s.subject] = (subjectCount[s.subject] || 0) + 1;
   });
 
-  // teacher-wise subject count
   const teacherSubjectCount = {};
   allSubjects.forEach((s) => {
     teacherSubjectCount[s.teacher_id] =
@@ -141,6 +140,12 @@ export default async function TeachersPage() {
                     </p>
                   </div>
                   <div className="ml-3 shrink-0 flex flex-col gap-1 items-end">
+                    <Link
+                      href={`/teachers/${teacher.id}/timetable`}
+                      className="text-xs font-medium text-green-600"
+                    >
+                      📅 Timetable
+                    </Link>
                     <Link
                       href={`/teachers/${teacher.id}`}
                       className="text-xs font-medium text-indigo-600"
