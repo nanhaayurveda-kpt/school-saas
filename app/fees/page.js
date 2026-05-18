@@ -137,7 +137,7 @@ export default async function FeesPage({ searchParams }) {
                 Mark Paid
               </Link>
               {fee.parent_phone && (
-                
+                <a
                   href={`https://wa.me/${fullPhone}?text=${msg}`}
                   target="_blank"
                   rel="noopener noreferrer"
