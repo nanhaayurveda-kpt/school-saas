@@ -17,5 +17,5 @@ export default async function TeacherFeesPage() {
     redirect("/teacher-login");
   }
 
-  redirect("/fees");
+  redirect("/teacher/dashboard");
 }

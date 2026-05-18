@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { students, fee_concessions, users } from "@/lib/schema";
+import { students, fee_concessions, users, fees } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
@@ -36,6 +36,17 @@ export default async function StudentDetailPage({ params }) {
     .select()
     .from(fee_concessions)
     .where(eq(fee_concessions.student_id, Number(id)));
+
+  const studentFees = await db
+    .select()
+    .from(fees)
+    .where(eq(fees.student_id, Number(id)));
+  const totalFees = studentFees.reduce((sum, f) => sum + (f.amount || 0), 0);
+  const paidFees = studentFees
+    .filter((f) => f.status === "paid")
+    .reduce((sum, f) => sum + (f.amount || 0), 0);
+  const pendingFees = totalFees - paidFees;
+  const pendingList = studentFees.filter((f) => f.status !== "paid");
 
   return (
     <div>
@@ -100,132 +111,105 @@ export default async function StudentDetailPage({ params }) {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Roll Number
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.roll_number || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Roll Number</p>
+            <p className="text-sm font-medium text-gray-900">{s.roll_number || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Scholar No.
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.admission_no || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Scholar No.</p>
+            <p className="text-sm font-medium text-gray-900">{s.admission_no || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              PEN
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">PEN</p>
             <p className="text-sm font-medium text-gray-900">{s.pen || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Aadhaar No.
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.aadhaar || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Aadhaar No.</p>
+            <p className="text-sm font-medium text-gray-900">{s.aadhaar || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Father Name
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.father_name || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Father Name</p>
+            <p className="text-sm font-medium text-gray-900">{s.father_name || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Mother Name
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.mother_name || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Mother Name</p>
+            <p className="text-sm font-medium text-gray-900">{s.mother_name || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Phone
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.phone || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Phone</p>
+            <p className="text-sm font-medium text-gray-900">{s.phone || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Alt Phone
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.alt_phone || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Alt Phone</p>
+            <p className="text-sm font-medium text-gray-900">{s.alt_phone || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Gender
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.gender || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Gender</p>
+            <p className="text-sm font-medium text-gray-900">{s.gender || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Date of Birth
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Date of Birth</p>
             <p className="text-sm font-medium text-gray-900">{s.dob || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Religion
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.religion || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Religion</p>
+            <p className="text-sm font-medium text-gray-900">{s.religion || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Caste
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.caste || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Caste</p>
+            <p className="text-sm font-medium text-gray-900">{s.caste || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Academic Year
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.academic_year || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Academic Year</p>
+            <p className="text-sm font-medium text-gray-900">{s.academic_year || "—"}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Admission Date
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Admission Date</p>
             <p className="text-sm font-medium text-gray-900">
-              {s.admission_date
-                ? new Date(s.admission_date).toLocaleDateString("en-IN")
-                : "—"}
+              {s.admission_date ? new Date(s.admission_date).toLocaleDateString("en-IN") : "—"}
             </p>
           </div>
           <div className="col-span-2">
-            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">
-              Address
-            </p>
-            <p className="text-sm font-medium text-gray-900">
-              {s.address || "—"}
-            </p>
+            <p className="text-xs text-gray-400 uppercase font-medium mb-0.5">Address</p>
+            <p className="text-sm font-medium text-gray-900">{s.address || "—"}</p>
           </div>
         </div>
       </div>
 
+      {/* Fee Status */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-sm font-bold text-gray-900">💰 Fee Status</h2>
+          <Link href="/fees" className="text-xs text-indigo-600 font-medium">View All →</Link>
+        </div>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="bg-gray-50 rounded-lg p-2.5 text-center">
+            <p className="text-xs text-gray-400">Total</p>
+            <p className="text-sm font-bold text-gray-900">₹{totalFees}</p>
+          </div>
+          <div className="bg-green-50 rounded-lg p-2.5 text-center">
+            <p className="text-xs text-green-500">Paid</p>
+            <p className="text-sm font-bold text-green-700">₹{paidFees}</p>
+          </div>
+          <div className="bg-red-50 rounded-lg p-2.5 text-center">
+            <p className="text-xs text-red-400">Pending</p>
+            <p className="text-sm font-bold text-red-600">₹{pendingFees}</p>
+          </div>
+        </div>
+        {pendingList.length > 0 && (
+          <div className="space-y-1.5">
+            {pendingList.map((f) => (
+              <div key={f.id} className="flex justify-between items-center bg-red-50 rounded-lg px-3 py-2">
+                <p className="text-xs font-medium text-gray-800">{f.month || "—"} {f.academic_year || ""}</p>
+                <p className="text-xs font-bold text-red-600">₹{f.amount}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Fee Concession */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <h2 className="text-sm font-bold text-gray-900 mb-3">
-          💸 Fee Concession
-        </h2>
-
+        <h2 className="text-sm font-bold text-gray-900 mb-3">💸 Fee Concession</h2>
         {concessions.length > 0 ? (
           <div className="space-y-2 mb-4">
             {concessions.map((c) => (
@@ -235,23 +219,14 @@ export default async function StudentDetailPage({ params }) {
               >
                 <div>
                   <p className="text-sm font-medium text-gray-900">
-                    {c.discount_type === "percent"
-                      ? `${c.discount_value}% discount`
-                      : `₹${c.discount_value} off`}
+                    {c.discount_type === "percent" ? `${c.discount_value}% discount` : `₹${c.discount_value} off`}
                   </p>
-                  {c.reason && (
-                    <p className="text-xs text-gray-500 mt-0.5">{c.reason}</p>
-                  )}
+                  {c.reason && <p className="text-xs text-gray-500 mt-0.5">{c.reason}</p>}
                 </div>
                 <form action={deleteConcession}>
                   <input type="hidden" name="id" value={c.id} />
                   <input type="hidden" name="student_id" value={s.id} />
-                  <button
-                    type="submit"
-                    className="text-xs text-red-500 font-medium"
-                  >
-                    Remove
-                  </button>
+                  <button type="submit" className="text-xs text-red-500 font-medium">Remove</button>
                 </form>
               </div>
             ))}
@@ -259,14 +234,11 @@ export default async function StudentDetailPage({ params }) {
         ) : (
           <p className="text-xs text-gray-400 mb-4">No concession set.</p>
         )}
-
         <form action={addConcession} className="space-y-3">
           <input type="hidden" name="student_id" value={s.id} />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Type
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
               <select
                 name="discount_type"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -276,9 +248,7 @@ export default async function StudentDetailPage({ params }) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Value
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Value</label>
               <input
                 type="number"
                 name="discount_value"
@@ -289,9 +259,7 @@ export default async function StudentDetailPage({ params }) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Reason
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Reason</label>
             <input
               type="text"
               name="reason"
@@ -299,10 +267,7 @@ export default async function StudentDetailPage({ params }) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium"
-          >
+          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium">
             Add Concession
           </button>
         </form>
