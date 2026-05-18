@@ -544,42 +544,6 @@ export async function addPeriod(formData) {
   redirect(`/timetable?class=${className}`);
 }
 
-export async function savePeriodTimings(formData) {
-  const user = await getAuthUser();
-
-  const totalPeriods = parseInt(formData.get("total_periods"));
-  if (!totalPeriods || totalPeriods < 1) {
-    await setFlash("error", "Invalid number of periods");
-    redirect("/settings/periods");
-  }
-
-  // Pehle saare purane timings delete karo (re-save support)
-  await db
-    .delete(schema.period_timings)
-    .where(eq(schema.period_timings.user_id, user.id));
-
-  // Naye timings insert karo
-  const rows = [];
-  for (let i = 1; i <= totalPeriods; i++) {
-    const start = formData.get(`start_${i}`);
-    const end = formData.get(`end_${i}`);
-    if (!start || !end) continue;
-    rows.push({
-      user_id: user.id,
-      period_no: i,
-      start_time: start,
-      end_time: end,
-    });
-  }
-
-  if (rows.length > 0) {
-    await db.insert(schema.period_timings).values(rows);
-  }
-
-  await setFlash("success", "Period timings saved!");
-  redirect("/settings/periods");
-}
-
 export async function saveTeacherWeekSchedule(formData) {
   const user = await getAuthUser();
 
@@ -589,7 +553,6 @@ export async function saveTeacherWeekSchedule(formData) {
     redirect("/teachers");
   }
 
-  // Fetch teacher name (needed for timetable.teacher_name column)
   const teacherResult = await db
     .select()
     .from(schema.teachers)
@@ -611,7 +574,7 @@ export async function saveTeacherWeekSchedule(formData) {
     redirect(`/teachers/${teacherId}/timetable`);
   }
 
-  // Fetch period_timings to fill start_time / end_time
+  // Fetch period_timings for start/end time
   const timings = await db
     .select()
     .from(schema.period_timings)
@@ -622,7 +585,7 @@ export async function saveTeacherWeekSchedule(formData) {
     timingMap[t.period_no] = { start: t.start_time, end: t.end_time };
   });
 
-  // Delete all existing periods of this teacher first (re-save support)
+  // Delete all existing periods for this teacher (re-save support)
   await db
     .delete(schema.timetable)
     .where(
@@ -641,27 +604,29 @@ export async function saveTeacherWeekSchedule(formData) {
     "Saturday",
   ];
 
-  const rows = [];
-  for (let p = 1; p <= totalPeriods; p++) {
-    const subject = formData.get(`subject_${p}`);
-    const className = formData.get(`class_${p}`);
-    const section = formData.get(`section_${p}`);
+  // Helper: extract one period for one day from form data
+  const getPeriodData = (day, p) => {
+    return {
+      subject: formData.get(`subject_${day}_${p}`),
+      className: formData.get(`class_${day}_${p}`),
+      section: formData.get(`section_${day}_${p}`),
+    };
+  };
 
-    // Skip empty / free periods
-    if (!subject || !className) continue;
-
-    const timing = timingMap[p];
-    const startTime = timing?.start || "00:00";
-    const endTime = timing?.end || "00:00";
-
-    const fullClass = section ? `${className}-${section}` : className;
-
-    // Insert one row per day (Mon-Sat) for this period
-    for (const day of days) {
+  // Helper: build period rows for a single day
+  const buildDayRows = (sourceDay, targetDay) => {
+    const rows = [];
+    for (let p = 1; p <= totalPeriods; p++) {
+      const { subject, className, section } = getPeriodData(sourceDay, p);
+      if (!subject || !className) continue;
+      const timing = timingMap[p];
+      const startTime = timing?.start || "00:00";
+      const endTime = timing?.end || "00:00";
+      const fullClass = section ? `${className}-${section}` : className;
       rows.push({
         user_id: user.id,
         class: fullClass,
-        day,
+        day: targetDay,
         period: p,
         subject,
         teacher_name: teacher.name,
@@ -669,15 +634,26 @@ export async function saveTeacherWeekSchedule(formData) {
         end_time: endTime,
       });
     }
+    return rows;
+  };
+
+  const allRows = [];
+  for (const day of days) {
+    // Check if this day is marked "same as Monday"
+    const sameAsMonday = formData.get(`same_${day}`) === "1";
+    const sourceDay =
+      day === "Monday" ? "Monday" : sameAsMonday ? "Monday" : day;
+    const dayRows = buildDayRows(sourceDay, day);
+    allRows.push(...dayRows);
   }
 
-  if (rows.length > 0) {
-    await db.insert(schema.timetable).values(rows);
+  if (allRows.length > 0) {
+    await db.insert(schema.timetable).values(allRows);
   }
 
   await setFlash(
     "success",
-    `Weekly timetable saved for ${teacher.name} (${rows.length} entries)`,
+    `Weekly timetable saved for ${teacher.name} (${allRows.length} entries)`,
   );
   redirect(`/teachers/${teacherId}`);
 }

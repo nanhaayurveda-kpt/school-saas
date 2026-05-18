@@ -12,8 +12,8 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect, notFound } from "next/navigation";
-import { saveTeacherWeekSchedule } from "@/app/actions";
 import Link from "next/link";
+import WeekScheduleForm from "./WeekScheduleForm";
 
 export default async function TeacherTimetablePage({ params }) {
   const { id } = await params;
@@ -41,49 +41,57 @@ export default async function TeacherTimetablePage({ params }) {
   const teacher = teacherResult[0];
   if (!teacher) notFound();
 
-  // Fetch this teacher's assigned subjects (for dropdown suggestions)
-  const subjects = await db
-    .select()
-    .from(teacher_subjects)
-    .where(eq(teacher_subjects.teacher_id, teacherId));
+  // Parallel fetch: assigned subjects + period_timings + existing entries
+  const [subjects, timings, existingEntries] = await Promise.all([
+    db
+      .select()
+      .from(teacher_subjects)
+      .where(eq(teacher_subjects.teacher_id, teacherId)),
+    db
+      .select()
+      .from(period_timings)
+      .where(eq(period_timings.user_id, user.id))
+      .orderBy(period_timings.period_no),
+    db
+      .select()
+      .from(timetable)
+      .where(
+        and(
+          eq(timetable.user_id, user.id),
+          eq(timetable.teacher_name, teacher.name),
+        ),
+      ),
+  ]);
 
-  // Unique subject names
   const uniqueSubjects = [...new Set(subjects.map((s) => s.subject))];
-
-  // Unique class-section combos
-  const classCombos = subjects.map((s) => ({
-    class: s.class,
-    section: s.section || "",
-  }));
-
-  // Fetch period_timings for total periods count
-  const timings = await db
-    .select()
-    .from(period_timings)
-    .where(eq(period_timings.user_id, user.id))
-    .orderBy(period_timings.period_no);
-
   const totalPeriods = timings.length;
 
-  // Fetch existing timetable entries for this teacher (any one day, since all same)
-  const existingEntries = await db
-    .select()
-    .from(timetable)
-    .where(
-      and(
-        eq(timetable.user_id, user.id),
-        eq(timetable.teacher_name, teacher.name),
-        eq(timetable.day, "Monday"),
-      ),
-    );
+  // Build day -> period -> entry map for pre-filling
+  const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
 
-  // Map period_no -> entry
-  const existingMap = {};
-  existingEntries.forEach((e) => {
-    existingMap[e.period] = e;
+  const dayPeriodMap = {};
+  days.forEach((d) => {
+    dayPeriodMap[d] = {};
   });
 
-  // All classes Nursery to 12 for dropdown
+  existingEntries.forEach((e) => {
+    if (!dayPeriodMap[e.day]) dayPeriodMap[e.day] = {};
+    // Parse "5-A" into class + section
+    const parts = (e.class || "").split("-");
+    dayPeriodMap[e.day][e.period] = {
+      subject: e.subject || "",
+      className: parts[0] || "",
+      section: parts[1] || "",
+    };
+  });
+
   const allClasses = [
     "Nursery",
     "LKG",
@@ -110,7 +118,7 @@ export default async function TeacherTimetablePage({ params }) {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Weekly Timetable</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {teacher.name} — same schedule applies Mon to Sat
+            {teacher.name} — fill Monday first, then mark other days same or set differently
           </p>
         </div>
         <Link
@@ -127,8 +135,7 @@ export default async function TeacherTimetablePage({ params }) {
             ⚠ Period timings not set yet
           </p>
           <p className="text-xs text-yellow-700 mb-3">
-            Please configure school-wide period timings first. This is a
-            one-time setup.
+            Please configure school-wide period timings first. One-time setup.
           </p>
           <Link
             href="/settings/periods"
@@ -139,10 +146,10 @@ export default async function TeacherTimetablePage({ params }) {
         </div>
       ) : (
         <>
-          {uniqueSubjects.length > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 max-w-3xl">
+          {subjects.length > 0 && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-5 max-w-4xl">
               <p className="text-xs text-blue-700 font-medium mb-1">
-                Assigned subjects (for reference)
+                Assigned subjects (reference)
               </p>
               <div className="flex flex-wrap gap-2 mt-1">
                 {subjects.map((s) => (
@@ -158,113 +165,16 @@ export default async function TeacherTimetablePage({ params }) {
             </div>
           )}
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-3xl">
-            <form action={saveTeacherWeekSchedule} className="space-y-4">
-              <input type="hidden" name="teacher_id" value={teacherId} />
-              <input
-                type="hidden"
-                name="total_periods"
-                value={totalPeriods}
-              />
-
-              <div className="hidden md:grid grid-cols-12 gap-3 text-xs font-medium text-gray-500 uppercase pb-2 border-b border-gray-100">
-                <div className="col-span-2">Period</div>
-                <div className="col-span-4">Subject</div>
-                <div className="col-span-3">Class</div>
-                <div className="col-span-3">Section</div>
-              </div>
-
-              {timings.map((t) => {
-                const p = t.period_no;
-                const existing = existingMap[p];
-
-                // Parse existing class+section from "5-A" or "5"
-                let defaultClass = "";
-                let defaultSection = "";
-                if (existing?.class) {
-                  const parts = existing.class.split("-");
-                  defaultClass = parts[0] || "";
-                  defaultSection = parts[1] || "";
-                }
-                const defaultSubject = existing?.subject || "";
-
-                return (
-                  <div
-                    key={p}
-                    className="grid grid-cols-12 gap-3 items-center py-2 border-b border-gray-50 last:border-0"
-                  >
-                    <div className="col-span-12 md:col-span-2">
-                      <div className="text-sm font-semibold text-gray-700">
-                        P{p}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {t.start_time}–{t.end_time}
-                      </div>
-                    </div>
-
-                    <div className="col-span-12 md:col-span-4">
-                      <input
-                        type="text"
-                        name={`subject_${p}`}
-                        list={`subjects_${p}`}
-                        placeholder="Free / Subject name"
-                        defaultValue={defaultSubject}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      <datalist id={`subjects_${p}`}>
-                        {uniqueSubjects.map((s) => (
-                          <option key={s} value={s} />
-                        ))}
-                      </datalist>
-                    </div>
-
-                    <div className="col-span-6 md:col-span-3">
-                      <select
-                        name={`class_${p}`}
-                        defaultValue={defaultClass}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      >
-                        <option value="">— Class —</option>
-                        {allClasses.map((c) => (
-                          <option key={c} value={c}>
-                            {c}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="col-span-6 md:col-span-3">
-                      <select
-                        name={`section_${p}`}
-                        defaultValue={defaultSection}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      >
-                        <option value="">— Section —</option>
-                        {allSections.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div className="pt-4 flex flex-wrap gap-3">
-                <button
-                  type="submit"
-                  className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
-                >
-                  Save Weekly Schedule
-                </button>
-                <p className="text-xs text-gray-500 self-center">
-                  Leave subject blank for free periods. Same schedule will apply
-                  Mon–Sat.
-                </p>
-              </div>
-            </form>
-          </div>
+          <WeekScheduleForm
+            teacherId={teacherId}
+            timings={timings}
+            totalPeriods={totalPeriods}
+            uniqueSubjects={uniqueSubjects}
+            allClasses={allClasses}
+            allSections={allSections}
+            dayPeriodMap={dayPeriodMap}
+            days={days}
+          />
         </>
       )}
     </div>
