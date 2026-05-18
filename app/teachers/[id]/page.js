@@ -47,12 +47,20 @@ export default async function TeacherDetailPage({ params }) {
           <h1 className="text-2xl font-bold text-gray-900">Teacher Details</h1>
           <p className="text-gray-500 text-sm mt-1">{t.name}</p>
         </div>
-        <Link
-          href="/teachers"
-          className="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-200 text-sm font-medium"
-        >
-          ← Back
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/teachers/${t.id}/edit`}
+            className="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
+          >
+            ✎ Edit
+          </Link>
+          <Link
+            href="/teachers"
+            className="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-200 text-sm font-medium"
+          >
+            ← Back
+          </Link>
+        </div>
       </div>
 
       {/* Main Detail Card */}
