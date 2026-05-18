@@ -427,7 +427,7 @@ export async function saveAttendance(formData) {
     }
   }
 
-await setFlash("success", "Attendance saved!");
+  await setFlash("success", "Attendance saved!");
   if (teacherToken) {
     redirect("/teacher/attendance");
   }
@@ -442,69 +442,14 @@ export async function createExam(formData) {
     class: formData.get("class"),
     subject: formData.get("subject"),
     exam_date: formData.get("exam_date"),
+    exam_type: formData.get("exam_type") || "unit",
+    academic_year: formData.get("academic_year") || null,
     max_marks: parseInt(formData.get("max_marks")),
     passing_marks: parseInt(formData.get("passing_marks")),
     user_id: user.id,
   });
 
   await setFlash("success", "Exam scheduled successfully!");
-  redirect("/exams");
-}
-
-export async function saveResults(formData) {
-  const user = await getAuthUser();
-
-  const exam_id = parseInt(formData.get("exam_id"));
-  const studentIds = formData.getAll("student_id");
-
-  for (const sid of studentIds) {
-    const marks = formData.get(`marks_${sid}`);
-    if (marks === "" || marks === null) continue;
-
-    const marksNum = parseFloat(marks);
-    const remarks = formData.get(`remarks_${sid}`) || "";
-
-    let grade = "F";
-    if (marksNum >= 90) grade = "A+";
-    else if (marksNum >= 75) grade = "A";
-    else if (marksNum >= 60) grade = "B";
-    else if (marksNum >= 45) grade = "C";
-    else if (marksNum >= 33) grade = "D";
-
-    const existing = await db
-      .select()
-      .from(schema.results)
-      .where(
-        and(
-          eq(schema.results.exam_id, exam_id),
-          eq(schema.results.student_id, parseInt(sid)),
-        ),
-      );
-
-    if (existing.length > 0) {
-      await db
-        .update(schema.results)
-        .set({ marks_obtained: marksNum, grade, remarks })
-        .where(
-          and(
-            eq(schema.results.exam_id, exam_id),
-            eq(schema.results.student_id, parseInt(sid)),
-            eq(schema.results.user_id, user.id),
-          ),
-        );
-    } else {
-      await db.insert(schema.results).values({
-        exam_id,
-        student_id: parseInt(sid),
-        marks_obtained: marksNum,
-        grade,
-        remarks,
-        user_id: user.id,
-      });
-    }
-  }
-
-  await setFlash("success", "Marks saved successfully!");
   redirect("/exams");
 }
 

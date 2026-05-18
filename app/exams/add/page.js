@@ -21,6 +21,13 @@ export default async function AddExamPage() {
     "12",
   ];
 
+  // Auto-suggest academic year (Apr-Mar cycle)
+  const now = new Date();
+  const month = now.getMonth(); // 0-Jan, 11-Dec
+  const year = now.getFullYear();
+  const startYear = month < 3 ? year - 1 : year;
+  const defaultAcademicYear = `${startYear}-${String(startYear + 1).slice(-2)}`;
+
   return (
     <div>
       <div className="mb-8">
@@ -49,6 +56,23 @@ export default async function AddExamPage() {
               <option value="Half Yearly Exam">Half Yearly Exam</option>
               <option value="Annual Exam">Annual Exam</option>
               <option value="Pre-Board Exam">Pre-Board Exam</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Exam Type <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="exam_type"
+              required
+              defaultValue="unit"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="unit">Unit Test</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="half_yearly">Half Yearly</option>
+              <option value="annual">Annual</option>
             </select>
           </div>
 
@@ -123,6 +147,19 @@ export default async function AddExamPage() {
                 className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Academic Year
+            </label>
+            <input
+              type="text"
+              name="academic_year"
+              defaultValue={defaultAcademicYear}
+              placeholder="e.g., 2026-27"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
 
           <div className="flex gap-3 pt-2">
