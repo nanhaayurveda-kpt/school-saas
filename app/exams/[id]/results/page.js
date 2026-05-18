@@ -5,8 +5,6 @@ import { exams, students, results } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
-import { setFlash } from "@/lib/flash";
-import { saveResults } from "@/app/actions";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { users } from "@/lib/schema";
@@ -53,7 +51,7 @@ export default async function MarksEntryPage({ params }) {
         </p>
       </div>
 
-      <form action={saveResults}>
+      <form action="/api/results/save" method="POST">
         <input type="hidden" name="exam_id" value={exam.id} />
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
@@ -113,9 +111,6 @@ export default async function MarksEntryPage({ params }) {
                           placeholder="0"
                           className="w-24 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
-                        <p className="text-xs text-indigo-500 mt-1">
-                          Click here to enter marks
-                        </p>
                       </td>
                       <td className="px-6 py-4 text-sm">
                         {existing?.grade ? (
