@@ -33,6 +33,7 @@ export default async function FeeReceiptPage({ params }) {
   const [fee] = await db
     .select({
       id: fees.id,
+      student_id: fees.student_id,
       amount: fees.amount,
       paid_amount: fees.paid_amount,
       due_date: fees.due_date,
