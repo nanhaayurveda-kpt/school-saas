@@ -28,6 +28,7 @@ export default async function MarksheetPage({ searchParams }) {
     .select()
     .from(exams)
     .where(eq(exams.user_id, user.id));
+
   const classes = [
     "Nursery",
     "LKG",
@@ -45,17 +46,42 @@ export default async function MarksheetPage({ searchParams }) {
     "11",
     "12",
   ];
+
   const years = [
     ...new Set(allExams.map((e) => e.academic_year).filter(Boolean)),
   ]
     .sort()
     .reverse();
+
   const examTypes = [
     { val: "quarterly", label: "Quarterly" },
     { val: "half_yearly", label: "Half Yearly" },
     { val: "annual", label: "Annual" },
     { val: "unit", label: "Unit Test" },
   ];
+
+  // Build quick-access list: class -> set of exam_types that exist
+  const classExamMap = {};
+  allExams.forEach((e) => {
+    if (!classExamMap[e.class]) classExamMap[e.class] = new Set();
+    if (e.exam_type) classExamMap[e.class].add(e.exam_type);
+  });
+
+  const quickAccess = [];
+  Object.entries(classExamMap).forEach(([cls, typeSet]) => {
+    typeSet.forEach((type) => {
+      quickAccess.push({ class: cls, type });
+    });
+  });
+  quickAccess.sort((a, b) => {
+    const ac = isNaN(parseInt(a.class)) ? 99 : parseInt(a.class);
+    const bc = isNaN(parseInt(b.class)) ? 99 : parseInt(b.class);
+    if (ac !== bc) return ac - bc;
+    return a.type.localeCompare(b.type);
+  });
+
+  const typeLabelMap = {};
+  examTypes.forEach((t) => (typeLabelMap[t.val] = t.label));
 
   return (
     <div>
@@ -103,6 +129,7 @@ export default async function MarksheetPage({ searchParams }) {
                     type="radio"
                     name="type"
                     value={val}
+                    required
                     defaultChecked={selectedType === val}
                     className="accent-indigo-600"
                   />
@@ -150,22 +177,38 @@ export default async function MarksheetPage({ searchParams }) {
         </form>
       </div>
 
-      {/* Quick Access */}
-      {classes.length > 0 && (
+      {/* Quick Access — सिर्फ वो classes जिनमें exams हैं */}
+      {quickAccess.length > 0 ? (
         <div>
-          <p className="text-xs font-medium text-gray-500 mb-2">Quick Access</p>
+          <p className="text-xs font-medium text-gray-500 mb-2">
+            Quick Access ({quickAccess.length})
+          </p>
           <div className="grid grid-cols-2 gap-2">
-            {classes.map((c) => (
+            {quickAccess.map((qa, idx) => (
               <a
-                key={c}
-                href={`/marksheet/view?class=${c}&type=annual`}
-                className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm text-center"
+                key={idx}
+                href={`/marksheet/view?class=${qa.class}&type=${qa.type}`}
+                className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm text-center hover:border-indigo-200 hover:shadow"
               >
-                <p className="text-sm font-bold text-indigo-700">Class {c}</p>
-                <p className="text-xs text-gray-400 mt-0.5">Annual Marksheet</p>
+                <p className="text-sm font-bold text-indigo-700">
+                  Class {qa.class}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {typeLabelMap[qa.type] || qa.type}
+                </p>
               </a>
             ))}
           </div>
+        </div>
+      ) : (
+        <div className="bg-gray-50 border border-gray-100 rounded-xl p-6 text-center text-gray-400 text-xs">
+          No exams scheduled yet.{" "}
+          <a
+            href="/exams/add"
+            className="text-indigo-600 font-medium"
+          >
+            Schedule one →
+          </a>
         </div>
       )}
     </div>

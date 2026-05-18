@@ -129,6 +129,62 @@ export default async function MarksheetViewPage({ searchParams }) {
     unit: "Unit Test",
   };
 
+  // Pre-compute per-student summary (so JSX stays clean)
+  const studentSummaries = classStudents.map((student) => {
+    const studentResults = resultsMap[student.id] || {};
+
+    let totalMax = 0;
+    let totalObtained = 0;
+    let enteredCount = 0;
+    let anyFailedSubject = false;
+
+    classExams.forEach((e) => {
+      const r = studentResults[e.id];
+      if (r && r.marks_obtained !== null && r.marks_obtained !== undefined) {
+        totalMax += e.max_marks;
+        totalObtained += r.marks_obtained;
+        enteredCount += 1;
+        if (r.marks_obtained < e.passing_marks) {
+          anyFailedSubject = true;
+        }
+      }
+    });
+
+    const allEntered = enteredCount === classExams.length;
+    const percentage =
+      totalMax > 0 ? ((totalObtained / totalMax) * 100).toFixed(1) : null;
+
+    let grade = "—";
+    let status = "Pending"; // Pending | Pass | Fail
+
+    if (totalMax > 0) {
+      const pct = (totalObtained / totalMax) * 100;
+      if (pct >= 90) grade = "A+";
+      else if (pct >= 75) grade = "A";
+      else if (pct >= 60) grade = "B";
+      else if (pct >= 45) grade = "C";
+      else if (pct >= 33) grade = "D";
+      else grade = "F";
+    }
+
+    if (allEntered) {
+      const pct = totalMax > 0 ? (totalObtained / totalMax) * 100 : 0;
+      status = !anyFailedSubject && pct >= 33 ? "Pass" : "Fail";
+    }
+
+    return {
+      student,
+      studentResults,
+      totalMax,
+      totalObtained,
+      enteredCount,
+      allEntered,
+      percentage,
+      grade,
+      status,
+    };
+  });
+
   return (
     <div>
       {/* Screen Controls */}
@@ -213,47 +269,30 @@ export default async function MarksheetViewPage({ searchParams }) {
                 <th className="border border-gray-300 px-2 py-2 text-center w-12">
                   Grade
                 </th>
-                <th className="border border-gray-300 px-2 py-2 text-center w-16">
+                <th className="border border-gray-300 px-2 py-2 text-center w-20">
                   Result
                 </th>
               </tr>
             </thead>
             <tbody>
-              {classStudents.map((student, idx) => {
-                const studentResults = resultsMap[student.id] || {};
-                const totalMax = classExams.reduce(
-                  (sum, e) => sum + e.max_marks,
-                  0,
-                );
-                const totalObtained = classExams.reduce((sum, e) => {
-                  const r = studentResults[e.id];
-                  return sum + (r ? r.marks_obtained : 0);
-                }, 0);
+              {studentSummaries.map((s, idx) => {
+                const {
+                  student,
+                  studentResults,
+                  totalMax,
+                  totalObtained,
+                  allEntered,
+                  percentage,
+                  grade,
+                  status,
+                } = s;
 
-                const percentage =
-                  totalMax > 0
-                    ? ((totalObtained / totalMax) * 100).toFixed(1)
-                    : null;
-
-                let grade = "—";
-                let passed = true;
-                if (totalMax > 0) {
-                  const pct = (totalObtained / totalMax) * 100;
-                  if (pct >= 90) grade = "A+";
-                  else if (pct >= 75) grade = "A";
-                  else if (pct >= 60) grade = "B";
-                  else if (pct >= 45) grade = "C";
-                  else if (pct >= 33) grade = "D";
-                  else {
-                    grade = "F";
-                    passed = false;
-                  }
-                }
-
-                classExams.forEach((e) => {
-                  const r = studentResults[e.id];
-                  if (r && r.marks_obtained < e.passing_marks) passed = false;
-                });
+                const statusClass =
+                  status === "Pass"
+                    ? "text-green-600"
+                    : status === "Fail"
+                      ? "text-red-600"
+                      : "text-orange-600";
 
                 return (
                   <tr
@@ -271,18 +310,26 @@ export default async function MarksheetViewPage({ searchParams }) {
                     </td>
                     {classExams.map((exam) => {
                       const r = studentResults[exam.id];
-                      const failed = r && r.marks_obtained < exam.passing_marks;
+                      const entered =
+                        r && r.marks_obtained !== null && r.marks_obtained !== undefined;
+                      const failed = entered && r.marks_obtained < exam.passing_marks;
                       return (
                         <td
                           key={exam.id}
-                          className={`border border-gray-200 px-2 py-1.5 text-center font-medium ${failed ? "text-red-600" : "text-gray-800"}`}
+                          className={`border border-gray-200 px-2 py-1.5 text-center font-medium ${
+                            !entered
+                              ? "text-gray-300"
+                              : failed
+                                ? "text-red-600"
+                                : "text-gray-800"
+                          }`}
                         >
-                          {r ? r.marks_obtained : "—"}
+                          {entered ? r.marks_obtained : "—"}
                         </td>
                       );
                     })}
                     <td className="border border-gray-200 px-2 py-1.5 text-center font-bold text-gray-900">
-                      {totalObtained}/{totalMax}
+                      {totalMax > 0 ? `${totalObtained}/${totalMax}` : "—"}
                     </td>
                     <td className="border border-gray-200 px-2 py-1.5 text-center text-gray-700">
                       {percentage !== null ? `${percentage}%` : "—"}
@@ -291,9 +338,14 @@ export default async function MarksheetViewPage({ searchParams }) {
                       {grade}
                     </td>
                     <td
-                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-xs ${passed ? "text-green-600" : "text-red-600"}`}
+                      className={`border border-gray-200 px-2 py-1.5 text-center font-bold text-xs ${statusClass}`}
                     >
-                      {passed ? "Pass" : "Fail"}
+                      {status}
+                      {!allEntered && status === "Pending" && (
+                        <div className="text-[10px] font-normal text-orange-500">
+                          Awaiting marks
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
