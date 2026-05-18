@@ -427,7 +427,10 @@ export async function saveAttendance(formData) {
     }
   }
 
-  await setFlash("success", "Attendance saved!");
+await setFlash("success", "Attendance saved!");
+  if (teacherToken) {
+    redirect("/teacher/attendance");
+  }
   redirect("/attendance");
 }
 
