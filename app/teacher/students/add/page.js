@@ -1,5 +1,3 @@
-import { addStudent } from "@/app/actions";
-
 export default async function AddStudentPage() {
   const classes = [
     "Nursery",
@@ -30,7 +28,11 @@ export default async function AddStudentPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <form action={addStudent} className="space-y-4">
+        <form
+          method="POST"
+          action="/api/teacher/students/add"
+          className="space-y-4"
+        >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Full Name <span className="text-red-500">*</span>
