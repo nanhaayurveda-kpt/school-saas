@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import { students } from "@/lib/schema";
 import Link from "next/link";
-import { deleteStudent } from "@/app/actions";
+import DeleteStudentButton from "./DeleteStudentButton";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -209,19 +209,10 @@ export default async function StudentsPage({ searchParams }) {
                               >
                                 Edit
                               </Link>
-                              <form action={deleteStudent} className="inline">
-                                <input
-                                  type="hidden"
-                                  name="id"
-                                  value={student.id}
-                                />
-                                <button
-                                  type="submit"
-                                  className="text-xs text-red-500 font-medium"
-                                >
-                                  Delete
-                                </button>
-                              </form>
+                              <DeleteStudentButton
+                                studentId={student.id}
+                                studentName={student.name}
+                              />
                             </div>
                           </div>
                         ))}

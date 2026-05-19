@@ -7,10 +7,23 @@ import { db } from "@/lib/db";
 import { students, teachers } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
+import DeleteStudentButton from "./DeleteStudentButton";
 
 const SECRET = new TextEncoder().encode(process.env.SESSION_SECRET);
 
-export default async function TeacherStudentsPage() {
+const ERROR_MESSAGES = {
+  has_fees: "Cannot delete: student has fee records.",
+  has_attendance: "Cannot delete: student has attendance records.",
+  has_results: "Cannot delete: student has exam results.",
+  has_certificates: "Cannot delete: student has issued certificates.",
+};
+
+export default async function TeacherStudentsPage({ searchParams }) {
+  const params = await searchParams;
+  const deletedFlag = params?.deleted === "1";
+  const errorCode = params?.error;
+  const errorMsg = errorCode ? ERROR_MESSAGES[errorCode] : null;
+
   const cookieStore = await cookies();
   const token = cookieStore.get("teacher_session")?.value;
   if (!token) redirect("/teacher-login");
@@ -54,6 +67,17 @@ export default async function TeacherStudentsPage() {
       </div>
 
       <div className="p-4 max-w-2xl mx-auto">
+        {deletedFlag && (
+          <div className="mb-3 bg-green-50 border border-green-200 text-green-700 text-sm px-3 py-2 rounded-lg">
+            Student deleted successfully.
+          </div>
+        )}
+        {errorMsg && (
+          <div className="mb-3 bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-lg">
+            {errorMsg}
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-xl font-bold text-gray-900">Students</h1>
           <Link
@@ -73,13 +97,19 @@ export default async function TeacherStudentsPage() {
             {myStudents.map((s) => (
               <div
                 key={s.id}
-                className="bg-white rounded-xl border border-gray-100 px-4 py-3"
+                className="bg-white rounded-xl border border-gray-100 px-4 py-3 flex items-center justify-between"
               >
-                <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                <p className="text-xs text-gray-400">
-                  Class {s.class} {s.section ? `— ${s.section}` : ""} · Roll{" "}
-                  {s.roll_number || "—"}
-                </p>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                  <p className="text-xs text-gray-400">
+                    Class {s.class} {s.section ? `— ${s.section}` : ""} · Roll{" "}
+                    {s.roll_number || "—"}
+                  </p>
+                </div>
+                <DeleteStudentButton
+                  studentId={s.id}
+                  studentName={s.name}
+                />
               </div>
             ))}
           </div>
