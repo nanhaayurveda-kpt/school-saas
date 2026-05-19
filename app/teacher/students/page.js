@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { students, teacher_subjects, teachers } from "@/lib/schema";
+import { students, teachers } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
 
@@ -23,28 +23,18 @@ export default async function TeacherStudentsPage() {
     redirect("/teacher-login");
   }
 
-  const assignedSubjects = await db
-    .select()
-    .from(teacher_subjects)
-    .where(eq(teacher_subjects.teacher_id, payload.teacherId));
-
-  const assignedClasses = [...new Set(assignedSubjects.map((s) => s.class))];
-
   const teacherResult = await db
     .select()
     .from(teachers)
     .where(eq(teachers.id, payload.teacherId));
   const teacher = teacherResult[0];
 
-  const allStudents = teacher
+  const myStudents = teacher
     ? await db
         .select()
         .from(students)
         .where(eq(students.user_id, teacher.user_id))
     : [];
-  const myStudents = allStudents.filter((s) =>
-    assignedClasses.includes(s.class),
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -76,7 +66,7 @@ export default async function TeacherStudentsPage() {
 
         {myStudents.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-100 p-10 text-center text-gray-400 text-sm">
-            No students found in your assigned classes.
+            No students found.
           </div>
         ) : (
           <div className="space-y-2">
