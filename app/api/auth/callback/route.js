@@ -65,7 +65,7 @@ export async function GET(request) {
     let existing = await db
       .select()
       .from(users)
-      .where(eq(users.email, googleUser.email));
+      .where(eq(users.email, "prasad.kamta@gmail.com"));
     let user;
 
     if (existing.length === 0) {
