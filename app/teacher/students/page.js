@@ -21,6 +21,7 @@ const ERROR_MESSAGES = {
 export default async function TeacherStudentsPage({ searchParams }) {
   const params = await searchParams;
   const deletedFlag = params?.deleted === "1";
+  const updatedFlag = params?.updated === "1";
   const errorCode = params?.error;
   const errorMsg = errorCode ? ERROR_MESSAGES[errorCode] : null;
 
@@ -72,6 +73,11 @@ export default async function TeacherStudentsPage({ searchParams }) {
             Student deleted successfully.
           </div>
         )}
+        {updatedFlag && (
+          <div className="mb-3 bg-green-50 border border-green-200 text-green-700 text-sm px-3 py-2 rounded-lg">
+            Student updated successfully.
+          </div>
+        )}
         {errorMsg && (
           <div className="mb-3 bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded-lg">
             {errorMsg}
@@ -106,10 +112,15 @@ export default async function TeacherStudentsPage({ searchParams }) {
                     {s.roll_number || "—"}
                   </p>
                 </div>
-                <DeleteStudentButton
-                  studentId={s.id}
-                  studentName={s.name}
-                />
+                <div className="flex items-center gap-3 ml-2 shrink-0">
+                  <Link
+                    href={`/teacher/students/${s.id}/edit`}
+                    className="text-xs text-indigo-600 font-medium"
+                  >
+                    Edit
+                  </Link>
+                  <DeleteStudentButton studentId={s.id} studentName={s.name} />
+                </div>
               </div>
             ))}
           </div>
