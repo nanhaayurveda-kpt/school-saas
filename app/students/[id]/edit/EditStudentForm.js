@@ -1,12 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import { updateStudent } from "@/app/actions";
+import { useState, useEffect } from "react";
 
 export default function EditStudentForm({ s, classes }) {
   const [photoUrl, setPhotoUrl] = useState(s.photo_url || "");
   const [photoPreview, setPhotoPreview] = useState(s.photo_url || "");
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [admissionNo, setAdmissionNo] = useState(s.admission_no || "");
+  const [admissionStatus, setAdmissionStatus] = useState("idle");
+  const [admissionConflict, setAdmissionConflict] = useState(null);
+
+  // Live duplicate check whenever admissionNo changes
+  useEffect(() => {
+    const trimmed = admissionNo.trim();
+    // No check if empty or unchanged from original
+    if (!trimmed || trimmed === (s.admission_no || "")) {
+      setAdmissionStatus("idle");
+      setAdmissionConflict(null);
+      return;
+    }
+    setAdmissionStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/students/check-admission-no?admission_no=${encodeURIComponent(trimmed)}&exclude_id=${s.id}`,
+        );
+        const data = await res.json();
+        if (data.available) {
+          setAdmissionStatus("available");
+          setAdmissionConflict(null);
+        } else {
+          setAdmissionStatus("taken");
+          setAdmissionConflict(data.conflict);
+        }
+      } catch {
+        setAdmissionStatus("idle");
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [admissionNo, s.admission_no, s.id]);
 
   async function handlePhotoChange(e) {
     const file = e.target.files[0];
@@ -29,7 +62,12 @@ export default function EditStudentForm({ s, classes }) {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <form action={updateStudent} className="space-y-4">
+        <form
+          method="POST"
+          action="/api/students/update"
+          onSubmit={() => setSubmitting(true)}
+          className="space-y-4"
+        >
           <input type="hidden" name="id" value={s.id} />
           <input type="hidden" name="photo_url" value={photoUrl} />
 
@@ -133,9 +171,28 @@ export default function EditStudentForm({ s, classes }) {
               <input
                 type="text"
                 name="admission_no"
-                defaultValue={s.admission_no || ""}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={admissionNo}
+                onChange={(e) => setAdmissionNo(e.target.value)}
+                className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
+                  admissionStatus === "taken"
+                    ? "border-red-500 focus:ring-red-500 bg-red-50"
+                    : admissionStatus === "available"
+                      ? "border-green-400 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-indigo-500"
+                }`}
               />
+              {admissionStatus === "checking" && (
+                <p className="text-xs text-gray-500 mt-1">Checking...</p>
+              )}
+              {admissionStatus === "taken" && admissionConflict && (
+                <p className="text-xs text-red-600 mt-1">
+                  ⚠️ Already used by {admissionConflict.name} (Class{" "}
+                  {admissionConflict.class}-{admissionConflict.section})
+                </p>
+              )}
+              {admissionStatus === "available" && (
+                <p className="text-xs text-green-600 mt-1">✓ Available</p>
+              )}
             </div>
           </div>
 
@@ -337,9 +394,15 @@ export default function EditStudentForm({ s, classes }) {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
+              disabled={
+                submitting ||
+                uploading ||
+                admissionStatus === "taken" ||
+                admissionStatus === "checking"
+              }
+              className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Update Student
+              {submitting ? "Updating..." : "Update Student"}
             </button>
             <a
               href={`/students/${s.id}`}

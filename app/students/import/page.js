@@ -1,5 +1,3 @@
-import { importStudents } from "@/app/actions";
-
 export default function ImportPage() {
   const classes = [
     "Nursery",
@@ -48,7 +46,7 @@ export default function ImportPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 max-w-2xl">
-        <form action={importStudents} className="space-y-4">
+        <form method="POST" action="/api/students/import" className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

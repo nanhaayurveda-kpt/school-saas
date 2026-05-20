@@ -1,3 +1,4 @@
+// app/promote/page.js
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
@@ -6,8 +7,7 @@ import { students, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
-import { setFlash } from "@/lib/flash";
-import { promoteStudents } from "@/app/actions";
+import PromoteForm from "./PromoteForm";
 
 export default async function PromotePage() {
   const cookieStore = await cookies();
@@ -27,6 +27,7 @@ export default async function PromotePage() {
     .select()
     .from(students)
     .where(eq(students.user_id, user.id));
+
   const classes = [
     "Nursery",
     "LKG",
@@ -99,7 +100,7 @@ export default async function PromotePage() {
             >
               <p className="text-sm font-bold text-indigo-700">Class {c}</p>
               <p className="text-xs text-indigo-500">
-                {classCounts[c]} students
+                {classCounts[c] || 0} students
               </p>
             </div>
           ))}
@@ -110,64 +111,12 @@ export default async function PromotePage() {
         <p className="text-xs font-medium text-gray-600 mb-3">
           Promote Students
         </p>
-        <form action={promoteStudents} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              From Class <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="from_class"
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">Select class to promote...</option>
-              {classes.map((c) => (
-                <option key={c} value={c}>
-                  Class {c} ({classCounts[c]} students)
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              To Class <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="to_class"
-              required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">Select destination class...</option>
-              {allClassOptions.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Academic Year <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="new_academic_year"
-              required
-              defaultValue={nextAcademicYear}
-              placeholder="e.g. 2025-26"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium"
-          >
-            Promote Students →
-          </button>
-        </form>
+        <PromoteForm
+          classes={classes}
+          allClassOptions={allClassOptions}
+          classCounts={classCounts}
+          nextAcademicYear={nextAcademicYear}
+        />
       </div>
     </div>
   );
