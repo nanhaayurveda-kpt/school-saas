@@ -25,12 +25,16 @@ export default async function StudentsPage({ searchParams }) {
   const search = params?.search?.toLowerCase() || "";
   const selectedClass = params?.class || "";
   const selectedYear = params?.year || "";
+  const selectedSection = params?.section || "";
 
   const allStudents = await db
     .select()
     .from(students)
     .where(eq(students.user_id, user.id));
   const classes = [...new Set(allStudents.map((s) => s.class))].sort();
+  const sections = [
+    ...new Set(allStudents.map((s) => s.section).filter(Boolean)),
+  ].sort();
   const years = [
     ...new Set(allStudents.map((s) => s.academic_year).filter(Boolean)),
   ]
@@ -45,8 +49,9 @@ export default async function StudentsPage({ searchParams }) {
       s.father_name?.toLowerCase().includes(search) ||
       s.phone?.includes(search);
     const matchClass = !selectedClass || s.class === selectedClass;
+    const matchSection = !selectedSection || s.section === selectedSection;
     const matchYear = !selectedYear || s.academic_year === selectedYear;
-    return matchSearch && matchClass && matchYear;
+    return matchSearch && matchClass && matchSection && matchYear;
   });
 
   const grouped = {};
@@ -72,7 +77,7 @@ export default async function StudentsPage({ searchParams }) {
             Click on a student to view concession & details.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/students/import"
             className="bg-white border border-indigo-300 text-indigo-600 px-3 py-2 rounded-lg text-sm font-medium"
@@ -114,6 +119,18 @@ export default async function StudentsPage({ searchParams }) {
             ))}
           </select>
           <select
+            name="section"
+            defaultValue={selectedSection}
+            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          >
+            <option value="">All Sections</option>
+            {sections.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <select
             name="year"
             defaultValue={selectedYear}
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -131,7 +148,7 @@ export default async function StudentsPage({ searchParams }) {
           >
             Filter
           </button>
-          {(search || selectedClass || selectedYear) && (
+          {(search || selectedClass || selectedSection || selectedYear) && (
             <a
               href="/students"
               className="bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm"

@@ -1,12 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AddStudentForm({ classes, today }) {
   const [photoUrl, setPhotoUrl] = useState("");
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [admissionNo, setAdmissionNo] = useState("");
+  const [admissionStatus, setAdmissionStatus] = useState("idle");
+  const [admissionConflict, setAdmissionConflict] = useState(null);
+  // Fetch next admission number when form loads
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/students/next-admission-no")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.admission_no) {
+          setAdmissionNo(data.admission_no);
+          setAdmissionStatus("available");
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Live duplicate check whenever admissionNo changes
+  useEffect(() => {
+    if (!admissionNo.trim()) {
+      setAdmissionStatus("idle");
+      setAdmissionConflict(null);
+      return;
+    }
+    setAdmissionStatus("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/students/check-admission-no?admission_no=${encodeURIComponent(admissionNo.trim())}`,
+        );
+        const data = await res.json();
+        if (data.available) {
+          setAdmissionStatus("available");
+          setAdmissionConflict(null);
+        } else {
+          setAdmissionStatus("taken");
+          setAdmissionConflict(data.conflict);
+        }
+      } catch {
+        setAdmissionStatus("idle");
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [admissionNo]);
 
   async function handlePhotoChange(e) {
     const file = e.target.files[0];
@@ -143,14 +191,33 @@ export default function AddStudentForm({ classes, today }) {
           {/* PEN */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              PEN (Permanent Education Number)
+              Admission/Scholor Number
             </label>
             <input
               type="text"
-              name="pen"
-              placeholder="11-digit PEN"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              name="admission_no"
+              value={admissionNo}
+              onChange={(e) => setAdmissionNo(e.target.value)}
+              className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
+                admissionStatus === "taken"
+                  ? "border-red-500 focus:ring-red-500 bg-red-50"
+                  : admissionStatus === "available"
+                    ? "border-green-400 focus:ring-green-500"
+                    : "border-gray-300 focus:ring-indigo-500"
+              }`}
             />
+            {admissionStatus === "checking" && (
+              <p className="text-xs text-gray-500 mt-1">Checking...</p>
+            )}
+            {admissionStatus === "taken" && admissionConflict && (
+              <p className="text-xs text-red-600 mt-1">
+                ⚠️ Already used by {admissionConflict.name} (Class{" "}
+                {admissionConflict.class}-{admissionConflict.section})
+              </p>
+            )}
+            {admissionStatus === "available" && admissionNo.trim() && (
+              <p className="text-xs text-green-600 mt-1">✓ Available</p>
+            )}
           </div>
 
           {/* Admission Date + Academic Year */}
@@ -310,7 +377,12 @@ export default function AddStudentForm({ classes, today }) {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              disabled={submitting || uploading}
+              disabled={
+                submitting ||
+                uploading ||
+                admissionStatus === "taken" ||
+                admissionStatus === "checking"
+              }
               className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {submitting ? "Saving..." : "Save Student"}
