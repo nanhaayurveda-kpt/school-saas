@@ -36,11 +36,15 @@ export async function POST(request) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
   const session = await getSession(token);
   if (!session) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
 
   const userResult = await db
@@ -49,7 +53,9 @@ export async function POST(request) {
     .where(eq(schema.users.email, session.email));
   const user = userResult[0];
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
 
   // ─── Parse form ────────────────────────────────────────────────────────
@@ -84,7 +90,9 @@ export async function POST(request) {
       "error",
       "Invalid data: " + JSON.stringify(parsed.error.flatten().fieldErrors),
     );
-    return NextResponse.redirect(new URL("/students/add", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/students/add", request.url), {
+      status: 303,
+    });
   }
 
   const data = parsed.data;
@@ -105,9 +113,11 @@ export async function POST(request) {
     if (existingRoll.length > 0) {
       await setFlash(
         "error",
-        `Class ${data.class}-${data.section} में Roll No. ${data.roll_number} पहले से मौजूद है (${existingRoll[0].name})`,
+        `Roll No. ${data.roll_number} already exists in Class ${data.class}-${data.section} (${existingRoll[0].name})`,
       );
-      return NextResponse.redirect(new URL("/students/add", request.url), { status: 303 });
+      return NextResponse.redirect(new URL("/students/add", request.url), {
+        status: 303,
+      });
     }
   }
 
@@ -125,20 +135,26 @@ export async function POST(request) {
     if (existingAdm.length > 0) {
       await setFlash(
         "error",
-        `Admission No. ${data.admission_no} पहले से मौजूद है (${existingAdm[0].name} — Class ${existingAdm[0].class}-${existingAdm[0].section})`,
+        `Admission No. ${data.admission_no} already exists (${existingAdm[0].name} — Class ${existingAdm[0].class}-${existingAdm[0].section})`,
       );
-      return NextResponse.redirect(new URL("/students/add", request.url), { status: 303 });
+      return NextResponse.redirect(new URL("/students/add", request.url), {
+        status: 303,
+      });
     }
   }
 
   // ─── Insert ────────────────────────────────────────────────────────────
   await db.insert(schema.students).values({
     ...data,
-    admission_date: data.admission_date ? new Date(data.admission_date) : new Date(),
+    admission_date: data.admission_date
+      ? new Date(data.admission_date)
+      : new Date(),
     fee_status: "pending",
     user_id: user.id,
   });
 
   await setFlash("success", "Student added successfully!");
-  return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/students", request.url), {
+    status: 303,
+  });
 }
