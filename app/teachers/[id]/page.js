@@ -9,7 +9,8 @@ import { redirect } from "next/navigation";
 import { users } from "@/lib/schema";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { addTeacherSubject, deleteTeacherSubject } from "@/app/actions";
+import { deleteTeacherSubject } from "@/app/actions";
+import AssignSubjectForm from "./AssignSubjectForm";
 import CopyPin from "./CopyPin";
 import DeleteTeacher from "./DeleteTeacher";
 
@@ -153,78 +154,7 @@ export default async function TeacherDetailPage({ params }) {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Assign Subject
         </h2>
-        <form action={addTeacherSubject} className="space-y-4">
-          <input type="hidden" name="teacher_id" value={t.id} />
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Subject
-              </label>
-              <input
-                type="text"
-                name="subject"
-                required
-                placeholder="e.g. Mathematics"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Class
-              </label>
-              <select
-                name="class"
-                required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">Select...</option>
-                {[
-                  "Nursery",
-                  "LKG",
-                  "UKG",
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "6",
-                  "7",
-                  "8",
-                  "9",
-                  "10",
-                  "11",
-                  "12",
-                ].map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Section
-              </label>
-              <select
-                name="section"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">All</option>
-                {["A", "B", "C", "D", "E"].map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <button
-            type="submit"
-            className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
-          >
-            Assign Subject
-          </button>
-        </form>
+        <AssignSubjectForm teacherId={t.id} />
       </div>
 
       {/* Delete Teacher */}

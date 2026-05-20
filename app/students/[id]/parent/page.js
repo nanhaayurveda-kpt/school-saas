@@ -7,8 +7,7 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
-import { setFlash } from "@/lib/flash";
-import { saveParent } from "@/app/actions";
+import ParentForm from "./ParentForm";
 
 export default async function CreateParentPage({ params }) {
   const { id } = await params;
@@ -54,81 +53,7 @@ export default async function CreateParentPage({ params }) {
           </div>
         )}
 
-        <form action={saveParent} className="space-y-5">
-          <input type="hidden" name="student_id" value={student.id} />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Parent Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              defaultValue={existingParent?.name || student.father_name || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">
-                (used for login)
-              </span>
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              required
-              defaultValue={existingParent?.phone || student.phone || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              defaultValue={existingParent?.email || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password <span className="text-red-500">*</span>
-              <span className="text-gray-400 font-normal ml-1">
-                (share this with the parent)
-              </span>
-            </label>
-            <input
-              type="text"
-              name="password"
-              required
-              defaultValue={existingParent?.password || ""}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
-            >
-              {existingParent ? "Update Account" : "Create Account"}
-            </button>
-            <a
-              href="/students"
-              className="bg-gray-100 text-gray-700 px-6 py-2.5 rounded-lg hover:bg-gray-200 text-sm font-medium"
-            >
-              Cancel
-            </a>
-          </div>
-        </form>
+        <ParentForm student={student} existingParent={existingParent} />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-// app/api/certificates/issue/route.js
+// app/api/concessions/add/route.js
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
@@ -32,23 +32,31 @@ export async function POST(request) {
   const formData = await request.formData();
   const studentIdRaw = formData.get("student_id");
   const student_id = parseInt(studentIdRaw, 10);
-  const cert_type = formData.get("cert_type");
-  const issue_date = formData.get("issue_date");
-  const serial_no = formData.get("serial_no") || null;
   const reason = formData.get("reason") || null;
-  const last_class = formData.get("last_class") || null;
-  const last_exam_passed = formData.get("last_exam_passed") || null;
-  const conduct = formData.get("conduct") || "Good";
-  const custom_content = formData.get("custom_content") || null;
+  const discount_type = formData.get("discount_type");
+  const discountValueRaw = formData.get("discount_value");
+  const discount_value = parseInt(discountValueRaw, 10);
 
   if (isNaN(student_id)) {
     await setFlash("error", "Invalid student");
-    return NextResponse.redirect(new URL("/certificates", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
   }
 
-  if (!cert_type || !issue_date) {
-    await setFlash("error", "Certificate type and issue date are required");
-    return NextResponse.redirect(new URL("/certificates", request.url), { status: 303 });
+  if (!discount_type || isNaN(discount_value) || discount_value <= 0) {
+    await setFlash("error", "Valid discount type and value are required");
+    return NextResponse.redirect(
+      new URL(`/students/${student_id}`, request.url),
+      { status: 303 },
+    );
+  }
+
+  // Percentage > 100 doesn't make sense
+  if (discount_type === "percent" && discount_value > 100) {
+    await setFlash("error", "Percentage discount cannot exceed 100");
+    return NextResponse.redirect(
+      new URL(`/students/${student_id}`, request.url),
+      { status: 303 },
+    );
   }
 
   // ─── Ownership check ───────────────────────────────────────────────────
@@ -65,60 +73,41 @@ export async function POST(request) {
     return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
   }
 
-  // ─── Duplicate check 1: serial_no must be unique per user (if given) ───
-  if (serial_no) {
-    const serialConflict = await db
-      .select()
-      .from(schema.certificates)
-      .where(
-        and(
-          eq(schema.certificates.user_id, user.id),
-          eq(schema.certificates.serial_no, serial_no),
-        ),
-      );
-    if (serialConflict.length > 0) {
-      await setFlash(
-        "error",
-        `Serial No. ${serial_no} is already used by another certificate.`,
-      );
-      return NextResponse.redirect(new URL("/certificates", request.url), { status: 303 });
-    }
-  }
-
-  // ─── Duplicate check 2: same student + cert_type + issue_date ──────────
-  // Prevents accidental re-issue of the same certificate on the same day
-  const conditions = [
-    eq(schema.certificates.user_id, user.id),
-    eq(schema.certificates.student_id, student_id),
-    eq(schema.certificates.cert_type, cert_type),
-    eq(schema.certificates.issue_date, issue_date),
-  ];
+  // ─── Duplicate check: student already has a concession? ────────────────
+  // Schema doesn't distinguish by fee_type; one concession per student is policy
   const existing = await db
     .select()
-    .from(schema.certificates)
-    .where(and(...conditions));
+    .from(schema.fee_concessions)
+    .where(
+      and(
+        eq(schema.fee_concessions.user_id, user.id),
+        eq(schema.fee_concessions.student_id, student_id),
+      ),
+    );
   if (existing.length > 0) {
     await setFlash(
       "error",
-      `A ${cert_type} certificate was already issued to ${studentCheck[0].name} on ${issue_date}.`,
+      `${studentCheck[0].name} already has a concession. Remove the existing one first.`,
     );
-    return NextResponse.redirect(new URL("/certificates", request.url), { status: 303 });
+    return NextResponse.redirect(
+      new URL(`/students/${student_id}`, request.url),
+      { status: 303 },
+    );
   }
 
   // ─── Insert ────────────────────────────────────────────────────────────
-  await db.insert(schema.certificates).values({
+  await db.insert(schema.fee_concessions).values({
     student_id,
-    cert_type,
-    issue_date,
-    serial_no,
     reason,
-    last_class,
-    last_exam_passed,
-    conduct,
-    custom_content,
+    discount_type,
+    discount_value,
     user_id: user.id,
+    created_at: new Date(),
   });
 
-  await setFlash("success", "Certificate issued successfully!");
-  return NextResponse.redirect(new URL("/certificates", request.url), { status: 303 });
+  await setFlash("success", "Concession added!");
+  return NextResponse.redirect(
+    new URL(`/students/${student_id}`, request.url),
+    { status: 303 },
+  );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { saveTeacherWeekSchedule } from "@/app/actions";
 
 const NON_TEACHING_LABELS = {
   lunch: "🍱 Lunch Break",
@@ -26,6 +25,7 @@ export default function WeekScheduleForm({
   days,
 }) {
   const [activeDay, setActiveDay] = useState("Monday");
+  const [submitting, setSubmitting] = useState(false);
 
   // For each non-Monday day, detect if it matches Monday exactly
   const detectSameAsMonday = (day) => {
@@ -67,7 +67,12 @@ export default function WeekScheduleForm({
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6 max-w-4xl">
-      <form action={saveTeacherWeekSchedule} className="space-y-5">
+      <form
+        method="POST"
+        action="/api/teachers/save-schedule"
+        onSubmit={() => setSubmitting(true)}
+        className="space-y-5"
+      >
         <input type="hidden" name="teacher_id" value={teacherId} />
         <input type="hidden" name="total_periods" value={totalPeriods} />
 
@@ -106,9 +111,7 @@ export default function WeekScheduleForm({
           return (
             <div key={day} className={hidden ? "hidden" : "block"}>
               <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                <h2 className="text-base font-semibold text-gray-800">
-                  {day}
-                </h2>
+                <h2 className="text-base font-semibold text-gray-800">{day}</h2>
                 {!isMon && (
                   <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input
@@ -242,13 +245,14 @@ export default function WeekScheduleForm({
         <div className="pt-4 border-t border-gray-100 flex flex-wrap gap-3">
           <button
             type="submit"
-            className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
+            disabled={submitting}
+            className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Weekly Schedule
+            {submitting ? "Saving..." : "Save Weekly Schedule"}
           </button>
           <p className="text-xs text-gray-500 self-center">
-            Lunch/Misc periods are auto-managed school-wide. Days marked "Same as
-            Monday" auto-copy.
+            Lunch/Misc periods are auto-managed school-wide. Days marked "Same
+            as Monday" auto-copy.
           </p>
         </div>
       </form>

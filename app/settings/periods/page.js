@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { cookies } from "next/headers";
-import { savePeriodTimings } from "@/app/actions";
+import PeriodTimingsForm from "./PeriodTimingsForm";
 import Link from "next/link";
 
 export default async function PeriodTimingsPage() {
@@ -74,7 +74,8 @@ export default async function PeriodTimingsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Period Timings</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Set school-wide period timings once. Change here for summer/winter shifts.
+            Set school-wide period timings once. Change here for summer/winter
+            shifts.
           </p>
         </div>
         <Link
@@ -86,93 +87,12 @@ export default async function PeriodTimingsPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-3xl">
-        <form action={savePeriodTimings} className="space-y-4">
-          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100 flex-wrap">
-            <label className="text-sm font-medium text-gray-700">
-              Total periods per day
-            </label>
-            <input
-              type="number"
-              name="total_periods"
-              min={1}
-              max={14}
-              required
-              defaultValue={totalPeriods}
-              className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <span className="text-xs text-gray-400">
-              (Press Save after changing this)
-            </span>
-          </div>
-
-          <div className="hidden md:grid grid-cols-12 gap-3 text-xs font-medium text-gray-500 uppercase pb-2">
-            <div className="col-span-2">Period</div>
-            <div className="col-span-3">Start Time</div>
-            <div className="col-span-3">End Time</div>
-            <div className="col-span-4">Type</div>
-          </div>
-
-          {Array.from({ length: totalPeriods }, (_, i) => {
-            const periodNo = i + 1;
-            const current = timingMap[periodNo];
-            const fallback =
-              defaultTimings[i] || { start: "", end: "", label: "teaching" };
-            const startVal = current?.start || fallback.start;
-            const endVal = current?.end || fallback.end;
-            const labelVal = current?.label || fallback.label;
-
-            return (
-              <div
-                key={periodNo}
-                className="grid grid-cols-12 gap-3 items-center py-2 border-b border-gray-50 last:border-0"
-              >
-                <div className="col-span-12 md:col-span-2 text-sm font-semibold text-gray-700">
-                  Period {periodNo}
-                </div>
-                <div className="col-span-4 md:col-span-3">
-                  <input
-                    type="time"
-                    name={`start_${periodNo}`}
-                    required
-                    defaultValue={startVal}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="col-span-4 md:col-span-3">
-                  <input
-                    type="time"
-                    name={`end_${periodNo}`}
-                    required
-                    defaultValue={endVal}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="col-span-4 md:col-span-4">
-                  <select
-                    name={`label_${periodNo}`}
-                    defaultValue={labelVal}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    {periodTypes.map((pt) => (
-                      <option key={pt.value} value={pt.value}>
-                        {pt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            );
-          })}
-
-          <div className="pt-4 border-t border-gray-100">
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
-            >
-              Save Timings
-            </button>
-          </div>
-        </form>
+        <PeriodTimingsForm
+          totalPeriods={totalPeriods}
+          timingMap={timingMap}
+          defaultTimings={defaultTimings}
+          periodTypes={periodTypes}
+        />
       </div>
 
       {existing.length > 0 && (
@@ -182,9 +102,9 @@ export default async function PeriodTimingsPage() {
       )}
 
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4 max-w-3xl text-xs text-blue-800">
-        <strong>Tip:</strong> Set Lunch / Misc / Assembly type for non-teaching periods.
-        Teachers will see these as locked rows in their weekly schedule form — no need
-        to fill them every time.
+        <strong>Tip:</strong> Set Lunch / Misc / Assembly type for non-teaching
+        periods. Teachers will see these as locked rows in their weekly schedule
+        form — no need to fill them every time.
       </div>
     </div>
   );
