@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { addPayment } from "@/app/actions";
 
 export default function FeeAddForm({
   allStudents,
@@ -17,6 +16,7 @@ export default function FeeAddForm({
   const [amount, setAmount] = useState("");
   const [concessionInfo, setConcessionInfo] = useState(null);
   const [netAmount, setNetAmount] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   function handleStudentChange(e) {
     const studentId = parseInt(e.target.value);
@@ -75,6 +75,12 @@ export default function FeeAddForm({
 
   return (
     <form action={addPayment} className="space-y-4">
+      <form
+        method="POST"
+        action="/api/fees/add"
+        onSubmit={() => setSubmitting(true)}
+        className="space-y-4"
+      ></form>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Student <span className="text-red-500">*</span>
@@ -250,9 +256,10 @@ export default function FeeAddForm({
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium"
+          disabled={submitting}
+          className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Save Payment
+          {submitting ? "Saving..." : "Save Payment"}
         </button>
         <a
           href="/fees"

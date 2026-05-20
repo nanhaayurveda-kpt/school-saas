@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
-import { markFeePaid } from "@/app/actions";
+import PayFeeForm from "./PayFeeForm";
 import { fees, students, users } from "@/lib/schema";
 
 export default async function PayFeePage({ params }) {
@@ -101,86 +101,18 @@ export default async function PayFeePage({ params }) {
           </div>
         </div>
 
-        <form action={markFeePaid} className="space-y-4">
-          <input type="hidden" name="fee_id" value={fee.id} />
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount Paying Now (₹) <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              name="paid_amount"
-              required
-              min="1"
-              defaultValue={fee.amount - (fee.paid_amount || 0)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              Total: ₹{fee.amount} · Already paid: ₹{fee.paid_amount || 0} ·
-              Balance: ₹{fee.amount - (fee.paid_amount || 0)}
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Payment Mode <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-4 gap-2">
-              {["cash", "online", "upi", "cheque"].map((mode) => (
-                <label
-                  key={mode}
-                  className="flex items-center justify-center border border-gray-300 rounded-lg px-2 py-2 text-xs font-medium cursor-pointer has-[:checked]:bg-indigo-600 has-[:checked]:text-white has-[:checked]:border-indigo-600"
-                >
-                  <input
-                    type="radio"
-                    name="payment_mode"
-                    value={mode}
-                    required
-                    defaultChecked={mode === "cash"}
-                    className="sr-only"
-                  />
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Payment Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              name="paid_date"
-              required
-              defaultValue={today}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Receipt No.
-            </label>
-            <input
-              type="text"
-              name="receipt_no"
-              placeholder="e.g. RCP/2024/001"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              className="flex-1 bg-green-600 text-white py-2.5 rounded-lg text-sm font-medium"
-            >
-              Mark as Paid
-            </button>
-            <a
-              href="/fees"
-              className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium text-center"
-            >
-              Cancel
-            </a>
-          </div>
-        </form>
+        <div className="text-xs text-gray-500 mb-4 bg-gray-50 rounded-lg px-3 py-2">
+          Total: ₹{fee.amount} · Already paid: ₹{fee.paid_amount || 0} ·{" "}
+          <span className="font-bold text-indigo-600">
+            Balance: ₹{fee.amount - (fee.paid_amount || 0)}
+          </span>
+        </div>
+
+        <PayFeeForm
+          feeId={fee.id}
+          balance={fee.amount - (fee.paid_amount || 0)}
+          today={today}
+        />
       </div>
     </div>
   );
