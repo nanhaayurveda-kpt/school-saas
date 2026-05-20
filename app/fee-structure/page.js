@@ -7,14 +7,16 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { deleteFeeStructure } from "@/app/actions";
 
 export default async function FeeStructurePage() {
   const cookieStore = await cookies();
   const session = await getSession(cookieStore.get("session")?.value);
   if (!session) redirect("/login");
 
-  const userResult = await db.select().from(users).where(eq(users.email, session.email));
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
   const user = userResult[0];
 
   const allStructures = await db
@@ -38,7 +40,9 @@ export default async function FeeStructurePage() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Fee Structure</h1>
-          <p className="text-gray-500 text-xs mt-0.5">Class-wise fee definition</p>
+          <p className="text-gray-500 text-xs mt-0.5">
+            Class-wise fee definition
+          </p>
         </div>
         <Link
           href="/fee-structure/add"
@@ -57,26 +61,41 @@ export default async function FeeStructurePage() {
           {classes.map((cls) => {
             const clsStructures = allStructures.filter((s) => s.class === cls);
             return (
-              <div key={cls} className="bg-white rounded-xl border border-indigo-100 shadow-sm overflow-hidden">
+              <div
+                key={cls}
+                className="bg-white rounded-xl border border-indigo-100 shadow-sm overflow-hidden"
+              >
                 <div className="bg-indigo-600 px-4 py-2.5">
-                  <span className="text-white font-bold text-sm">Class {cls}</span>
+                  <span className="text-white font-bold text-sm">
+                    Class {cls}
+                  </span>
                 </div>
                 <div className="divide-y divide-gray-100">
                   {clsStructures.map((s) => (
-                    <div key={s.id} className="px-4 py-3 flex justify-between items-center">
+                    <div
+                      key={s.id}
+                      className="px-4 py-3 flex justify-between items-center"
+                    >
                       <div>
                         <p className="text-sm font-medium text-gray-900">
                           {feeTypeLabel[s.fee_type] || s.fee_type}
                         </p>
                         {s.academic_year && (
-                          <p className="text-xs text-gray-400">{s.academic_year}</p>
+                          <p className="text-xs text-gray-400">
+                            {s.academic_year}
+                          </p>
                         )}
                       </div>
                       <div className="flex items-center gap-4">
-                        <p className="text-sm font-bold text-indigo-600">₹{s.amount}</p>
-                        <form action={deleteFeeStructure}>
+                        <p className="text-sm font-bold text-indigo-600">
+                          ₹{s.amount}
+                        </p>
+                        <form method="POST" action="/api/fee-structure/delete">
                           <input type="hidden" name="id" value={s.id} />
-                          <button type="submit" className="text-xs text-red-500 font-medium">
+                          <button
+                            type="submit"
+                            className="text-xs text-red-500 font-medium"
+                          >
                             Delete
                           </button>
                         </form>

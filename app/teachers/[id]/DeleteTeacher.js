@@ -1,11 +1,10 @@
 "use client";
 
-import { deleteTeacher } from "@/app/actions";
-
 export default function DeleteTeacher({ teacherId, teacherName }) {
   return (
     <form
-      action={deleteTeacher}
+      method="POST"
+      action="/api/teachers/delete"
       onSubmit={(e) => {
         if (!confirm(`Delete ${teacherName}? This cannot be undone.`)) {
           e.preventDefault();

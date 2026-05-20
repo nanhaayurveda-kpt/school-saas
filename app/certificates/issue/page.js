@@ -6,6 +6,7 @@ import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import SubmitButton from "./SubmitButton";
 
 export default async function IssueCertificatePage({ searchParams }) {
   const params = await searchParams;
@@ -40,8 +41,21 @@ export default async function IssueCertificatePage({ searchParams }) {
 
   const today = new Date().toISOString().split("T")[0];
   const classes = [
-    "Nursery", "LKG", "UKG",
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12",
+    "Nursery",
+    "LKG",
+    "UKG",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
   ];
 
   return (
@@ -234,12 +248,7 @@ export default async function IssueCertificatePage({ searchParams }) {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg text-sm font-medium"
-            >
-              Issue Certificate
-            </button>
+            <SubmitButton />
             <a
               href="/certificates"
               className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium text-center"

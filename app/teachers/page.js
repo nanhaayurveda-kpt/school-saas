@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
 import { teachers, timetable, teacher_subjects } from "@/lib/schema";
-import { deleteTeacher } from "@/app/actions";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
@@ -152,7 +151,7 @@ export default async function TeachersPage() {
                     >
                       Edit Subjects
                     </Link>
-                    <form action={deleteTeacher}>
+                    <form method="POST" action="/api/teachers/delete">
                       <input type="hidden" name="id" value={teacher.id} />
                       <button
                         type="submit"

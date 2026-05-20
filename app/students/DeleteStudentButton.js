@@ -1,7 +1,5 @@
 "use client";
 
-import { deleteStudent } from "@/app/actions";
-
 export default function DeleteStudentButton({ studentId, studentName }) {
   function handleSubmit(e) {
     if (
@@ -14,12 +12,14 @@ export default function DeleteStudentButton({ studentId, studentName }) {
   }
 
   return (
-    <form action={deleteStudent} onSubmit={handleSubmit} className="inline">
+    <form
+      method="POST"
+      action="/api/students/delete"
+      onSubmit={handleSubmit}
+      className="inline"
+    >
       <input type="hidden" name="id" value={studentId} />
-      <button
-        type="submit"
-        className="text-xs text-red-500 font-medium"
-      >
+      <button type="submit" className="text-xs text-red-500 font-medium">
         Delete
       </button>
     </form>

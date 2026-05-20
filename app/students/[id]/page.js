@@ -8,7 +8,6 @@ import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { deleteStudent, deleteConcession } from "@/app/actions";
 import AddConcessionForm from "./AddConcessionForm";
 
 export default async function StudentDetailPage({ params }) {
@@ -64,7 +63,7 @@ export default async function StudentDetailPage({ params }) {
           >
             Edit
           </Link>
-          <form action={deleteStudent}>
+          <form method="POST" action="/api/students/delete">
             <input type="hidden" name="id" value={s.id} />
             <button
               type="submit"
@@ -293,7 +292,7 @@ export default async function StudentDetailPage({ params }) {
                     <p className="text-xs text-gray-500 mt-0.5">{c.reason}</p>
                   )}
                 </div>
-                <form action={deleteConcession}>
+                <form method="POST" action="/api/concessions/delete">
                   <input type="hidden" name="id" value={c.id} />
                   <input type="hidden" name="student_id" value={s.id} />
                   <button

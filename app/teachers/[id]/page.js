@@ -9,7 +9,6 @@ import { redirect } from "next/navigation";
 import { users } from "@/lib/schema";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { deleteTeacherSubject } from "@/app/actions";
 import AssignSubjectForm from "./AssignSubjectForm";
 import CopyPin from "./CopyPin";
 import DeleteTeacher from "./DeleteTeacher";
@@ -130,7 +129,11 @@ export default async function TeacherDetailPage({ params }) {
                   >
                     {s.subject} — Class {s.class}{" "}
                     {s.section ? `(${s.section})` : ""}
-                    <form action={deleteTeacherSubject} className="inline">
+                    <form
+                      method="POST"
+                      action="/api/teachers/delete-subject"
+                      className="inline"
+                    >
                       <input type="hidden" name="id" value={s.id} />
                       <button
                         type="submit"
