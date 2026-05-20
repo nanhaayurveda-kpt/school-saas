@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { addStudent } from "@/app/actions";
 
 export default function AddStudentForm({ classes, today }) {
   const [photoUrl, setPhotoUrl] = useState("");
   const [photoPreview, setPhotoPreview] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   async function handlePhotoChange(e) {
     const file = e.target.files[0];
@@ -31,7 +31,12 @@ export default function AddStudentForm({ classes, today }) {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <form action={addStudent} className="space-y-4">
+        <form
+          method="POST"
+          action="/api/students/add"
+          onSubmit={() => setSubmitting(true)}
+          className="space-y-4"
+        >
           <input type="hidden" name="photo_url" value={photoUrl} />
 
           {/* Photo Upload */}
@@ -305,9 +310,10 @@ export default function AddStudentForm({ classes, today }) {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium"
+              disabled={submitting || uploading}
+              className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Student
+              {submitting ? "Saving..." : "Save Student"}
             </button>
             <a
               href="/students"
