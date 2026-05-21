@@ -68,7 +68,7 @@ export async function POST(request) {
       .from(schema.teachers)
       .where(
         and(
-          eq(schema.teachers.user_id, user.id),
+          eq(schema.teachers.user_id, 2),
           eq(schema.teachers.pin, pin),
           ne(schema.teachers.id, id),
         ),
