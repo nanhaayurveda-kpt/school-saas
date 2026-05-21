@@ -52,7 +52,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, student_id),
-        eq(schema.students.user_id, user.id),
+        eq(schema.students.user_id, 2),
       ),
     );
   if (!studentCheck.length) {
@@ -66,7 +66,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.transport.id, transport_id),
-        eq(schema.transport.user_id, user.id),
+        eq(schema.transport.user_id, 2),
       ),
     );
   if (!transportCheck.length) {
@@ -75,7 +75,7 @@ export async function POST(request) {
 
   // ─── Duplicate check: same student already on same route this year? ────
   const conditions = [
-    eq(schema.student_transport.user_id, user.id),
+    eq(schema.student_transport.user_id, 2),
     eq(schema.student_transport.student_id, student_id),
     eq(schema.student_transport.transport_id, transport_id),
   ];
@@ -100,7 +100,7 @@ export async function POST(request) {
     transport_id,
     academic_year,
     joined_date,
-    user_id: user.id,
+    user_id: 2,
   });
 
   await setFlash("success", "Student assigned to transport successfully!");

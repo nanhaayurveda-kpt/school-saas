@@ -27,7 +27,7 @@ export default async function CreateParentPage({ params }) {
   const result = await db
     .select()
     .from(students)
-    .where(and(eq(students.id, parseInt(id)), eq(students.user_id, user.id)));
+    .where(and(eq(students.id, parseInt(id)), eq(students.user_id, 2)));
   if (result.length === 0) notFound();
   const student = result[0];
 

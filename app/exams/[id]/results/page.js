@@ -23,14 +23,14 @@ export default async function MarksEntryPage({ params }) {
   const examResult = await db
     .select()
     .from(exams)
-    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, user.id)));
+    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, 2)));
   if (examResult.length === 0) notFound();
   const exam = examResult[0];
 
   const classStudents = await db
     .select()
     .from(students)
-    .where(and(eq(students.class, exam.class), eq(students.user_id, user.id)));
+    .where(and(eq(students.class, exam.class), eq(students.user_id, 2)));
 
   const existingResults = await db
     .select()

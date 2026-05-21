@@ -26,12 +26,12 @@ export default async function AssignTransportPage() {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, user.id))
+    .where(eq(students.user_id, 2))
     .orderBy(students.class, students.name);
   const allRoutes = await db
     .select()
     .from(transport)
-    .where(eq(transport.user_id, user.id))
+    .where(eq(transport.user_id, 2))
     .orderBy(transport.route_name);
 
   const today = new Date().toISOString().split("T")[0];

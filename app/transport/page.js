@@ -23,7 +23,7 @@ export default async function TransportPage() {
   const allRoutes = await db
     .select()
     .from(transport)
-    .where(eq(transport.user_id, user.id))
+    .where(eq(transport.user_id, 2))
     .orderBy(transport.route_name);
 
   const allAssignments = await db

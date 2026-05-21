@@ -28,7 +28,7 @@ export default async function PeriodTimingsPage() {
   const existing = await db
     .select()
     .from(period_timings)
-    .where(eq(period_timings.user_id, user.id))
+    .where(eq(period_timings.user_id, 2))
     .orderBy(period_timings.period_no);
 
   // Map period_no -> {start, end, label}

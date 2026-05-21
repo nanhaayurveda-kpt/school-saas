@@ -49,7 +49,7 @@ export async function POST(request) {
 
   // ─── Duplicate check: same route + stop already exists ────────────────
   const conditions = [
-    eq(schema.transport.user_id, user.id),
+    eq(schema.transport.user_id, 2),
     eq(schema.transport.route_name, route_name),
     eq(schema.transport.stop_name, stop_name),
   ];
@@ -72,7 +72,7 @@ export async function POST(request) {
     monthly_fee,
     driver_name,
     vehicle_no,
-    user_id: user.id,
+    user_id: 2,
   });
 
   await setFlash("success", "Route added successfully!");

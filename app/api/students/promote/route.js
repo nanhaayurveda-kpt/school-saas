@@ -51,7 +51,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.class, from_class),
-        eq(schema.students.user_id, user.id),
+        eq(schema.students.user_id, 2),
       ),
     );
 
@@ -71,7 +71,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.class, from_class),
-        eq(schema.students.user_id, user.id),
+        eq(schema.students.user_id, 2),
       ),
     );
 

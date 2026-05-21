@@ -44,7 +44,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, id),
-        eq(schema.students.user_id, user.id),
+        eq(schema.students.user_id, 2),
       ),
     );
   if (!studentCheck.length) {
@@ -66,7 +66,7 @@ export async function POST(request) {
       .from(schema.students)
       .where(
         and(
-          eq(schema.students.user_id, user.id),
+          eq(schema.students.user_id, 2),
           eq(schema.students.class, newClass),
           eq(schema.students.section, newSection),
           eq(schema.students.roll_number, newRoll),
@@ -89,7 +89,7 @@ export async function POST(request) {
       .from(schema.students)
       .where(
         and(
-          eq(schema.students.user_id, user.id),
+          eq(schema.students.user_id, 2),
           eq(schema.students.admission_no, newAdmission),
           ne(schema.students.id, id),
         ),
@@ -141,7 +141,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, id),
-        eq(schema.students.user_id, user.id),
+        eq(schema.students.user_id, 2),
       ),
     );
 

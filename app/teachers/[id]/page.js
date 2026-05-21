@@ -31,7 +31,7 @@ export default async function TeacherDetailPage({ params }) {
   const result = await db
     .select()
     .from(teachers)
-    .where(and(eq(teachers.id, Number(id)), eq(teachers.user_id, user.id)));
+    .where(and(eq(teachers.id, Number(id)), eq(teachers.user_id, 2)));
   if (result.length === 0) notFound();
 
   const t = result[0];

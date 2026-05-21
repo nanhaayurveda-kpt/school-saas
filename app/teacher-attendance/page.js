@@ -24,12 +24,12 @@ export default async function TeacherAttendancePage({ searchParams }) {
   const today = new Date().toISOString().split("T")[0];
   const selectedDate = params?.date || today;
 
-  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, user.id));
+  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, 2));
 
   const existing = await db
     .select()
     .from(teacher_attendance)
-    .where(and(eq(teacher_attendance.date, selectedDate), eq(teacher_attendance.user_id, user.id)));
+    .where(and(eq(teacher_attendance.date, selectedDate), eq(teacher_attendance.user_id, 2)));
 
   const attendanceMap = {};
   existing.forEach((a) => {

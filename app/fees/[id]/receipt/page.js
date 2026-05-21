@@ -33,7 +33,7 @@ export default async function FeeReceiptPage({ params }) {
   const settingsResult = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, user.id));
+    .where(eq(school_settings.user_id, 2));
   const settings = settingsResult[0] || {};
 
   const [fee] = await db
@@ -59,7 +59,7 @@ export default async function FeeReceiptPage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, user.id)));
+    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, 2)));
   const concessionResult = fee.student_id
     ? await db
         .select()

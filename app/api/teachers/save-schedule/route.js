@@ -44,7 +44,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.teachers.id, teacherId),
-        eq(schema.teachers.user_id, user.id),
+        eq(schema.teachers.user_id, 2),
       ),
     );
   const teacher = teacherResult[0];
@@ -67,7 +67,7 @@ export async function POST(request) {
   const timings = await db
     .select()
     .from(schema.period_timings)
-    .where(eq(schema.period_timings.user_id, user.id));
+    .where(eq(schema.period_timings.user_id, 2));
   const timingMap = {};
   timings.forEach((t) => {
     timingMap[t.period_no] = { start: t.start_time, end: t.end_time };
@@ -78,7 +78,7 @@ export async function POST(request) {
     .delete(schema.timetable)
     .where(
       and(
-        eq(schema.timetable.user_id, user.id),
+        eq(schema.timetable.user_id, 2),
         eq(schema.timetable.teacher_name, teacher.name),
       ),
     );
@@ -108,7 +108,7 @@ export async function POST(request) {
       const endTime = timing?.end || "00:00";
       const fullClass = section ? `${className}-${section}` : className;
       rows.push({
-        user_id: user.id,
+        user_id: 2,
         class: fullClass,
         day: targetDay,
         period: p,

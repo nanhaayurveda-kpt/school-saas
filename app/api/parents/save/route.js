@@ -58,7 +58,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, student_id),
-        eq(schema.students.user_id, user.id),
+        eq(schema.students.user_id, 2),
       ),
     );
   if (!studentCheck.length) {
@@ -70,7 +70,7 @@ export async function POST(request) {
     phone,
     email: email || null,
     password,
-    user_id: user.id,
+    user_id: 2,
   };
 
   // ─── UPSERT pattern (naturally retry-safe) ─────────────────────────────
@@ -82,7 +82,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.parents.student_id, student_id),
-        eq(schema.parents.user_id, user.id),
+        eq(schema.parents.user_id, 2),
       ),
     );
 
@@ -98,7 +98,7 @@ export async function POST(request) {
       .where(
         and(
           eq(schema.parents.student_id, student_id),
-          eq(schema.parents.user_id, user.id),
+          eq(schema.parents.user_id, 2),
         ),
       );
     await setFlash("success", "Parent account updated successfully!");

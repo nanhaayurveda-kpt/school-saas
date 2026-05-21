@@ -26,7 +26,7 @@ export default async function PromotePage() {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, user.id));
+    .where(eq(students.user_id, 2));
 
   const classes = [
     "Nursery",

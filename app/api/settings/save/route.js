@@ -59,7 +59,7 @@ export async function POST(request) {
   const existing = await db
     .select()
     .from(schema.school_settings)
-    .where(eq(schema.school_settings.user_id, user.id));
+    .where(eq(schema.school_settings.user_id, 2));
   const current = existing[0] || {};
 
   // ─── Parse form ────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ export async function POST(request) {
   }
 
   const data = {
-    user_id: user.id,
+    user_id: 2,
     ...parsed.data,
     logo_url,
     qr_code_url,
@@ -114,7 +114,7 @@ export async function POST(request) {
     await db
       .update(schema.school_settings)
       .set(data)
-      .where(eq(schema.school_settings.user_id, user.id));
+      .where(eq(schema.school_settings.user_id, 2));
   } else {
     await db.insert(schema.school_settings).values(data);
   }

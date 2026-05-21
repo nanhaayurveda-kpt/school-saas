@@ -37,7 +37,7 @@ export async function POST(request) {
     .select()
     .from(schema.teachers)
     .where(
-      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, user.id)),
+      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, 2)),
     );
   if (!teacherCheck.length) {
     return NextResponse.redirect(new URL("/teachers", request.url), { status: 303 });

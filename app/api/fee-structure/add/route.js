@@ -43,7 +43,7 @@ export async function POST(request) {
 
   // ─── Duplicate check: same class + fee_type + academic_year ────────────
   const conditions = [
-    eq(schema.fee_structures.user_id, user.id),
+    eq(schema.fee_structures.user_id, 2),
     eq(schema.fee_structures.class, cls),
     eq(schema.fee_structures.fee_type, fee_type),
   ];
@@ -64,7 +64,7 @@ export async function POST(request) {
 
   // ─── Insert ────────────────────────────────────────────────────────────
   await db.insert(schema.fee_structures).values({
-    user_id: user.id,
+    user_id: 2,
     class: cls,
     fee_type,
     amount,

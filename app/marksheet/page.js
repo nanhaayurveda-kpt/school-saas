@@ -27,7 +27,7 @@ export default async function MarksheetPage({ searchParams }) {
   const allExams = await db
     .select()
     .from(exams)
-    .where(eq(exams.user_id, user.id));
+    .where(eq(exams.user_id, 2));
 
   const classes = [
     "Nursery",

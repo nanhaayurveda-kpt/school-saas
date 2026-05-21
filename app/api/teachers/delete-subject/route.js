@@ -50,7 +50,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.teachers.id, teacher_id),
-        eq(schema.teachers.user_id, user.id),
+        eq(schema.teachers.user_id, 2),
       ),
     );
   if (!teacherOwner.length) {

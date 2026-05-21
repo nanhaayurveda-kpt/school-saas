@@ -59,7 +59,7 @@ export async function POST(request) {
 
   // ─── Duplicate check: same exam (name + class + subject + date) ────────
   const conditions = [
-    eq(schema.exams.user_id, user.id),
+    eq(schema.exams.user_id, 2),
     eq(schema.exams.name, name),
     eq(schema.exams.class, className),
     eq(schema.exams.subject, subject),
@@ -87,7 +87,7 @@ export async function POST(request) {
     academic_year,
     max_marks,
     passing_marks,
-    user_id: user.id,
+    user_id: 2,
   });
 
   await setFlash("success", "Exam scheduled successfully!");

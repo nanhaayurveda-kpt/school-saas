@@ -26,14 +26,14 @@ export default async function ReportCardPage({ params }) {
   const examResult = await db
     .select()
     .from(exams)
-    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, user.id)));
+    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, 2)));
   if (examResult.length === 0) notFound();
   const exam = examResult[0];
 
   const classStudents = await db
     .select()
     .from(students)
-    .where(and(eq(students.class, exam.class), eq(students.user_id, user.id)));
+    .where(and(eq(students.class, exam.class), eq(students.user_id, 2)));
   const examResults = await db
     .select()
     .from(results)
@@ -41,7 +41,7 @@ export default async function ReportCardPage({ params }) {
   const settingsResult = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, user.id));
+    .where(eq(school_settings.user_id, 2));
   const settings = settingsResult[0] || {};
 
   const resultsMap = {};

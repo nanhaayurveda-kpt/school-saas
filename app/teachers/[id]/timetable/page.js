@@ -37,7 +37,7 @@ export default async function TeacherTimetablePage({ params }) {
   const teacherResult = await db
     .select()
     .from(teachers)
-    .where(and(eq(teachers.id, teacherId), eq(teachers.user_id, user.id)));
+    .where(and(eq(teachers.id, teacherId), eq(teachers.user_id, 2)));
   const teacher = teacherResult[0];
   if (!teacher) notFound();
 
@@ -50,14 +50,14 @@ export default async function TeacherTimetablePage({ params }) {
     db
       .select()
       .from(period_timings)
-      .where(eq(period_timings.user_id, user.id))
+      .where(eq(period_timings.user_id, 2))
       .orderBy(period_timings.period_no),
     db
       .select()
       .from(timetable)
       .where(
         and(
-          eq(timetable.user_id, user.id),
+          eq(timetable.user_id, 2),
           eq(timetable.teacher_name, teacher.name),
         ),
       ),

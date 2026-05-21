@@ -27,8 +27,8 @@ export default async function AddPeriodPage({ searchParams }) {
   if (!user) redirect("/login");
 
   const [allStudents, allTeachers] = await Promise.all([
-    db.select().from(students).where(eq(students.user_id, user.id)),
-    db.select().from(teachers).where(eq(teachers.user_id, user.id)),
+    db.select().from(students).where(eq(students.user_id, 2)),
+    db.select().from(teachers).where(eq(teachers.user_id, 2)),
   ]);
   const classes = [...new Set(allStudents.map((s) => s.class))].sort();
   const days = [

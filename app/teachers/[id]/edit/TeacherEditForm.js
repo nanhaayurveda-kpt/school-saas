@@ -64,7 +64,19 @@ export default function TeacherEditForm({ teacher }) {
           />
         </div>
       </div>
-
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Login PIN
+        </label>
+        <input
+          type="text"
+          name="pin"
+          defaultValue={teacher.pin || ""}
+          placeholder="4-6 digit PIN"
+          maxLength={6}
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
       <div className="flex gap-3 pt-2">
         <button
           type="submit"

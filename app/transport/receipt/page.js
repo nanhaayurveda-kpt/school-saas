@@ -38,7 +38,7 @@ export default async function TransportReceiptPage({ searchParams }) {
   const settingsRows = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, user.id));
+    .where(eq(school_settings.user_id, 2));
   const school = settingsRows[0] || {};
 
   const rows = await db

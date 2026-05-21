@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function StudentLoginPage() {
-  const [form, setForm] = useState({ phone: "", password: "" });
+  const [form, setForm] = useState({
+    phone: "",
+    password: "",
+    admission_no: "",
+  });
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -69,7 +73,10 @@ export default function StudentLoginPage() {
               maxLength={6}
               value={form.password}
               onChange={(e) =>
-                setForm({ ...form, password: e.target.value.replace(/\D/g, "") })
+                setForm({
+                  ...form,
+                  password: e.target.value.replace(/\D/g, ""),
+                })
               }
               placeholder="Last 6 digits of mobile number"
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -77,6 +84,21 @@ export default function StudentLoginPage() {
             <p className="text-xs text-gray-400 mt-1">
               Hint: your password is the last 6 digits of your mobile number
             </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Admission Number
+            </label>
+            <input
+              type="text"
+              required
+              value={form.admission_no}
+              onChange={(e) =>
+                setForm({ ...form, admission_no: e.target.value.trim() })
+              }
+              placeholder="e.g. 101"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
           <button
             type="submit"

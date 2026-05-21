@@ -39,7 +39,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.fee_structures.id, id),
-        eq(schema.fee_structures.user_id, user.id),
+        eq(schema.fee_structures.user_id, 2),
       ),
     );
 

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { students } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(request) {
-  const { phone, password } = await request.json();
+  const { phone, password, admission_no } = await request.json();
 
-  if (!phone || !password) {
+  if (!phone || !password || !admission_no) {
     return NextResponse.json(
       { success: false, message: "Mobile number and password required" },
       { status: 400 },
@@ -27,7 +27,12 @@ export async function POST(request) {
   const result = await db
     .select()
     .from(students)
-    .where(eq(students.phone, cleanPhone));
+    .where(
+      and(
+        eq(students.phone, cleanPhone),
+        eq(students.admission_no, admission_no.trim()),
+      ),
+    );
 
   if (result.length === 0) {
     return NextResponse.json(

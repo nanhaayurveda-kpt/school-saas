@@ -104,7 +104,7 @@ export async function POST(request) {
       .from(schema.students)
       .where(
         and(
-          eq(schema.students.user_id, user.id),
+          eq(schema.students.user_id, 2),
           eq(schema.students.class, data.class),
           eq(schema.students.section, data.section),
           eq(schema.students.roll_number, data.roll_number),
@@ -128,7 +128,7 @@ export async function POST(request) {
       .from(schema.students)
       .where(
         and(
-          eq(schema.students.user_id, user.id),
+          eq(schema.students.user_id, 2),
           eq(schema.students.admission_no, data.admission_no),
         ),
       );
@@ -150,7 +150,7 @@ export async function POST(request) {
       ? new Date(data.admission_date)
       : new Date(),
     fee_status: "pending",
-    user_id: user.id,
+    user_id: 2,
   });
 
   await setFlash("success", "Student added successfully!");

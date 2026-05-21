@@ -52,7 +52,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.teachers.id, teacher_id),
-        eq(schema.teachers.user_id, user.id),
+        eq(schema.teachers.user_id, 2),
       ),
     );
   if (!teacherCheck.length) {
@@ -61,7 +61,7 @@ export async function POST(request) {
 
   // ─── Duplicate check: same teacher + subject + class + section ─────────
   const conditions = [
-    eq(schema.teacher_subjects.user_id, user.id),
+    eq(schema.teacher_subjects.user_id, 2),
     eq(schema.teacher_subjects.teacher_id, teacher_id),
     eq(schema.teacher_subjects.subject, subject),
     eq(schema.teacher_subjects.class, className),
@@ -87,7 +87,7 @@ export async function POST(request) {
     subject,
     class: className,
     section,
-    user_id: user.id,
+    user_id: 2,
   });
 
   await setFlash("success", "Subject assigned successfully!");

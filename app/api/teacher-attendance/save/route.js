@@ -23,7 +23,7 @@ export async function POST(request) {
 
   if (!date) return NextResponse.redirect(new URL("/teacher-attendance", request.url));
 
-  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, user.id));
+  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, 2));
 
   for (const t of allTeachers) {
     const status = formData.get(`status_${t.id}`) || "present";
@@ -55,7 +55,7 @@ export async function POST(request) {
         date,
         status,
         note,
-        user_id: user.id,
+        user_id: 2,
         created_at: new Date(),
       });
     }

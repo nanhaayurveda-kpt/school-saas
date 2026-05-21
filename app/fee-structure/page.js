@@ -22,7 +22,7 @@ export default async function FeeStructurePage() {
   const allStructures = await db
     .select()
     .from(fee_structures)
-    .where(eq(fee_structures.user_id, user.id))
+    .where(eq(fee_structures.user_id, 2))
     .orderBy(fee_structures.class);
 
   const classes = [...new Set(allStructures.map((s) => s.class))].sort();

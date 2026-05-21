@@ -38,7 +38,7 @@ export default async function ExamsPage({ searchParams }) {
       result_count: sql`(SELECT COUNT(*) FROM results WHERE results.exam_id = ${exams.id})`,
     })
     .from(exams)
-    .where(eq(exams.user_id, user.id))
+    .where(eq(exams.user_id, 2))
     .orderBy(sql`${exams.exam_date} DESC`);
 
   const classes = [

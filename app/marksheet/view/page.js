@@ -34,14 +34,14 @@ export default async function MarksheetViewPage({ searchParams }) {
   const settingsRows = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, user.id));
+    .where(eq(school_settings.user_id, 2));
   const school = settingsRows[0] || {};
 
   const classStudents = await db
     .select()
     .from(students)
     .where(
-      and(eq(students.class, selectedClass), eq(students.user_id, user.id)),
+      and(eq(students.class, selectedClass), eq(students.user_id, 2)),
     )
     .orderBy(students.roll_number, students.name);
   if (classStudents.length === 0) {
@@ -73,7 +73,7 @@ export default async function MarksheetViewPage({ searchParams }) {
   const conditions = [
     eq(exams.class, selectedClass),
     eq(exams.exam_type, selectedType),
-    eq(exams.user_id, user.id),
+    eq(exams.user_id, 2),
   ];
   if (selectedYear) conditions.push(eq(exams.academic_year, selectedYear));
 

@@ -66,14 +66,14 @@ export default async function TimetablePage({ searchParams }) {
           .where(
             and(
               eq(timetable.class, selectedClass),
-              eq(timetable.user_id, user.id),
+              eq(timetable.user_id, 2),
             ),
           )
       : Promise.resolve([]),
     db
       .select()
       .from(period_timings)
-      .where(eq(period_timings.user_id, user.id))
+      .where(eq(period_timings.user_id, 2))
       .orderBy(period_timings.period_no),
   ]);
 

@@ -30,13 +30,13 @@ export default async function IssueCertificatePage({ searchParams }) {
         .select()
         .from(students)
         .where(
-          and(eq(students.class, selectedClass), eq(students.user_id, user.id)),
+          and(eq(students.class, selectedClass), eq(students.user_id, 2)),
         )
         .orderBy(students.name)
     : await db
         .select()
         .from(students)
-        .where(eq(students.user_id, user.id))
+        .where(eq(students.user_id, 2))
         .orderBy(students.name);
 
   const today = new Date().toISOString().split("T")[0];

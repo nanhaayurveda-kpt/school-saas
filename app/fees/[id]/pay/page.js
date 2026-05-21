@@ -40,7 +40,7 @@ export default async function PayFeePage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, user.id)));
+    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, 2)));
 
   if (result.length === 0) notFound();
   const fee = result[0];

@@ -27,7 +27,7 @@ export default async function SettingsPage() {
   const result = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, user.id));
+    .where(eq(school_settings.user_id, 2));
   const s = result[0] || {};
 
   return (

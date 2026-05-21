@@ -32,25 +32,25 @@ export default async function DashboardPage() {
   const [studentCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(students)
-    .where(eq(students.user_id, user.id));
+    .where(eq(students.user_id, 2));
   const [teacherCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(teachers)
-    .where(eq(teachers.user_id, user.id));
+    .where(eq(teachers.user_id, 2));
   const [pendingFees] = await db
     .select({ total: sql`SUM(amount)`, count: sql`COUNT(*)` })
     .from(fees)
-    .where(and(sql`status = 'pending'`, eq(fees.user_id, user.id)));
+    .where(and(sql`status = 'pending'`, eq(fees.user_id, 2)));
   const [paidFees] = await db
     .select({ total: sql`SUM(amount)` })
     .from(fees)
-    .where(and(sql`status = 'paid'`, eq(fees.user_id, user.id)));
+    .where(and(sql`status = 'paid'`, eq(fees.user_id, 2)));
   const [todayPresent] = await db
     .select({ count: sql`COUNT(*)` })
     .from(attendance)
     .where(
       and(
-        eq(attendance.user_id, user.id),
+        eq(attendance.user_id, 2),
         sql`date = ${today} AND status = 'present'`,
       ),
     );
@@ -59,29 +59,29 @@ export default async function DashboardPage() {
     .from(attendance)
     .where(
       and(
-        eq(attendance.user_id, user.id),
+        eq(attendance.user_id, 2),
         sql`date = ${today} AND status = 'absent'`,
       ),
     );
   const [examCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(exams)
-    .where(eq(exams.user_id, user.id));
+    .where(eq(exams.user_id, 2));
   const [noticeCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(notices)
-    .where(eq(notices.user_id, user.id));
+    .where(eq(notices.user_id, 2));
 
   const recentNotices = await db
     .select()
     .from(notices)
-    .where(eq(notices.user_id, user.id))
+    .where(eq(notices.user_id, 2))
     .orderBy(sql`created_at DESC`)
     .limit(3);
   const upcomingExams = await db
     .select()
     .from(exams)
-    .where(and(sql`exam_date >= ${today}`, eq(exams.user_id, user.id)))
+    .where(and(sql`exam_date >= ${today}`, eq(exams.user_id, 2)))
     .orderBy(sql`exam_date ASC`)
     .limit(3);
 
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
     ? await db
         .select()
         .from(school_settings)
-        .where(eq(school_settings.user_id, user.id))
+        .where(eq(school_settings.user_id, 2))
     : [];
   const settings = settingsRows[0] || null;
   const settingsIncomplete =
