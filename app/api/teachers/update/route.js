@@ -61,6 +61,29 @@ export async function POST(request) {
   const phone = formData.get("phone") || null;
   const email = formData.get("email") || null;
   const pin = formData.get("pin") || null;
+  // PIN duplicate check
+  if (pin) {
+    const pinConflict = await db
+      .select()
+      .from(schema.teachers)
+      .where(
+        and(
+          eq(schema.teachers.user_id, user.id),
+          eq(schema.teachers.pin, pin),
+          ne(schema.teachers.id, id),
+        ),
+      );
+    if (pinConflict.length > 0) {
+      await setFlash(
+        "error",
+        "This PIN is already assigned to another teacher.",
+      );
+      return NextResponse.redirect(
+        new URL(`/teachers/${id}/edit`, request.url),
+        { status: 303 },
+      );
+    }
+  }
 
   if (!name) {
     await setFlash("error", "Name is required");
