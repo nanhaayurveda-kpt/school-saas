@@ -74,13 +74,12 @@ export default function FeeAddForm({
   }
 
   return (
-    <form action={addPayment} className="space-y-4">
-      <form
-        method="POST"
-        action="/api/fees/add"
-        onSubmit={() => setSubmitting(true)}
-        className="space-y-4"
-      ></form>
+    <form
+      method="POST"
+      action="/api/fees/add"
+      onSubmit={() => setSubmitting(true)}
+      className="space-y-4"
+    >
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Student <span className="text-red-500">*</span>
