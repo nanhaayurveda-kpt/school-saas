@@ -14,6 +14,7 @@ import {
   notices,
   school_settings,
   users,
+  teacher_attendance,
 } from "@/lib/schema";
 import { sql, eq, and } from "drizzle-orm";
 
@@ -60,6 +61,51 @@ export default async function DashboardPage() {
     .where(
       and(
         eq(attendance.user_id, 2),
+        sql`date = ${today} AND status = 'absent'`,
+      ),
+    );
+  // Class-wise student attendance for today
+  const classRows = await db
+    .select({
+      class: students.class,
+      status: attendance.status,
+      count: sql`COUNT(*)`,
+    })
+    .from(attendance)
+    .leftJoin(students, eq(attendance.student_id, students.id))
+    .where(and(eq(attendance.user_id, 2), eq(attendance.date, today)))
+    .groupBy(students.class, attendance.status);
+
+  const classMap = {};
+  classRows.forEach((r) => {
+    const cls = r.class || "—";
+    if (!classMap[cls]) classMap[cls] = { present: 0, absent: 0 };
+    if (r.status === "present") classMap[cls].present = Number(r.count);
+    else if (r.status === "absent") classMap[cls].absent = Number(r.count);
+  });
+  const classList = Object.keys(classMap).sort((a, b) => {
+    const na = parseInt(a),
+      nb = parseInt(b);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return a.localeCompare(b);
+  });
+
+  // Staff attendance today
+  const [staffPresent] = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(teacher_attendance)
+    .where(
+      and(
+        eq(teacher_attendance.user_id, 2),
+        sql`date = ${today} AND status = 'present'`,
+      ),
+    );
+  const [staffAbsent] = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(teacher_attendance)
+    .where(
+      and(
+        eq(teacher_attendance.user_id, 2),
         sql`date = ${today} AND status = 'absent'`,
       ),
     );
@@ -233,6 +279,60 @@ export default async function DashboardPage() {
             {noticeCount?.count || 0}
           </div>
           <div className="text-xs text-gray-500 mt-0.5">Notices</div>
+        </div>
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+        <h2 className="font-semibold text-gray-900 text-sm mb-3">
+          Today's Attendance — Class-wise
+        </h2>
+        {classList.length === 0 ? (
+          <p className="text-xs text-gray-400">
+            Attendance not marked yet for today.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex text-[11px] font-semibold text-gray-400 px-1">
+              <span className="flex-1">Class</span>
+              <span className="w-16 text-center text-green-600">Present</span>
+              <span className="w-16 text-center text-red-500">Absent</span>
+            </div>
+            {classList.map((cls) => (
+              <div
+                key={cls}
+                className="flex items-center bg-gray-50 rounded-lg px-3 py-2"
+              >
+                <span className="flex-1 text-sm font-medium text-gray-800">
+                  Class {cls}
+                </span>
+                <span className="w-16 text-center text-sm font-bold text-green-600">
+                  {classMap[cls].present}
+                </span>
+                <span className="w-16 text-center text-sm font-bold text-red-500">
+                  {classMap[cls].absent}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+        <h2 className="font-semibold text-gray-900 text-sm mb-3">
+          Today's Staff Attendance
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-green-50 rounded-lg px-3 py-3 text-center">
+            <div className="text-2xl font-bold text-green-600">
+              {staffPresent?.count || 0}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">Present</div>
+          </div>
+          <div className="bg-red-50 rounded-lg px-3 py-3 text-center">
+            <div className="text-2xl font-bold text-red-500">
+              {staffAbsent?.count || 0}
+            </div>
+            <div className="text-xs text-gray-500 mt-0.5">Absent</div>
+          </div>
         </div>
       </div>
 
