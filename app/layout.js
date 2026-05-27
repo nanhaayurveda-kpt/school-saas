@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 import { Inter } from "next/font/google";
 import FlashMessageContainer from "@/components/FlashMessageContainer";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { getSession } from "@/lib/session";
@@ -46,7 +45,7 @@ export default async function RootLayout({ children }) {
 
         {user ? (
           <div className="min-h-screen">
-            {/* Top Bar — har screen par */}
+            {/* Top Bar — only Logout */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-indigo-900 shadow-md">
               <div className="max-w-2xl mx-auto flex items-center justify-end px-4 py-3">
                 <form action="/logout" method="POST">
@@ -57,35 +56,8 @@ export default async function RootLayout({ children }) {
               </div>
             </div>
 
-            {/* Bottom Nav — Home + Menu + Profile */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
-              <div className="max-w-2xl mx-auto flex">
-                <Link
-                  href="/dashboard"
-                  className="flex-1 flex flex-col items-center justify-center py-2.5 text-xs font-medium text-gray-600"
-                >
-                  <span className="text-2xl leading-none">🏠</span>
-                  <span className="mt-1">Home</span>
-                </Link>
-                <Link
-                  href="/menu"
-                  className="flex-1 flex flex-col items-center justify-center py-2.5 text-xs font-medium text-indigo-600"
-                >
-                  <span className="text-2xl leading-none">⋯</span>
-                  <span className="mt-1">Menu</span>
-                </Link>
-                <Link
-                  href="/settings"
-                  className="flex-1 flex flex-col items-center justify-center py-2.5 text-xs font-medium text-gray-600"
-                >
-                  <span className="text-2xl leading-none">👤</span>
-                  <span className="mt-1">Profile</span>
-                </Link>
-              </div>
-            </div>
-
             {/* Main content — centered, mobile-style width */}
-            <main className="max-w-2xl mx-auto px-4 pt-16 pb-24">
+            <main className="max-w-2xl mx-auto px-4 pt-16 pb-8">
               {children}
             </main>
           </div>
