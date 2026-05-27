@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
+import AttendanceSnapshot from "./AttendanceSnapshot";
 import {
   students,
   teachers,
@@ -281,98 +282,13 @@ export default async function DashboardPage() {
           <div className="text-xs text-gray-500 mt-0.5">Notices</div>
         </div>
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-        <h2 className="font-semibold text-gray-900 text-sm mb-3">
-          Today's Staff Attendance
-        </h2>
-        {staffPresentList.length === 0 && staffAbsentList.length === 0 ? (
-          <p className="text-xs text-gray-400">
-            Staff attendance not marked yet for today.
-          </p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-green-50 rounded-lg px-3 py-3">
-              <p className="text-xs font-semibold text-green-700 mb-1">
-                Present ({staffPresentList.length})
-              </p>
-              {staffPresentList.length === 0 ? (
-                <p className="text-xs text-gray-400">—</p>
-              ) : (
-                staffPresentList.map((n, i) => (
-                  <p key={i} className="text-xs text-gray-800">
-                    {n}
-                  </p>
-                ))
-              )}
-            </div>
-            <div className="bg-red-50 rounded-lg px-3 py-3">
-              <p className="text-xs font-semibold text-red-600 mb-1">
-                Absent ({staffAbsentList.length})
-              </p>
-              {staffAbsentList.length === 0 ? (
-                <p className="text-xs text-gray-400">—</p>
-              ) : (
-                staffAbsentList.map((n, i) => (
-                  <p key={i} className="text-xs text-gray-800">
-                    {n}
-                  </p>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-        <h2 className="font-semibold text-gray-900 text-sm mb-3">
-          Today's Attendance — Class-wise
-        </h2>
-        {classList.length === 0 ? (
-          <p className="text-xs text-gray-400">
-            Attendance not marked yet for today.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {classList.map((cls) => (
-              <div key={cls} className="border border-gray-100 rounded-lg p-3">
-                <p className="text-sm font-bold text-indigo-700 mb-2">
-                  Class {cls}
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs font-semibold text-green-700 mb-1">
-                      Present ({classMap[cls].present.length})
-                    </p>
-                    {classMap[cls].present.length === 0 ? (
-                      <p className="text-xs text-gray-400">—</p>
-                    ) : (
-                      classMap[cls].present.map((n, i) => (
-                        <p key={i} className="text-xs text-gray-800">
-                          {n}
-                        </p>
-                      ))
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-red-600 mb-1">
-                      Absent ({classMap[cls].absent.length})
-                    </p>
-                    {classMap[cls].absent.length === 0 ? (
-                      <p className="text-xs text-gray-400">—</p>
-                    ) : (
-                      classMap[cls].absent.map((n, i) => (
-                        <p key={i} className="text-xs text-gray-800">
-                          {n}
-                        </p>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <AttendanceSnapshot
+        staffPresentList={staffPresentList}
+        staffAbsentList={staffAbsentList}
+        classMap={classMap}
+        classList={classList}
+      />
 
       <div className="space-y-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
