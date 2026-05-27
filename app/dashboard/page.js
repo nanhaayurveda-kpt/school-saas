@@ -10,6 +10,8 @@ import {
   teachers,
   fees,
   attendance,
+  exams,
+  notices,
   school_settings,
   users,
 } from "@/lib/schema";
@@ -43,6 +45,45 @@ export default async function DashboardPage() {
     .select({ total: sql`SUM(amount)` })
     .from(fees)
     .where(and(sql`status = 'paid'`, eq(fees.user_id, 2)));
+  const [todayPresent] = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(attendance)
+    .where(
+      and(
+        eq(attendance.user_id, 2),
+        sql`date = ${today} AND status = 'present'`,
+      ),
+    );
+  const [todayAbsent] = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(attendance)
+    .where(
+      and(
+        eq(attendance.user_id, 2),
+        sql`date = ${today} AND status = 'absent'`,
+      ),
+    );
+  const [examCount] = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(exams)
+    .where(eq(exams.user_id, 2));
+  const [noticeCount] = await db
+    .select({ count: sql`COUNT(*)` })
+    .from(notices)
+    .where(eq(notices.user_id, 2));
+
+  const recentNotices = await db
+    .select()
+    .from(notices)
+    .where(eq(notices.user_id, 2))
+    .orderBy(sql`created_at DESC`)
+    .limit(3);
+  const upcomingExams = await db
+    .select()
+    .from(exams)
+    .where(and(sql`exam_date >= ${today}`, eq(exams.user_id, 2)))
+    .orderBy(sql`exam_date ASC`)
+    .limit(3);
 
   const settingsRows = user
     ? await db
@@ -55,142 +96,251 @@ export default async function DashboardPage() {
     !settings?.school_name || !settings?.principal_name;
 
   return (
-    <div className="pb-6">
-      {/* ── Header: logo + school name + bell ── */}
-      <div className="flex items-center gap-3 mb-4">
-        {settings?.logo_url ? (
-          <img
-            src={settings.logo_url}
-            alt="Logo"
-            className="h-14 w-14 object-contain rounded-full border border-gray-100 shrink-0"
-          />
-        ) : (
-          <div className="h-14 w-14 rounded-full bg-indigo-50 flex items-center justify-center text-2xl shrink-0">
-            🏫
+    <div>
+      {settings?.logo_url || settings?.school_name ? (
+        <div className="flex items-center gap-3 mb-5 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100">
+          {settings.logo_url && (
+            <img
+              src={settings.logo_url}
+              alt="Logo"
+              className="h-12 w-12 object-contain rounded"
+            />
+          )}
+          <div>
+            <p className="text-base font-bold text-gray-900">
+              {settings.school_name}
+            </p>
+            {settings.principal_name && (
+              <p className="text-xs text-gray-500">
+                Principal: {settings.principal_name}
+              </p>
+            )}
           </div>
-        )}
-        <h1 className="flex-1 text-center text-xl font-extrabold text-indigo-500 leading-snug px-1">
-          {settings?.school_name || "DEMO ENGLISH SCHOOL"}
-        </h1>
+        </div>
+      ) : null}
+      <div className="flex justify-between items-center mb-5">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 text-xs mt-0.5">
+            {new Date().toLocaleDateString("en-IN", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        </div>
         <Link
-          href="/notices"
-          aria-label="Notices"
-          className="text-3xl text-gray-700 shrink-0"
+          href="/students/add"
+          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm"
         >
-          🔔
+          + Student
         </Link>
       </div>
 
-      {/* ── Hero banner ── */}
-      <div className="rounded-2xl overflow-hidden mb-7 border border-gray-100 bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-100">
-        <div className="flex items-end justify-center gap-2 pt-8 text-6xl">
-          <span>🧒</span>
-          <span>👧</span>
-          <span>🧑</span>
-          <span>👧</span>
-        </div>
-        <div className="h-8 mt-3 bg-emerald-300/70" />
-      </div>
-
-      {/* ── Settings warning (demo me khaali na dikhe) ── */}
       {settingsIncomplete && (
         <Link
           href="/settings"
-          className="block bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-3 mb-7"
+          className="block bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-3 mb-5"
         >
           <p className="text-sm font-semibold text-yellow-800">
             ⚠️ School Settings Incomplete
           </p>
           <p className="text-xs text-yellow-700 mt-0.5">
-            Add school name, principal name and logo in Settings.
+            Fill in school name and Principal name — otherwise receipts and
+            certificates will be blank.
+          </p>
+          <p className="text-xs text-yellow-600 font-medium mt-1">
+            Go to Settings →
           </p>
         </Link>
       )}
 
-      {/* ── Academic ── */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-3">Academic</h2>
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <Link
-          href="/teachers"
-          className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition"
-        >
-          <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl shrink-0">
-            👨‍🏫
-          </div>
-          <div className="min-w-0">
-            <p className="text-base text-gray-800 leading-tight">Staff</p>
-            <p className="text-xl font-bold text-gray-900 mt-1">
-              {teacherCount?.count || 0}
+      {Number(todayPresent?.count) === 0 &&
+        Number(todayAbsent?.count) === 0 &&
+        Number(studentCount?.count) > 0 && (
+          <Link
+            href={`/attendance/mark?date=${today}`}
+            className="block bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 mb-5"
+          >
+            <p className="text-sm font-semibold text-indigo-800">
+              📋 Attendance not marked yet for today
             </p>
-          </div>
-        </Link>
-        <Link
-          href="/students"
-          className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition"
-        >
-          <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-3xl shrink-0">
-            👧
-          </div>
-          <div className="min-w-0">
-            <p className="text-base text-gray-800 leading-tight">Student</p>
-            <p className="text-xl font-bold text-gray-900 mt-1">
-              {studentCount?.count || 0}
+            <p className="text-xs text-indigo-600 font-medium mt-0.5">
+              Mark Now →
             </p>
+          </Link>
+        )}
+
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">🎓</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {studentCount?.count || 0}
           </div>
-        </Link>
+          <div className="text-xs text-gray-500 mt-0.5">Total Students</div>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">👨‍🏫</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {teacherCount?.count || 0}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">Total Teachers</div>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">⚠️</div>
+          <div className="text-2xl font-bold text-red-600">
+            ₹{pendingFees?.total || 0}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">
+            Pending Fees ({pendingFees?.count || 0})
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">✅</div>
+          <div className="text-2xl font-bold text-green-600">
+            ₹{paidFees?.total || 0}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">Fees Collected</div>
+        </div>
       </div>
 
-      {/* ── Finance ── */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Finance</h2>
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <Link
-          href="/fees"
-          className="flex flex-col items-center text-center active:scale-95 transition"
-        >
-          <div className="h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center text-4xl mb-2">
-            💰
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">🟢</div>
+          <div className="text-2xl font-bold text-green-600">
+            {todayPresent?.count || 0}
           </div>
-          <p className="text-base font-medium text-gray-800">Income</p>
-        </Link>
-        <Link
-          href="/reports"
-          className="flex flex-col items-center text-center active:scale-95 transition"
-        >
-          <div className="h-20 w-20 rounded-full bg-orange-50 flex items-center justify-center text-4xl mb-2">
-            📈
+          <div className="text-xs text-gray-500 mt-0.5">Present Today</div>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">🔴</div>
+          <div className="text-2xl font-bold text-red-500">
+            {todayAbsent?.count || 0}
           </div>
-          <p className="text-base font-medium text-gray-800">Expense</p>
-        </Link>
-        <Link
-          href="/fees?status=pending"
-          className="flex flex-col items-center text-center active:scale-95 transition"
-        >
-          <div className="h-20 w-20 rounded-full bg-rose-50 flex items-center justify-center text-4xl mb-2">
-            📅
+          <div className="text-xs text-gray-500 mt-0.5">Absent Today</div>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">📝</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {examCount?.count || 0}
           </div>
-          <p className="text-base font-medium text-gray-800">Due</p>
-        </Link>
+          <div className="text-xs text-gray-500 mt-0.5">Total Exams</div>
+        </div>
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="text-2xl mb-1">📋</div>
+          <div className="text-2xl font-bold text-gray-900">
+            {noticeCount?.count || 0}
+          </div>
+          <div className="text-xs text-gray-500 mt-0.5">Notices</div>
+        </div>
       </div>
 
-      {/* ── Attendance ── */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Attendance</h2>
-      <div className="flex gap-6">
-        <Link
-          href={`/teacher-attendance?date=${today}`}
-          className="flex flex-col items-center text-center active:scale-95 transition"
-        >
-          <div className="h-20 w-20 rounded-full bg-amber-50 flex items-center justify-center text-4xl">
-            👨‍🏫
+      <div className="space-y-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <h2 className="font-semibold text-gray-900 text-sm mb-3">
+            All Features
+          </h2>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { href: "/students", icon: "🎓", label: "Students" },
+              { href: "/admissions", icon: "📋", label: "Admissions" },
+              { href: "/teachers", icon: "👨‍🏫", label: "Teachers" },
+              { href: "/teacher-login", icon: "🔑", label: "Teacher Login" },
+              { href: "/fees", icon: "💰", label: "Fees" },
+              { href: "/fee-structure", icon: "🏷️", label: "Fee Structure" },
+              { href: "/attendance", icon: "✅", label: "Attendance" },
+              {
+                href: `/teacher-attendance?date=${today}`,
+                icon: "🧑‍🏫",
+                label: "Staff Attend.",
+              },
+              { href: "/exams", icon: "📝", label: "Exams" },
+              { href: "/marksheet", icon: "📄", label: "Marksheet" },
+              { href: "/certificates", icon: "🏅", label: "Certificates" },
+              { href: "/transport", icon: "🚌", label: "Transport" },
+              { href: "/promote", icon: "⬆️", label: "Promote" },
+              { href: "/notices", icon: "📢", label: "Notices" },
+              { href: "/timetable", icon: "🗓️", label: "Timetable" },
+              { href: "/reports", icon: "📊", label: "Reports" },
+              { href: "/settings", icon: "⚙️", label: "Settings" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center justify-center text-center bg-gray-50 rounded-xl p-3 active:scale-95 transition"
+              >
+                <span className="text-2xl mb-1">{item.icon}</span>
+                <span className="text-[11px] font-medium text-gray-700 leading-tight">
+                  {item.label}
+                </span>
+              </Link>
+            ))}
           </div>
-        </Link>
-        <Link
-          href={`/attendance/mark?date=${today}`}
-          className="flex flex-col items-center text-center active:scale-95 transition"
-        >
-          <div className="h-20 w-20 rounded-full bg-indigo-50 flex items-center justify-center text-4xl">
-            👧
-          </div>
-        </Link>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <h2 className="font-semibold text-gray-900 text-sm mb-3">
+            Upcoming Exams
+          </h2>
+          {upcomingExams.length === 0 ? (
+            <p className="text-xs text-gray-400">No upcoming exams.</p>
+          ) : (
+            <div className="space-y-3">
+              {upcomingExams.map((exam) => (
+                <div
+                  key={exam.id}
+                  className="flex justify-between items-center"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {exam.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Class {exam.class} · {exam.subject}
+                    </p>
+                  </div>
+                  <p className="text-xs text-indigo-600 font-medium">
+                    {exam.exam_date}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+          <h2 className="font-semibold text-gray-900 text-sm mb-3">
+            Recent Notices
+          </h2>
+          {recentNotices.length === 0 ? (
+            <p className="text-xs text-gray-400">No notices yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {recentNotices.map((notice) => (
+                <div key={notice.id}>
+                  <p className="text-sm font-medium text-gray-900">
+                    {notice.title}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {notice.category} ·{" "}
+                    <span
+                      className={
+                        notice.priority === "urgent"
+                          ? "text-red-500"
+                          : notice.priority === "important"
+                            ? "text-yellow-500"
+                            : "text-gray-400"
+                      }
+                    >
+                      {notice.priority}
+                    </span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
