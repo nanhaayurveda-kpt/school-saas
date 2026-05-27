@@ -64,24 +64,23 @@ export default async function DashboardPage() {
         sql`date = ${today} AND status = 'absent'`,
       ),
     );
-  // Class-wise student attendance for today
-  const classRows = await db
+  // Class-wise student attendance today — with names
+  const studAttRows = await db
     .select({
+      name: students.name,
       class: students.class,
       status: attendance.status,
-      count: sql`COUNT(*)`,
     })
     .from(attendance)
     .leftJoin(students, eq(attendance.student_id, students.id))
-    .where(and(eq(attendance.user_id, 2), eq(attendance.date, today)))
-    .groupBy(students.class, attendance.status);
+    .where(and(eq(attendance.user_id, 2), eq(attendance.date, today)));
 
   const classMap = {};
-  classRows.forEach((r) => {
+  studAttRows.forEach((r) => {
     const cls = r.class || "—";
-    if (!classMap[cls]) classMap[cls] = { present: 0, absent: 0 };
-    if (r.status === "present") classMap[cls].present = Number(r.count);
-    else if (r.status === "absent") classMap[cls].absent = Number(r.count);
+    if (!classMap[cls]) classMap[cls] = { present: [], absent: [] };
+    if (r.status === "present") classMap[cls].present.push(r.name);
+    else if (r.status === "absent") classMap[cls].absent.push(r.name);
   });
   const classList = Object.keys(classMap).sort((a, b) => {
     const na = parseInt(a),
@@ -90,25 +89,26 @@ export default async function DashboardPage() {
     return a.localeCompare(b);
   });
 
-  // Staff attendance today
-  const [staffPresent] = await db
-    .select({ count: sql`COUNT(*)` })
+  // Staff attendance today — with names
+  const staffRows = await db
+    .select({
+      name: teachers.name,
+      status: teacher_attendance.status,
+    })
     .from(teacher_attendance)
+    .leftJoin(teachers, eq(teacher_attendance.teacher_id, teachers.id))
     .where(
       and(
         eq(teacher_attendance.user_id, 2),
-        sql`date = ${today} AND status = 'present'`,
+        eq(teacher_attendance.date, today),
       ),
     );
-  const [staffAbsent] = await db
-    .select({ count: sql`COUNT(*)` })
-    .from(teacher_attendance)
-    .where(
-      and(
-        eq(teacher_attendance.user_id, 2),
-        sql`date = ${today} AND status = 'absent'`,
-      ),
-    );
+  const staffPresentList = staffRows
+    .filter((r) => r.status === "present")
+    .map((r) => r.name);
+  const staffAbsentList = staffRows
+    .filter((r) => r.status === "absent")
+    .map((r) => r.name);
   const [examCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(exams)
@@ -283,6 +283,48 @@ export default async function DashboardPage() {
       </div>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
         <h2 className="font-semibold text-gray-900 text-sm mb-3">
+          Today's Staff Attendance
+        </h2>
+        {staffPresentList.length === 0 && staffAbsentList.length === 0 ? (
+          <p className="text-xs text-gray-400">
+            Staff attendance not marked yet for today.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-green-50 rounded-lg px-3 py-3">
+              <p className="text-xs font-semibold text-green-700 mb-1">
+                Present ({staffPresentList.length})
+              </p>
+              {staffPresentList.length === 0 ? (
+                <p className="text-xs text-gray-400">—</p>
+              ) : (
+                staffPresentList.map((n, i) => (
+                  <p key={i} className="text-xs text-gray-800">
+                    {n}
+                  </p>
+                ))
+              )}
+            </div>
+            <div className="bg-red-50 rounded-lg px-3 py-3">
+              <p className="text-xs font-semibold text-red-600 mb-1">
+                Absent ({staffAbsentList.length})
+              </p>
+              {staffAbsentList.length === 0 ? (
+                <p className="text-xs text-gray-400">—</p>
+              ) : (
+                staffAbsentList.map((n, i) => (
+                  <p key={i} className="text-xs text-gray-800">
+                    {n}
+                  </p>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
+        <h2 className="font-semibold text-gray-900 text-sm mb-3">
           Today's Attendance — Class-wise
         </h2>
         {classList.length === 0 ? (
@@ -290,50 +332,46 @@ export default async function DashboardPage() {
             Attendance not marked yet for today.
           </p>
         ) : (
-          <div className="space-y-2">
-            <div className="flex text-[11px] font-semibold text-gray-400 px-1">
-              <span className="flex-1">Class</span>
-              <span className="w-16 text-center text-green-600">Present</span>
-              <span className="w-16 text-center text-red-500">Absent</span>
-            </div>
+          <div className="space-y-3">
             {classList.map((cls) => (
-              <div
-                key={cls}
-                className="flex items-center bg-gray-50 rounded-lg px-3 py-2"
-              >
-                <span className="flex-1 text-sm font-medium text-gray-800">
+              <div key={cls} className="border border-gray-100 rounded-lg p-3">
+                <p className="text-sm font-bold text-indigo-700 mb-2">
                   Class {cls}
-                </span>
-                <span className="w-16 text-center text-sm font-bold text-green-600">
-                  {classMap[cls].present}
-                </span>
-                <span className="w-16 text-center text-sm font-bold text-red-500">
-                  {classMap[cls].absent}
-                </span>
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-green-700 mb-1">
+                      Present ({classMap[cls].present.length})
+                    </p>
+                    {classMap[cls].present.length === 0 ? (
+                      <p className="text-xs text-gray-400">—</p>
+                    ) : (
+                      classMap[cls].present.map((n, i) => (
+                        <p key={i} className="text-xs text-gray-800">
+                          {n}
+                        </p>
+                      ))
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-red-600 mb-1">
+                      Absent ({classMap[cls].absent.length})
+                    </p>
+                    {classMap[cls].absent.length === 0 ? (
+                      <p className="text-xs text-gray-400">—</p>
+                    ) : (
+                      classMap[cls].absent.map((n, i) => (
+                        <p key={i} className="text-xs text-gray-800">
+                          {n}
+                        </p>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         )}
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
-        <h2 className="font-semibold text-gray-900 text-sm mb-3">
-          Today's Staff Attendance
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-green-50 rounded-lg px-3 py-3 text-center">
-            <div className="text-2xl font-bold text-green-600">
-              {staffPresent?.count || 0}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">Present</div>
-          </div>
-          <div className="bg-red-50 rounded-lg px-3 py-3 text-center">
-            <div className="text-2xl font-bold text-red-500">
-              {staffAbsent?.count || 0}
-            </div>
-            <div className="text-xs text-gray-500 mt-0.5">Absent</div>
-          </div>
-        </div>
       </div>
 
       <div className="space-y-4">
