@@ -55,9 +55,7 @@ export default async function AttendancePage({ searchParams }) {
     .select()
     .from(attendance)
     .leftJoin(students, eq(attendance.student_id, students.id))
-    .where(
-      and(eq(attendance.date, selectedDate), eq(students.user_id, 2)),
-    );
+    .where(and(eq(attendance.date, selectedDate), eq(students.user_id, 2)));
   const attendanceMap = {};
   todayAttendance.forEach((a) => {
     attendanceMap[a.student_id] = a.status;
@@ -70,10 +68,6 @@ export default async function AttendancePage({ searchParams }) {
     (s) => attendanceMap[s.id] === "absent",
   ).length;
   const notMarked = filteredStudents.filter((s) => !attendanceMap[s.id]).length;
-
-  const absentWithPhone = filteredStudents.filter(
-    (s) => attendanceMap[s.id] === "absent" && s.phone,
-  );
 
   const classWiseSummary = classes.map((cls) => {
     const clsStudents = allStudents.filter((s) => s.class === cls);
@@ -233,46 +227,6 @@ export default async function AttendancePage({ searchParams }) {
           })}
         </div>
       </div>
-
-      {absentWithPhone.length > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
-          <p className="text-sm font-semibold text-green-800 mb-3">
-            📲 WhatsApp Absent Parents ({absentWithPhone.length})
-          </p>
-          <div className="space-y-2">
-            {absentWithPhone.map((s) => {
-              const phone = s.phone.replace(/\D/g, "");
-              const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
-              const msg = encodeURIComponent(
-                `Dear ${s.father_name || "Parent"},\n\n${s.name} (Class ${s.class}${s.section ? " " + s.section : ""}) is absent today (${selectedDate}). Please inform the school.\n\n— School Management`,
-              );
-              return (
-                <div
-                  key={s.id}
-                  className="flex justify-between items-center bg-white rounded-lg px-3 py-2 border border-green-100"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {s.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {s.father_name || "—"} · {s.phone}
-                    </p>
-                  </div>
-                  <a
-                    href={`https://wa.me/${fullPhone}?text=${msg}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium"
-                  >
-                    WhatsApp
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       <div className="space-y-4">
         {sortedKeys.map((key) => {
