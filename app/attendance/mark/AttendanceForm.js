@@ -3,7 +3,6 @@
 import { useState } from "react";
 
 export default function AttendanceForm({
-  students,
   selectedDate,
   attendanceMap,
   sortedKeys,
@@ -47,25 +46,18 @@ export default function AttendanceForm({
                   </span>
                 </div>
                 <div className="divide-y divide-gray-50">
-                  {sorted.map((student) => (
-                    <div
-                      key={student.id}
-                      className="px-4 py-3 flex justify-between items-center"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
+                  {sorted.map((student) => {
+                    const status = attendanceMap[student.id];
+                    const defaultPresent = status !== "absent";
+                    return (
+                      <div
+                        key={student.id}
+                        className="px-4 py-3 flex justify-between items-center gap-3"
+                      >
                         <input
                           type="hidden"
                           name="student_id"
                           value={student.id}
-                        />
-                        <input
-                          type="checkbox"
-                          name="present"
-                          value={String(student.id)}
-                          defaultChecked={
-                            attendanceMap[student.id] === "present"
-                          }
-                          className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 shrink-0"
                         />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
@@ -75,24 +67,35 @@ export default function AttendanceForm({
                             Roll {student.roll_number || "—"}
                           </p>
                         </div>
+                        <div className="flex items-center gap-4 shrink-0">
+                          <label className="flex items-center gap-1.5 text-sm">
+                            <input
+                              type="radio"
+                              name={`status_${student.id}`}
+                              value="present"
+                              defaultChecked={defaultPresent}
+                              className="w-4 h-4 accent-green-600"
+                            />
+                            <span className="text-green-700 font-medium">
+                              Present
+                            </span>
+                          </label>
+                          <label className="flex items-center gap-1.5 text-sm">
+                            <input
+                              type="radio"
+                              name={`status_${student.id}`}
+                              value="absent"
+                              defaultChecked={status === "absent"}
+                              className="w-4 h-4 accent-red-500"
+                            />
+                            <span className="text-red-600 font-medium">
+                              Absent
+                            </span>
+                          </label>
+                        </div>
                       </div>
-                      <span
-                        className={`shrink-0 ml-2 px-2 py-0.5 text-xs rounded-full font-medium ${
-                          attendanceMap[student.id] === "present"
-                            ? "bg-green-100 text-green-700"
-                            : attendanceMap[student.id] === "absent"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-400"
-                        }`}
-                      >
-                        {attendanceMap[student.id] === "present"
-                          ? "✓ Present"
-                          : attendanceMap[student.id] === "absent"
-                            ? "✗ Absent"
-                            : "—"}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );

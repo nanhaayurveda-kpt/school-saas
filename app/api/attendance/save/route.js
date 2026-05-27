@@ -50,7 +50,6 @@ export async function POST(request) {
   const formData = await request.formData();
   const date = formData.get("date");
   const studentIds = formData.getAll("student_id");
-  const presentIds = formData.getAll("present");
 
   if (!date) {
     await setFlash("error", "Date is required");
@@ -61,7 +60,6 @@ export async function POST(request) {
   }
 
   // ─── Ownership pre-fetch: which student_ids actually belong to user? ──
-  // This prevents marking attendance for students not in this school
   const owned = await db
     .select({ id: schema.students.id })
     .from(schema.students)
@@ -69,7 +67,6 @@ export async function POST(request) {
   const ownedIds = new Set(owned.map((s) => s.id));
 
   // ─── Pre-fetch existing attendance for this date+user ─────────────────
-  // Single query instead of one per student — faster, fewer round trips
   const existingRows = await db
     .select({
       student_id: schema.attendance.student_id,
@@ -97,11 +94,11 @@ export async function POST(request) {
       continue;
     }
 
-    const status = presentIds.includes(idRaw) ? "present" : "absent";
+    // radio value per student: "present" or "absent"
+    const raw = formData.get(`status_${idRaw}`);
+    const status = raw === "absent" ? "absent" : "present";
 
     if (existingByStudent.has(studentId)) {
-      // Already has entry for this date — UPDATE (idempotent)
-      // Skip update if status hasn't changed (small optimization)
       if (existingByStudent.get(studentId) === status) {
         continue;
       }
@@ -117,8 +114,6 @@ export async function POST(request) {
         );
       updated++;
     } else {
-      // No existing entry — INSERT
-      // DB-level unique index will also catch race-condition duplicates
       await db.insert(schema.attendance).values({
         student_id: studentId,
         date,
