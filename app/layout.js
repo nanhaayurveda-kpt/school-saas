@@ -48,10 +48,7 @@ export default async function RootLayout({ children }) {
           <div className="min-h-screen">
             {/* Top Bar — har screen par */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-indigo-900 shadow-md">
-              <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-3">
-                <Link href="/dashboard" className="text-white font-bold text-lg">
-                  Nishant School
-                </Link>
+              <div className="max-w-2xl mx-auto flex items-center justify-end px-4 py-3">
                 <form action="/logout" method="POST">
                   <button type="submit" className="text-red-300 text-sm">
                     Logout
