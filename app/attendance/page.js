@@ -102,7 +102,9 @@ export default async function AttendancePage({ searchParams }) {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Student Attendance</h1>
+          <h1 className="text-xl font-bold text-gray-900">
+            Student Attendance
+          </h1>
           <p className="text-gray-500 text-xs mt-0.5">{selectedDate}</p>
         </div>
         <Link
@@ -164,7 +166,10 @@ export default async function AttendancePage({ searchParams }) {
           <div className="text-xs text-gray-400 mt-0.5">Not Marked</div>
         </div>
       </div>
-
+      <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4 text-sm text-blue-800">
+        👉 To mark attendance, tap{" "}
+        <span className="font-semibold">"Mark →"</span> next to any class below.
+      </div>
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden mb-5">
         <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-sm font-semibold text-gray-700">
