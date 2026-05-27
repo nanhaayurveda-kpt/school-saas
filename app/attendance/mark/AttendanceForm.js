@@ -10,11 +10,6 @@ export default function AttendanceForm({
   grouped,
 }) {
   const [submitting, setSubmitting] = useState(false);
-  function markAll(checked) {
-    document
-      .querySelectorAll('input[name="present"]')
-      .forEach((cb) => (cb.checked = checked));
-  }
 
   return (
     <form
@@ -23,25 +18,6 @@ export default function AttendanceForm({
       onSubmit={() => setSubmitting(true)}
     >
       <input type="hidden" name="date" value={selectedDate} />
-
-      {sortedKeys.length > 0 && (
-        <div className="flex gap-2 mb-3">
-          <button
-            type="button"
-            onClick={() => markAll(true)}
-            className="flex-1 bg-green-50 border border-green-200 text-green-700 py-2 rounded-lg text-xs font-medium"
-          >
-            ✅ All Present
-          </button>
-          <button
-            type="button"
-            onClick={() => markAll(false)}
-            className="flex-1 bg-red-50 border border-red-200 text-red-700 py-2 rounded-lg text-xs font-medium"
-          >
-            ❌ All Absent
-          </button>
-        </div>
-      )}
 
       <div className="space-y-4 mb-6">
         {sortedKeys.length === 0 ? (

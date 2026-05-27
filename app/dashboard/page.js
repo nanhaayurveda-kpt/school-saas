@@ -10,8 +10,6 @@ import {
   teachers,
   fees,
   attendance,
-  exams,
-  notices,
   school_settings,
   users,
 } from "@/lib/schema";
@@ -45,24 +43,6 @@ export default async function DashboardPage() {
     .select({ total: sql`SUM(amount)` })
     .from(fees)
     .where(and(sql`status = 'paid'`, eq(fees.user_id, 2)));
-  const [todayPresent] = await db
-    .select({ count: sql`COUNT(*)` })
-    .from(attendance)
-    .where(
-      and(
-        eq(attendance.user_id, 2),
-        sql`date = ${today} AND status = 'present'`,
-      ),
-    );
-  const [todayAbsent] = await db
-    .select({ count: sql`COUNT(*)` })
-    .from(attendance)
-    .where(
-      and(
-        eq(attendance.user_id, 2),
-        sql`date = ${today} AND status = 'absent'`,
-      ),
-    );
 
   const settingsRows = user
     ? await db
@@ -75,162 +55,141 @@ export default async function DashboardPage() {
     !settings?.school_name || !settings?.principal_name;
 
   return (
-    <div className="pb-4">
-      {/* School header — logo + name + bell */}
-      <div className="flex items-center gap-3 mb-5 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-100">
+    <div className="pb-6">
+      {/* ── Header: logo + school name + bell ── */}
+      <div className="flex items-center gap-3 mb-4">
         {settings?.logo_url ? (
           <img
             src={settings.logo_url}
             alt="Logo"
-            className="h-12 w-12 object-contain rounded-full border border-gray-100 shrink-0"
+            className="h-14 w-14 object-contain rounded-full border border-gray-100 shrink-0"
           />
         ) : (
-          <div className="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center text-xl shrink-0">
+          <div className="h-14 w-14 rounded-full bg-indigo-50 flex items-center justify-center text-2xl shrink-0">
             🏫
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <p className="text-lg font-bold text-indigo-600 leading-tight truncate">
-            {settings?.school_name || "School Name"}
-          </p>
-          {settings?.principal_name && (
-            <p className="text-xs text-gray-500 truncate">
-              Principal: {settings.principal_name}
-            </p>
-          )}
-        </div>
+        <h1 className="flex-1 text-center text-xl font-extrabold text-indigo-500 leading-snug px-1">
+          {settings?.school_name || "DEMO ENGLISH SCHOOL"}
+        </h1>
         <Link
           href="/notices"
-          className="text-2xl text-gray-700 shrink-0"
           aria-label="Notices"
+          className="text-3xl text-gray-700 shrink-0"
         >
           🔔
         </Link>
       </div>
 
-      {/* Hero banner */}
-      <div className="rounded-2xl overflow-hidden mb-6 bg-gradient-to-b from-sky-50 to-emerald-50 border border-gray-100">
-        <div className="flex items-end justify-center gap-1 px-4 pt-6 text-5xl">
-          <span>🧑‍🎓</span>
-          <span>👩‍🎓</span>
-          <span>🧑‍🎓</span>
-          <span>👩‍🎓</span>
+      {/* ── Hero banner ── */}
+      <div className="rounded-2xl overflow-hidden mb-7 border border-gray-100 bg-gradient-to-b from-sky-100 via-sky-50 to-emerald-100">
+        <div className="flex items-end justify-center gap-2 pt-8 text-6xl">
+          <span>🧒</span>
+          <span>👧</span>
+          <span>🧑</span>
+          <span>👧</span>
         </div>
-        <div className="h-6 bg-emerald-200/60" />
+        <div className="h-8 mt-3 bg-emerald-300/70" />
       </div>
 
-      {/* Settings warning */}
+      {/* ── Settings warning (demo me khaali na dikhe) ── */}
       {settingsIncomplete && (
         <Link
           href="/settings"
-          className="block bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-3 mb-6"
+          className="block bg-yellow-50 border border-yellow-300 rounded-xl px-4 py-3 mb-7"
         >
           <p className="text-sm font-semibold text-yellow-800">
             ⚠️ School Settings Incomplete
           </p>
           <p className="text-xs text-yellow-700 mt-0.5">
-            Fill in school name and Principal name — otherwise receipts and
-            certificates will be blank.
-          </p>
-          <p className="text-xs text-yellow-600 font-medium mt-1">
-            Go to Settings →
+            Add school name, principal name and logo in Settings.
           </p>
         </Link>
       )}
 
-      {/* Academic */}
-      <h2 className="text-lg font-bold text-gray-900 mb-3">Academic</h2>
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      {/* ── Academic ── */}
+      <h2 className="text-2xl font-bold text-gray-900 mb-3">Academic</h2>
+      <div className="grid grid-cols-2 gap-4 mb-8">
         <Link
           href="/teachers"
-          className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3"
+          className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition"
         >
-          <div className="h-12 w-12 rounded-full bg-amber-50 flex items-center justify-center text-2xl shrink-0">
+          <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center text-3xl shrink-0">
             👨‍🏫
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-gray-600 leading-tight">Staff</p>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-base text-gray-800 leading-tight">Staff</p>
+            <p className="text-xl font-bold text-gray-900 mt-1">
               {teacherCount?.count || 0}
             </p>
           </div>
         </Link>
         <Link
           href="/students"
-          className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center gap-3"
+          className="bg-gray-50 rounded-2xl p-4 flex items-center gap-3 active:scale-[0.98] transition"
         >
-          <div className="h-12 w-12 rounded-full bg-indigo-50 flex items-center justify-center text-2xl shrink-0">
-            👩‍🎓
+          <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center text-3xl shrink-0">
+            👧
           </div>
           <div className="min-w-0">
-            <p className="text-sm text-gray-600 leading-tight">Student</p>
-            <p className="text-xl font-bold text-gray-900">
+            <p className="text-base text-gray-800 leading-tight">Student</p>
+            <p className="text-xl font-bold text-gray-900 mt-1">
               {studentCount?.count || 0}
             </p>
           </div>
         </Link>
       </div>
 
-      {/* Finance */}
-      <h2 className="text-lg font-bold text-gray-900 mb-3">Finance</h2>
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <Link href="/fees" className="flex flex-col items-center text-center">
-          <div className="h-16 w-16 rounded-full bg-emerald-50 flex items-center justify-center text-2xl mb-2">
+      {/* ── Finance ── */}
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Finance</h2>
+      <div className="grid grid-cols-3 gap-3 mb-8">
+        <Link
+          href="/fees"
+          className="flex flex-col items-center text-center active:scale-95 transition"
+        >
+          <div className="h-20 w-20 rounded-full bg-emerald-50 flex items-center justify-center text-4xl mb-2">
             💰
           </div>
-          <p className="text-sm font-medium text-gray-700">Income</p>
-          <p className="text-xs text-emerald-600 font-semibold">
-            ₹{paidFees?.total || 0}
-          </p>
+          <p className="text-base font-medium text-gray-800">Income</p>
         </Link>
         <Link
           href="/reports"
-          className="flex flex-col items-center text-center"
+          className="flex flex-col items-center text-center active:scale-95 transition"
         >
-          <div className="h-16 w-16 rounded-full bg-orange-50 flex items-center justify-center text-2xl mb-2">
+          <div className="h-20 w-20 rounded-full bg-orange-50 flex items-center justify-center text-4xl mb-2">
             📈
           </div>
-          <p className="text-sm font-medium text-gray-700">Expense</p>
-          <p className="text-xs text-gray-400 font-semibold">View</p>
+          <p className="text-base font-medium text-gray-800">Expense</p>
         </Link>
         <Link
           href="/fees?status=pending"
-          className="flex flex-col items-center text-center"
+          className="flex flex-col items-center text-center active:scale-95 transition"
         >
-          <div className="h-16 w-16 rounded-full bg-red-50 flex items-center justify-center text-2xl mb-2">
+          <div className="h-20 w-20 rounded-full bg-rose-50 flex items-center justify-center text-4xl mb-2">
             📅
           </div>
-          <p className="text-sm font-medium text-gray-700">Due</p>
-          <p className="text-xs text-red-500 font-semibold">
-            ₹{pendingFees?.total || 0}
-          </p>
+          <p className="text-base font-medium text-gray-800">Due</p>
         </Link>
       </div>
 
-      {/* Attendance */}
-      <h2 className="text-lg font-bold text-gray-900 mb-3">Attendance</h2>
-      <div className="grid grid-cols-2 gap-3 mb-2">
+      {/* ── Attendance ── */}
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Attendance</h2>
+      <div className="flex gap-6">
         <Link
           href={`/teacher-attendance?date=${today}`}
-          className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col items-center text-center"
+          className="flex flex-col items-center text-center active:scale-95 transition"
         >
-          <div className="h-14 w-14 rounded-full bg-amber-50 flex items-center justify-center text-2xl mb-2">
+          <div className="h-20 w-20 rounded-full bg-amber-50 flex items-center justify-center text-4xl">
             👨‍🏫
           </div>
-          <p className="text-sm font-medium text-gray-700">Staff Attendance</p>
-          <p className="text-xs text-gray-400 mt-0.5">Present {todayPresent?.count || 0} · Absent {todayAbsent?.count || 0}</p>
         </Link>
         <Link
           href={`/attendance/mark?date=${today}`}
-          className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col items-center text-center"
+          className="flex flex-col items-center text-center active:scale-95 transition"
         >
-          <div className="h-14 w-14 rounded-full bg-indigo-50 flex items-center justify-center text-2xl mb-2">
-            👩‍🎓
+          <div className="h-20 w-20 rounded-full bg-indigo-50 flex items-center justify-center text-4xl">
+            👧
           </div>
-          <p className="text-sm font-medium text-gray-700">
-            Student Attendance
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">Mark today</p>
         </Link>
       </div>
     </div>
