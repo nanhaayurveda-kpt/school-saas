@@ -142,6 +142,15 @@ export default async function FeesPage({ searchParams }) {
               >
                 Mark Paid
               </Link>
+              <form method="POST" action="/api/fees/delete">
+                <input type="hidden" name="id" value={fee.id} />
+                <button
+                  type="submit"
+                  className="text-xs text-red-500 font-medium"
+                >
+                  Delete
+                </button>
+              </form>
               {fee.parent_phone && (
                 <a
                   href={`https://wa.me/${fullPhone}?text=${msg}`}
@@ -155,12 +164,23 @@ export default async function FeesPage({ searchParams }) {
             </div>
           )}
           {displayStatus === "paid" && (
-            <Link
-              href={`/fees/${fee.id}/receipt`}
-              className="text-xs text-green-600 font-medium"
-            >
-              🖨️ Receipt
-            </Link>
+            <div className="flex flex-col gap-0.5 items-end">
+              <Link
+                href={`/fees/${fee.id}/receipt`}
+                className="text-xs text-green-600 font-medium"
+              >
+                🖨️ Receipt
+              </Link>
+              <form method="POST" action="/api/fees/delete">
+                <input type="hidden" name="id" value={fee.id} />
+                <button
+                  type="submit"
+                  className="text-xs text-red-500 font-medium"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
           )}
         </div>
       </div>

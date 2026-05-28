@@ -96,7 +96,7 @@ export default function AttendanceSnapshot({
       {/* Class-wise Student Attendance */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-4">
         <h2 className="font-semibold text-gray-900 text-sm mb-3">
-          Today's Attendance — Class-wise
+          Today's attendance of students class-wise
         </h2>
         {classList.length === 0 ? (
           <p className="text-xs text-gray-400">No students found.</p>

@@ -105,7 +105,7 @@ export default async function StudentDashboardPage() {
       .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
   };
 
-  // Pending = due_date today ya future
+  // Pending = due_date today or future
   const today = new Date().toISOString().slice(0, 10);
   const pendingHomeworks = myHomeworks.filter(
     (hw) => hw.homeworks.due_date && hw.homeworks.due_date >= today,
