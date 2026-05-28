@@ -7,24 +7,18 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 
-const REGULAR_TYPES = ["monthly", "transport", "misc"];
+const REGULAR_TYPES = ["monthly", "transport", "amenity", "misc"];
 const OCCASIONAL_TYPES = ["exam", "admission", "late"];
-const ALL_TYPES = [...REGULAR_TYPES, ...OCCASIONAL_TYPES];
 
 export async function POST(request) {
-  // ─── Auth ──────────────────────────────────────────────────────────────────
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
   const session = await getSession(token);
   if (!session) {
-    return NextResponse.redirect(new URL("/login", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
   const userResult = await db
     .select()
@@ -32,70 +26,47 @@ export async function POST(request) {
     .where(eq(schema.users.email, session.email));
   const user = userResult[0];
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
 
-  // ─── Parse form ────────────────────────────────────────────────────────────
   const formData = await request.formData();
 
   const studentId = parseInt(formData.get("student_id"), 10);
   const dueDate = formData.get("due_date");
   const paidDate = formData.get("paid_date") || null;
   const paymentMode = formData.get("payment_mode") || "cash";
-  const receiptBase = formData.get("receipt_no")?.trim() || null;
   const academicYear = formData.get("academic_year")?.trim() || null;
-
-  // Selected months (array) — sent as months[]=January&months[]=February
   const selectedMonths = formData.getAll("months[]");
 
   if (!studentId || isNaN(studentId)) {
     await setFlash("error", "Student required");
-    return NextResponse.redirect(new URL("/fees/add", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
   }
   if (!selectedMonths.length) {
     await setFlash("error", "At least one month required");
-    return NextResponse.redirect(new URL("/fees/add", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
   }
   if (!dueDate) {
     await setFlash("error", "Due date required");
-    return NextResponse.redirect(new URL("/fees/add", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
   }
 
-  // ─── Ownership check ───────────────────────────────────────────────────────
   const studentRows = await db
     .select()
     .from(schema.students)
-    .where(
-      and(
-        eq(schema.students.id, studentId),
-        eq(schema.students.user_id, user.id),
-      ),
-    );
+    .where(and(eq(schema.students.id, studentId), eq(schema.students.user_id, 2)));
   if (!studentRows.length) {
     await setFlash("error", "Student not found");
-    return NextResponse.redirect(new URL("/fees/add", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
   }
 
-  // ─── Build rows to insert ──────────────────────────────────────────────────
-  // Regular types: apply to every selected month
-  // Occasional types: apply only to their specified month (if provided)
   const rowsToInsert = [];
 
-  // Regular fees — per month
+  // Regular fees — per selected month
   for (const month of selectedMonths) {
     for (const feeType of REGULAR_TYPES) {
       const amtRaw = formData.get(`amount_${feeType}`);
-      if (!amtRaw) continue; // not checked/provided
+      if (!amtRaw) continue;
       const amount = parseInt(amtRaw, 10);
       if (isNaN(amount) || amount <= 0) continue;
       rowsToInsert.push({ month, feeType, amount });
@@ -114,12 +85,9 @@ export async function POST(request) {
 
   if (!rowsToInsert.length) {
     await setFlash("error", "No valid fee types selected");
-    return NextResponse.redirect(new URL("/fees/add", request.url), {
-      status: 303,
-    });
+    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
   }
 
-  // ─── Insert — skip duplicates ───────────────────────────────────────────────
   let inserted = 0;
   let skipped = 0;
 
@@ -127,9 +95,8 @@ export async function POST(request) {
   const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
 
   for (const row of rowsToInsert) {
-    // Duplicate check
     const conditions = [
-      eq(schema.fees.user_id, user.id),
+      eq(schema.fees.user_id, 2),
       eq(schema.fees.student_id, studentId),
       eq(schema.fees.month, row.month),
       eq(schema.fees.fee_type, row.feeType),
@@ -147,15 +114,12 @@ export async function POST(request) {
       continue;
     }
 
-    // Receipt number: base + index or auto-generated
     const randPart = Math.floor(1000 + Math.random() * 9000);
-    const receiptNo = receiptBase
-      ? `${receiptBase}-${row.month.slice(0, 3).toUpperCase()}-${row.feeType.slice(0, 3).toUpperCase()}`
-      : `RCP-${datePart}-${randPart}`;
+    const receiptNo = `RCP-${datePart}-${randPart}`;
 
     await db.insert(schema.fees).values({
       student_id: studentId,
-      user_id: user.id,
+      user_id: 2,
       amount: row.amount,
       paid_amount: paidDate ? row.amount : 0,
       fee_type: row.feeType,
@@ -167,7 +131,6 @@ export async function POST(request) {
       receipt_no: receiptNo,
     });
 
-    // fee_payments row — only if paid
     if (paidDate) {
       const findRows = await db
         .select({ id: schema.fees.id })
@@ -179,7 +142,7 @@ export async function POST(request) {
         await db.insert(schema.fee_payments).values({
           fee_id: feeRow.id,
           student_id: studentId,
-          user_id: user.id,
+          user_id: 2,
           amount: row.amount,
           payment_mode: paymentMode,
           paid_date: new Date(paidDate),
@@ -191,22 +154,15 @@ export async function POST(request) {
     inserted++;
   }
 
-  // ─── Flash summary ─────────────────────────────────────────────────────────
   const monthLabel =
     selectedMonths.length === 1
       ? selectedMonths[0]
       : `${selectedMonths[0]} – ${selectedMonths[selectedMonths.length - 1]}`;
 
   if (inserted === 0) {
-    await setFlash(
-      "warning",
-      `All ${skipped} entries already exist (${monthLabel})`,
-    );
+    await setFlash("warning", `All ${skipped} entries already exist (${monthLabel})`);
   } else if (skipped > 0) {
-    await setFlash(
-      "success",
-      `${inserted} entries added, ${skipped} already existed (${monthLabel})`,
-    );
+    await setFlash("success", `${inserted} entries added, ${skipped} already existed (${monthLabel})`);
   } else {
     await setFlash("success", `${inserted} fee entries saved — ${monthLabel}`);
   }
