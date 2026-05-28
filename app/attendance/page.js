@@ -221,11 +221,6 @@ export default async function AttendancePage({ searchParams }) {
                   <span className="text-gray-500">Total: {total}</span>
                   <span className="text-green-600">Present: {present}</span>
                   <span className="text-red-500">Absent: {absent}</span>
-                  {unmarked > 0 && (
-                    <span className="text-yellow-500">
-                      Unmarked: {unmarked}
-                    </span>
-                  )}
                 </div>
               </div>
             );
