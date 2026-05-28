@@ -8,7 +8,7 @@ import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 
 const REGULAR_TYPES = ["monthly", "transport", "misc"];
-const OCCASIONAL_TYPES = ["exam", "admission"];
+const OCCASIONAL_TYPES = ["exam", "admission", "late"];
 const ALL_TYPES = [...REGULAR_TYPES, ...OCCASIONAL_TYPES];
 
 export async function POST(request) {

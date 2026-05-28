@@ -97,6 +97,7 @@ export default async function FeeReceiptPage({ params }) {
       monthly: "Monthly Fee",
       admission: "Admission Fee",
       exam: "Exam Fee",
+      late: "Late Payment",
       transport: "Transport Fee",
       misc: "Miscellaneous",
     }[fee.fee_type] ||

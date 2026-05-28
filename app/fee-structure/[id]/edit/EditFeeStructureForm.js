@@ -44,6 +44,7 @@ export default function EditFeeStructureForm({ structure, classes }) {
           <option value="monthly">Monthly Fee</option>
           <option value="admission">Admission Fee</option>
           <option value="exam">Exam Fee</option>
+          <option value="late">Late Payment</option>
           <option value="transport">Transport Fee</option>
           <option value="misc">Miscellaneous</option>
         </select>

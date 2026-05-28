@@ -3,8 +3,18 @@
 import { useState, useMemo } from "react";
 
 const MONTHS = [
-  "April", "May", "June", "July", "August", "September",
-  "October", "November", "December", "January", "February", "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+  "January",
+  "February",
+  "March",
 ];
 
 const REGULAR_FEE_TYPES = [
@@ -16,6 +26,7 @@ const REGULAR_FEE_TYPES = [
 const OCCASIONAL_FEE_TYPES = [
   { value: "exam", label: "Exam Fee" },
   { value: "admission", label: "Admission Fee" },
+  { value: "late", label: "Late Payment" },
 ];
 
 // ── Student selector (defined OUTSIDE main component to keep input focus) ──
@@ -45,12 +56,16 @@ function StudentSelector({
           >
             <option value="">Select class...</option>
             {classOptions.map((c) => (
-              <option key={c} value={c}>Class {c}</option>
+              <option key={c} value={c}>
+                Class {c}
+              </option>
             ))}
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Section</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Section
+          </label>
           <select
             value={selectedSection}
             onChange={onSectionChange}
@@ -59,7 +74,9 @@ function StudentSelector({
           >
             <option value="">All</option>
             {sectionOptions.map((s) => (
-              <option key={s} value={s}>Section {s}</option>
+              <option key={s} value={s}>
+                Section {s}
+              </option>
             ))}
           </select>
         </div>
@@ -126,7 +143,9 @@ function PaymentFields({ defaultAcYear = true, currentAcademicYear, today }) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Paid Date{" "}
-            <span className="text-gray-400 font-normal text-xs">(empty = pending)</span>
+            <span className="text-gray-400 font-normal text-xs">
+              (empty = pending)
+            </span>
           </label>
           <input
             type="date"
@@ -191,7 +210,8 @@ export default function FeeAddForm({
   const classOptions = useMemo(() => {
     const set = new Set(allStudents.map((s) => s.class));
     return [...set].sort((a, b) => {
-      const na = parseInt(a), nb = parseInt(b);
+      const na = parseInt(a),
+        nb = parseInt(b);
       if (!isNaN(na) && !isNaN(nb)) return na - nb;
       return a.localeCompare(b);
     });
@@ -216,12 +236,12 @@ export default function FeeAddForm({
   }, [allStudents, selectedClass, selectedSection]);
 
   const bulkTotal = useMemo(() => {
-    const regTotal = REGULAR_FEE_TYPES
-      .filter((ft) => checkedTypes[ft.value])
-      .reduce((sum, ft) => sum + (parseInt(bulkAmounts[ft.value]) || 0), 0);
-    const occTotal = OCCASIONAL_FEE_TYPES
-      .filter((ft) => checkedTypes[ft.value] && occasionalMonths[ft.value])
-      .reduce((sum, ft) => sum + (parseInt(bulkAmounts[ft.value]) || 0), 0);
+    const regTotal = REGULAR_FEE_TYPES.filter(
+      (ft) => checkedTypes[ft.value],
+    ).reduce((sum, ft) => sum + (parseInt(bulkAmounts[ft.value]) || 0), 0);
+    const occTotal = OCCASIONAL_FEE_TYPES.filter(
+      (ft) => checkedTypes[ft.value] && occasionalMonths[ft.value],
+    ).reduce((sum, ft) => sum + (parseInt(bulkAmounts[ft.value]) || 0), 0);
     return regTotal * selectedMonths.length + occTotal;
   }, [checkedTypes, bulkAmounts, selectedMonths, occasionalMonths]);
 
@@ -229,8 +249,11 @@ export default function FeeAddForm({
     setSelectedClass(e.target.value);
     setSelectedSection("");
     setSelectedStudentId("");
-    setAmount(""); setNetAmount(""); setConcessionInfo(null);
-    setBulkAmounts({}); setCheckedTypes({});
+    setAmount("");
+    setNetAmount("");
+    setConcessionInfo(null);
+    setBulkAmounts({});
+    setCheckedTypes({});
   }
 
   function handleSectionChange(e) {
@@ -258,15 +281,17 @@ export default function FeeAddForm({
       const base = structure.amount;
       setAmount(String(base));
       if (conc) {
-        const disc = conc.discount_type === "percent"
-          ? Math.round((base * conc.discount_value) / 100)
-          : conc.discount_value;
+        const disc =
+          conc.discount_type === "percent"
+            ? Math.round((base * conc.discount_value) / 100)
+            : conc.discount_value;
         setNetAmount(String(Math.max(0, base - disc)));
       } else {
         setNetAmount(String(base));
       }
     } else {
-      setAmount(""); setNetAmount("");
+      setAmount("");
+      setNetAmount("");
     }
   }
 
@@ -286,7 +311,8 @@ export default function FeeAddForm({
   function handleFeeTypeChange(e) {
     const ft = e.target.value;
     setSelectedFeeType(ft);
-    const conc = concessions.find((c) => c.student_id === selectedStudentId) || null;
+    const conc =
+      concessions.find((c) => c.student_id === selectedStudentId) || null;
     fillSingleAmount(selectedStudentId, ft, conc);
   }
 
@@ -294,9 +320,10 @@ export default function FeeAddForm({
     const base = parseInt(e.target.value) || 0;
     setAmount(e.target.value);
     if (concessionInfo) {
-      const disc = concessionInfo.discount_type === "percent"
-        ? Math.round((base * concessionInfo.discount_value) / 100)
-        : concessionInfo.discount_value;
+      const disc =
+        concessionInfo.discount_type === "percent"
+          ? Math.round((base * concessionInfo.discount_value) / 100)
+          : concessionInfo.discount_value;
       setNetAmount(String(Math.max(0, base - disc)));
     } else {
       setNetAmount(e.target.value);
@@ -310,7 +337,9 @@ export default function FeeAddForm({
   }
 
   function toggleAllMonths() {
-    setSelectedMonths((prev) => (prev.length === MONTHS.length ? [] : [...MONTHS]));
+    setSelectedMonths((prev) =>
+      prev.length === MONTHS.length ? [] : [...MONTHS],
+    );
   }
 
   function toggleFeeType(type) {
@@ -337,7 +366,9 @@ export default function FeeAddForm({
           type="button"
           onClick={() => setTab("single")}
           className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-            tab === "single" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600"
+            tab === "single"
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
           Single Fee
@@ -346,7 +377,9 @@ export default function FeeAddForm({
           type="button"
           onClick={() => setTab("bulk")}
           className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-            tab === "bulk" ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-600"
+            tab === "bulk"
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-100 text-gray-600"
           }`}
         >
           By Package
@@ -389,7 +422,9 @@ export default function FeeAddForm({
                 className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {[...REGULAR_FEE_TYPES, ...OCCASIONAL_FEE_TYPES].map((ft) => (
-                  <option key={ft.value} value={ft.value}>{ft.label}</option>
+                  <option key={ft.value} value={ft.value}>
+                    {ft.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -397,7 +432,9 @@ export default function FeeAddForm({
 
           {concessionInfo && (
             <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-              <p className="text-xs font-semibold text-green-700 mb-1">💸 Concession Applied</p>
+              <p className="text-xs font-semibold text-green-700 mb-1">
+                💸 Concession Applied
+              </p>
               <p className="text-xs text-green-600">
                 {concessionInfo.discount_type === "percent"
                   ? `${concessionInfo.discount_value}% discount`
@@ -415,7 +452,9 @@ export default function FeeAddForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Month
+              </label>
               <select
                 name="month"
                 defaultValue={currentMonth}
@@ -423,7 +462,9 @@ export default function FeeAddForm({
               >
                 <option value="">Select...</option>
                 {MONTHS.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
                 ))}
               </select>
             </div>
@@ -485,7 +526,9 @@ export default function FeeAddForm({
                 onClick={toggleAllMonths}
                 className="text-xs text-indigo-600 font-medium"
               >
-                {selectedMonths.length === MONTHS.length ? "Deselect All" : "Select All"}
+                {selectedMonths.length === MONTHS.length
+                  ? "Deselect All"
+                  : "Select All"}
               </button>
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -533,7 +576,9 @@ export default function FeeAddForm({
                 <div
                   key={ft.value}
                   className={`border rounded-lg px-3 py-2.5 flex items-center gap-3 ${
-                    checkedTypes[ft.value] ? "border-indigo-400 bg-indigo-50" : "border-gray-200"
+                    checkedTypes[ft.value]
+                      ? "border-indigo-400 bg-indigo-50"
+                      : "border-gray-200"
                   }`}
                 >
                   <input
@@ -555,7 +600,10 @@ export default function FeeAddForm({
                       name={`amount_${ft.value}`}
                       value={bulkAmounts[ft.value] || ""}
                       onChange={(e) =>
-                        setBulkAmounts((prev) => ({ ...prev, [ft.value]: e.target.value }))
+                        setBulkAmounts((prev) => ({
+                          ...prev,
+                          [ft.value]: e.target.value,
+                        }))
                       }
                       min="1"
                       required
@@ -564,7 +612,9 @@ export default function FeeAddForm({
                     />
                   ) : (
                     bulkAmounts[ft.value] && (
-                      <span className="text-xs text-gray-400">₹{bulkAmounts[ft.value]}</span>
+                      <span className="text-xs text-gray-400">
+                        ₹{bulkAmounts[ft.value]}
+                      </span>
                     )
                   )}
                 </div>
@@ -585,7 +635,9 @@ export default function FeeAddForm({
                 <div
                   key={ft.value}
                   className={`border rounded-lg px-3 py-2.5 ${
-                    checkedTypes[ft.value] ? "border-amber-400 bg-amber-50" : "border-gray-200"
+                    checkedTypes[ft.value]
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-gray-200"
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -608,7 +660,10 @@ export default function FeeAddForm({
                         name={`amount_${ft.value}`}
                         value={bulkAmounts[ft.value] || ""}
                         onChange={(e) =>
-                          setBulkAmounts((prev) => ({ ...prev, [ft.value]: e.target.value }))
+                          setBulkAmounts((prev) => ({
+                            ...prev,
+                            [ft.value]: e.target.value,
+                          }))
                         }
                         min="1"
                         required
@@ -626,14 +681,19 @@ export default function FeeAddForm({
                         name={`month_${ft.value}`}
                         value={occasionalMonths[ft.value] || ""}
                         onChange={(e) =>
-                          setOccasionalMonths((prev) => ({ ...prev, [ft.value]: e.target.value }))
+                          setOccasionalMonths((prev) => ({
+                            ...prev,
+                            [ft.value]: e.target.value,
+                          }))
                         }
                         required
                         className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
                       >
                         <option value="">Select month...</option>
                         {MONTHS.map((m) => (
-                          <option key={m} value={m}>{m}</option>
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -647,7 +707,9 @@ export default function FeeAddForm({
           {bulkTotal > 0 && (
             <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 flex justify-between items-center">
               <div>
-                <p className="text-xs font-medium text-indigo-700">Total Payable</p>
+                <p className="text-xs font-medium text-indigo-700">
+                  Total Payable
+                </p>
                 {selectedMonths.length > 1 && (
                   <p className="text-xs text-indigo-500 mt-0.5">
                     {selectedMonths.length} months × Regular + Extra fees
