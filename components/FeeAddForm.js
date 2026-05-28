@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function FeeAddForm({
   allStudents,
@@ -11,12 +11,61 @@ export default function FeeAddForm({
   currentAcademicYear,
   months,
 }) {
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedSection, setSelectedSection] = useState("");
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [selectedFeeType, setSelectedFeeType] = useState("monthly");
   const [amount, setAmount] = useState("");
   const [concessionInfo, setConcessionInfo] = useState(null);
   const [netAmount, setNetAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Unique classes from all students
+  const classOptions = useMemo(() => {
+    const set = new Set(allStudents.map((s) => s.class));
+    return [...set].sort((a, b) => {
+      const na = parseInt(a), nb = parseInt(b);
+      if (!isNaN(na) && !isNaN(nb)) return na - nb;
+      return a.localeCompare(b);
+    });
+  }, [allStudents]);
+
+  // Sections available for selected class
+  const sectionOptions = useMemo(() => {
+    if (!selectedClass) return [];
+    const set = new Set(
+      allStudents
+        .filter((s) => s.class === selectedClass && s.section)
+        .map((s) => s.section)
+    );
+    return [...set].sort();
+  }, [allStudents, selectedClass]);
+
+  // Filtered students based on class + section
+  const filteredStudents = useMemo(() => {
+    return allStudents.filter((s) => {
+      if (selectedClass && s.class !== selectedClass) return false;
+      if (selectedSection && s.section !== selectedSection) return false;
+      return true;
+    });
+  }, [allStudents, selectedClass, selectedSection]);
+
+  function handleClassChange(e) {
+    setSelectedClass(e.target.value);
+    setSelectedSection("");
+    setSelectedStudentId("");
+    setAmount("");
+    setNetAmount("");
+    setConcessionInfo(null);
+  }
+
+  function handleSectionChange(e) {
+    setSelectedSection(e.target.value);
+    setSelectedStudentId("");
+    setAmount("");
+    setNetAmount("");
+    setConcessionInfo(null);
+  }
 
   function handleStudentChange(e) {
     const studentId = parseInt(e.target.value);
@@ -39,7 +88,7 @@ export default function FeeAddForm({
     const student = allStudents.find((s) => s.id === studentId);
     if (!student) return;
     const structure = feeStructures.find(
-      (fs) => fs.class === student.class && fs.fee_type === feeType,
+      (fs) => fs.class === student.class && fs.fee_type === feeType
     );
     if (structure) {
       const base = structure.amount;
@@ -80,6 +129,47 @@ export default function FeeAddForm({
       onSubmit={() => setSubmitting(true)}
       className="space-y-4"
     >
+      {/* Class & Section Filter Row */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Class <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={selectedClass}
+            onChange={handleClassChange}
+            required
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">Select class...</option>
+            {classOptions.map((c) => (
+              <option key={c} value={c}>
+                Class {c}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Section
+          </label>
+          <select
+            value={selectedSection}
+            onChange={handleSectionChange}
+            disabled={!selectedClass}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
+          >
+            <option value="">All Sections</option>
+            {sectionOptions.map((sec) => (
+              <option key={sec} value={sec}>
+                Section {sec}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Student Dropdown (filtered) */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Student <span className="text-red-500">*</span>
@@ -89,17 +179,26 @@ export default function FeeAddForm({
           required
           value={selectedStudentId}
           onChange={handleStudentChange}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          disabled={!selectedClass}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
         >
-          <option value="">Select student...</option>
-          {allStudents.map((s) => (
+          <option value="">
+            {selectedClass ? "Select student..." : "Select class first"}
+          </option>
+          {filteredStudents.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name} — Class {s.class} {s.section || ""}
             </option>
           ))}
         </select>
+        {selectedClass && filteredStudents.length === 0 && (
+          <p className="text-xs text-amber-600 mt-1">
+            No students found for this class/section.
+          </p>
+        )}
       </div>
 
+      {/* Amount & Fee Type */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -135,6 +234,7 @@ export default function FeeAddForm({
         </div>
       </div>
 
+      {/* Concession Banner */}
       {concessionInfo && (
         <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3">
           <p className="text-xs font-semibold text-green-700 mb-1">
@@ -156,6 +256,7 @@ export default function FeeAddForm({
 
       <input type="hidden" name="net_amount" value={netAmount || amount} />
 
+      {/* Month & Academic Year */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -187,6 +288,7 @@ export default function FeeAddForm({
         </div>
       </div>
 
+      {/* Due Date & Paid Date */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -216,6 +318,7 @@ export default function FeeAddForm({
         </div>
       </div>
 
+      {/* Payment Mode */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Payment Mode{" "}
@@ -240,6 +343,20 @@ export default function FeeAddForm({
         </div>
       </div>
 
+      {/* Receipt No */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Receipt No.
+        </label>
+        <input
+          type="text"
+          name="receipt_no"
+          placeholder="e.g. RCP/2024/001"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      {/* Submit */}
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
