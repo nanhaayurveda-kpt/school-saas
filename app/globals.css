@@ -25,6 +25,12 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+input:not(:disabled),
+select:not(:disabled),
+textarea:not(:disabled) {
+  color: #1d4ed8;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
