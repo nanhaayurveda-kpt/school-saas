@@ -6,6 +6,7 @@ import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import AttendanceSnapshot from "./AttendanceSnapshot";
+import FeeSnapshot from "./FeeSnapshot";
 import {
   students,
   teachers,
@@ -47,6 +48,52 @@ export default async function DashboardPage() {
     .select({ total: sql`SUM(amount)` })
     .from(fees)
     .where(and(sql`status = 'paid'`, eq(fees.user_id, 2)));
+  // Student-wise fee totals (all fee_types combined) for fee snapshot
+  const feeRows = await db
+    .select({
+      student_id: fees.student_id,
+      name: students.name,
+      class: students.class,
+      amount: fees.amount,
+      status: fees.status,
+    })
+    .from(fees)
+    .leftJoin(students, eq(fees.student_id, students.id))
+    .where(eq(fees.user_id, 2));
+
+  const feeByStudent = {};
+  feeRows.forEach((r) => {
+    if (!r.student_id) return;
+    if (!feeByStudent[r.student_id]) {
+      feeByStudent[r.student_id] = {
+        name: r.name || "—",
+        class: r.class || "—",
+        total: 0,
+        paid: 0,
+      };
+    }
+    const amt = r.amount || 0;
+    feeByStudent[r.student_id].total += amt;
+    if (r.status === "paid") feeByStudent[r.student_id].paid += amt;
+  });
+
+  const feeClassMap = {};
+  Object.values(feeByStudent).forEach((s) => {
+    const cls = s.class || "—";
+    if (!feeClassMap[cls]) feeClassMap[cls] = [];
+    feeClassMap[cls].push({
+      name: s.name,
+      total: s.total,
+      paid: s.paid,
+      remaining: s.total - s.paid,
+    });
+  });
+  const feeClassList = Object.keys(feeClassMap).sort((a, b) => {
+    const na = parseInt(a),
+      nb = parseInt(b);
+    if (!isNaN(na) && !isNaN(nb)) return na - nb;
+    return a.localeCompare(b);
+  });
   const [todayPresent] = await db
     .select({ count: sql`COUNT(*)` })
     .from(attendance)
@@ -220,7 +267,7 @@ export default async function DashboardPage() {
         )}
 
       <div className="grid grid-cols-2 gap-3 mb-3">
-               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="text-2xl mb-1">📝</div>
           <div className="text-2xl font-bold text-gray-900">
             {examCount?.count || 0}
@@ -241,6 +288,12 @@ export default async function DashboardPage() {
         staffAbsentList={staffAbsentList}
         classMap={classMap}
         classList={classList}
+      />
+      <FeeSnapshot
+        totalCollected={paidFees?.total || 0}
+        totalPending={pendingFees?.total || 0}
+        feeClassMap={feeClassMap}
+        feeClassList={feeClassList}
       />
 
       <div className="space-y-4">
