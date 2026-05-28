@@ -60,14 +60,22 @@ export default async function FeeStructurePage() {
         <div className="space-y-4">
           {classes.map((cls) => {
             const clsStructures = allStructures.filter((s) => s.class === cls);
+            const monthlyTotal = clsStructures
+              .filter((s) =>
+                ["monthly", "transport", "misc"].includes(s.fee_type),
+              )
+              .reduce((sum, s) => sum + (s.amount || 0), 0);
             return (
               <div
                 key={cls}
                 className="bg-white rounded-xl border border-indigo-100 shadow-sm overflow-hidden"
               >
-                <div className="bg-indigo-600 px-4 py-2.5">
+                <div className="bg-indigo-600 px-4 py-2.5 flex justify-between items-center">
                   <span className="text-white font-bold text-sm">
                     Class {cls}
+                  </span>
+                  <span className="bg-white text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    Monthly Total: ₹{monthlyTotal}
                   </span>
                 </div>
                 <div className="divide-y divide-gray-100">
@@ -108,6 +116,14 @@ export default async function FeeStructurePage() {
                       </div>
                     </div>
                   ))}
+                  <div className="px-4 py-2.5 bg-indigo-50 flex justify-between items-center">
+                    <span className="text-xs font-semibold text-indigo-700">
+                      Monthly Total (Monthly + Transport + Misc)
+                    </span>
+                    <span className="text-sm font-bold text-indigo-700">
+                      ₹{monthlyTotal}
+                    </span>
+                  </div>
                 </div>
               </div>
             );

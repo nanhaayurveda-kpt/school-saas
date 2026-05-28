@@ -124,11 +124,29 @@ export default async function DashboardPage() {
     .where(and(eq(attendance.user_id, 2), eq(attendance.date, today)));
 
   const classMap = {};
+  const markedStudentNames = {};
   studAttRows.forEach((r) => {
     const cls = r.class || "—";
-    if (!classMap[cls]) classMap[cls] = { present: [], absent: [] };
-    if (r.status === "present") classMap[cls].present.push(r.name);
-    else if (r.status === "absent") classMap[cls].absent.push(r.name);
+    if (!classMap[cls]) classMap[cls] = { present: [], absent: [], na: [] };
+    if (!markedStudentNames[cls]) markedStudentNames[cls] = new Set();
+    if (r.status === "present") {
+      classMap[cls].present.push(r.name);
+      markedStudentNames[cls].add(r.name);
+    } else if (r.status === "absent") {
+      classMap[cls].absent.push(r.name);
+      markedStudentNames[cls].add(r.name);
+    }
+  });
+  // students with no attendance row today = N/A
+  const allStudentsForNA = await db
+    .select({ name: students.name, class: students.class })
+    .from(students)
+    .where(eq(students.user_id, 2));
+  allStudentsForNA.forEach((s) => {
+    const cls = s.class || "—";
+    if (!classMap[cls]) classMap[cls] = { present: [], absent: [], na: [] };
+    if (!markedStudentNames[cls]) markedStudentNames[cls] = new Set();
+    if (!markedStudentNames[cls].has(s.name)) classMap[cls].na.push(s.name);
   });
   const classList = Object.keys(classMap).sort((a, b) => {
     const na = parseInt(a),
@@ -151,12 +169,21 @@ export default async function DashboardPage() {
         eq(teacher_attendance.date, today),
       ),
     );
+
   const staffPresentList = staffRows
     .filter((r) => r.status === "present")
     .map((r) => r.name);
   const staffAbsentList = staffRows
     .filter((r) => r.status === "absent")
     .map((r) => r.name);
+  const markedStaffNames = new Set([...staffPresentList, ...staffAbsentList]);
+  const allTeachersForNA = await db
+    .select({ name: teachers.name })
+    .from(teachers)
+    .where(eq(teachers.user_id, 2));
+  const staffNAList = allTeachersForNA
+    .map((t) => t.name)
+    .filter((n) => !markedStaffNames.has(n));
   const [examCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(exams)
@@ -287,6 +314,7 @@ export default async function DashboardPage() {
         staffPresentList={staffPresentList}
         staffAbsentList={staffAbsentList}
         classMap={classMap}
+        staffNAList={staffNAList}
         classList={classList}
       />
       <FeeSnapshot

@@ -5,14 +5,48 @@ import { useState } from "react";
 export default function AttendanceSnapshot({
   staffPresentList,
   staffAbsentList,
+  staffNAList = [],
   classMap,
   classList,
 }) {
-  const [openStaff, setOpenStaff] = useState(null); // "present" | "absent" | null
+  const [openStaff, setOpenStaff] = useState(null); // "present" | "absent" | "na" | null
   const [selectedClass, setSelectedClass] = useState("");
 
   const staffMarked =
-    staffPresentList.length > 0 || staffAbsentList.length > 0;
+    staffPresentList.length > 0 ||
+    staffAbsentList.length > 0 ||
+    staffNAList.length > 0;
+
+  function StaffBox({ keyName, label, list, color }) {
+    const isOpen = openStaff === keyName;
+    return (
+      <button
+        type="button"
+        onClick={() => setOpenStaff(isOpen ? null : keyName)}
+        className={`${color.bg} rounded-lg px-3 py-3 text-left`}
+      >
+        <p className={`text-xs font-semibold ${color.text}`}>
+          {label} ({list.length})
+        </p>
+        <p className={`text-[10px] ${color.sub} mt-0.5`}>
+          {isOpen ? "Tap to hide" : "Tap to view"}
+        </p>
+        {isOpen && (
+          <div className="mt-2 space-y-0.5">
+            {list.length === 0 ? (
+              <p className="text-xs text-gray-400">—</p>
+            ) : (
+              list.map((n, i) => (
+                <p key={i} className="text-xs text-gray-800">
+                  {n}
+                </p>
+              ))
+            )}
+          </div>
+        )}
+      </button>
+    );
+  }
 
   return (
     <div>
@@ -26,61 +60,25 @@ export default function AttendanceSnapshot({
             Staff attendance not marked yet for today.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() =>
-                setOpenStaff(openStaff === "present" ? null : "present")
-              }
-              className="bg-green-50 rounded-lg px-3 py-3 text-left"
-            >
-              <p className="text-xs font-semibold text-green-700">
-                Present ({staffPresentList.length})
-              </p>
-              <p className="text-[10px] text-green-600 mt-0.5">
-                {openStaff === "present" ? "Tap to hide" : "Tap to view names"}
-              </p>
-              {openStaff === "present" && (
-                <div className="mt-2 space-y-0.5">
-                  {staffPresentList.length === 0 ? (
-                    <p className="text-xs text-gray-400">—</p>
-                  ) : (
-                    staffPresentList.map((n, i) => (
-                      <p key={i} className="text-xs text-gray-800">
-                        {n}
-                      </p>
-                    ))
-                  )}
-                </div>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setOpenStaff(openStaff === "absent" ? null : "absent")
-              }
-              className="bg-red-50 rounded-lg px-3 py-3 text-left"
-            >
-              <p className="text-xs font-semibold text-red-600">
-                Absent ({staffAbsentList.length})
-              </p>
-              <p className="text-[10px] text-red-500 mt-0.5">
-                {openStaff === "absent" ? "Tap to hide" : "Tap to view names"}
-              </p>
-              {openStaff === "absent" && (
-                <div className="mt-2 space-y-0.5">
-                  {staffAbsentList.length === 0 ? (
-                    <p className="text-xs text-gray-400">—</p>
-                  ) : (
-                    staffAbsentList.map((n, i) => (
-                      <p key={i} className="text-xs text-gray-800">
-                        {n}
-                      </p>
-                    ))
-                  )}
-                </div>
-              )}
-            </button>
+          <div className="grid grid-cols-3 gap-3">
+            <StaffBox
+              keyName="present"
+              label="Present"
+              list={staffPresentList}
+              color={{ bg: "bg-green-50", text: "text-green-700", sub: "text-green-600" }}
+            />
+            <StaffBox
+              keyName="absent"
+              label="Absent"
+              list={staffAbsentList}
+              color={{ bg: "bg-red-50", text: "text-red-600", sub: "text-red-500" }}
+            />
+            <StaffBox
+              keyName="na"
+              label="N/A"
+              list={staffNAList}
+              color={{ bg: "bg-yellow-50", text: "text-yellow-700", sub: "text-yellow-600" }}
+            />
           </div>
         )}
       </div>
@@ -92,7 +90,7 @@ export default function AttendanceSnapshot({
         </h2>
         {classList.length === 0 ? (
           <p className="text-xs text-gray-400">
-            Attendance not marked yet for today.
+            No students found.
           </p>
         ) : (
           <div>
@@ -104,14 +102,14 @@ export default function AttendanceSnapshot({
               <option value="">Select class to view names...</option>
               {classList.map((cls) => (
                 <option key={cls} value={cls}>
-                  Class {cls} — Present {classMap[cls].present.length}, Absent{" "}
-                  {classMap[cls].absent.length}
+                  Class {cls} — P {classMap[cls].present.length}, A{" "}
+                  {classMap[cls].absent.length}, N/A {classMap[cls].na.length}
                 </option>
               ))}
             </select>
 
             {selectedClass && classMap[selectedClass] && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <p className="text-xs font-semibold text-green-700 mb-1">
                     Present ({classMap[selectedClass].present.length})
@@ -134,6 +132,20 @@ export default function AttendanceSnapshot({
                     <p className="text-xs text-gray-400">—</p>
                   ) : (
                     classMap[selectedClass].absent.map((n, i) => (
+                      <p key={i} className="text-xs text-gray-800">
+                        {n}
+                      </p>
+                    ))
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-yellow-700 mb-1">
+                    N/A ({classMap[selectedClass].na.length})
+                  </p>
+                  {classMap[selectedClass].na.length === 0 ? (
+                    <p className="text-xs text-gray-400">—</p>
+                  ) : (
+                    classMap[selectedClass].na.map((n, i) => (
                       <p key={i} className="text-xs text-gray-800">
                         {n}
                       </p>

@@ -240,18 +240,6 @@ export default function FeeAddForm({
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Receipt No.
-        </label>
-        <input
-          type="text"
-          name="receipt_no"
-          placeholder="e.g. RCP/2024/001"
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-
       <div className="flex gap-3 pt-2">
         <button
           type="submit"

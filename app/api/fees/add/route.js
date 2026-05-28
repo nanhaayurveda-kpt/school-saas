@@ -24,11 +24,15 @@ export async function POST(request) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
   const session = await getSession(token);
   if (!session) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
 
   const userResult = await db
@@ -37,7 +41,9 @@ export async function POST(request) {
     .where(eq(schema.users.email, session.email));
   const user = userResult[0];
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
 
   // ─── Parse form ────────────────────────────────────────────────────────
@@ -59,13 +65,17 @@ export async function POST(request) {
       "error",
       "Invalid data: " + JSON.stringify(parsed.error.flatten().fieldErrors),
     );
-    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/fees/add", request.url), {
+      status: 303,
+    });
   }
 
   const studentId = parseInt(parsed.data.student_id, 10);
   if (isNaN(studentId)) {
     await setFlash("error", "Invalid student");
-    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/fees/add", request.url), {
+      status: 303,
+    });
   }
 
   // ─── Ownership check: student belongs to this user ─────────────────────
@@ -73,14 +83,13 @@ export async function POST(request) {
     .select()
     .from(schema.students)
     .where(
-      and(
-        eq(schema.students.id, studentId),
-        eq(schema.students.user_id, 2),
-      ),
+      and(eq(schema.students.id, studentId), eq(schema.students.user_id, 2)),
     );
   if (!studentCheck.length) {
     await setFlash("error", "Student not found");
-    return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/fees/add", request.url), {
+      status: 303,
+    });
   }
 
   const feeType = parsed.data.fee_type || "tuition";
@@ -109,7 +118,9 @@ export async function POST(request) {
         "error",
         `Fee for ${student.name} — ${month} ${academicYear || ""} (${feeType}) already exists. Use "Mark Paid" for additional payments.`,
       );
-      return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
+      return NextResponse.redirect(new URL("/fees/add", request.url), {
+        status: 303,
+      });
     }
   }
 
@@ -122,6 +133,11 @@ export async function POST(request) {
   const paidDate = parsed.data.paid_date || null;
 
   // ─── Insert fee row ────────────────────────────────────────────────────
+  // Auto-generate receipt number (server-side, unique): RCP-YYYYMMDD-XXXX
+  const now = new Date();
+  const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const randPart = Math.floor(1000 + Math.random() * 9000);
+  const receiptNo = parsed.data.receipt_no || `RCP-${datePart}-${randPart}`;
   await db.insert(schema.fees).values({
     student_id: studentId,
     amount: net_amount,
@@ -132,7 +148,7 @@ export async function POST(request) {
     fee_type: feeType,
     academic_year: academicYear,
     month: month,
-    receipt_no: parsed.data.receipt_no || null,
+    receipt_no: receiptNo,
     user_id: 2,
   });
 
@@ -145,7 +161,8 @@ export async function POST(request) {
       eq(schema.fees.fee_type, feeType),
     ];
     if (month) findConditions.push(eq(schema.fees.month, month));
-    if (academicYear) findConditions.push(eq(schema.fees.academic_year, academicYear));
+    if (academicYear)
+      findConditions.push(eq(schema.fees.academic_year, academicYear));
 
     const inserted = await db
       .select()
@@ -162,7 +179,7 @@ export async function POST(request) {
         amount: net_amount,
         payment_mode: formData.get("payment_mode") || "cash",
         paid_date: new Date(paidDate),
-        receipt_no: parsed.data.receipt_no || null,
+        receipt_no: receiptNo,
       });
     }
   }
