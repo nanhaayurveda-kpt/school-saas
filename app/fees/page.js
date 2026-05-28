@@ -137,12 +137,6 @@ export default async function FeesPage({ searchParams }) {
                 Edit
               </Link>
               <Link
-                href={`/fees/${fee.id}/edit`}
-                className="block text-xs font-medium text-gray-500"
-              >
-                Edit
-              </Link>
-              <Link
                 href={`/fees/${fee.id}/pay`}
                 className="text-xs text-indigo-600 font-medium"
               >

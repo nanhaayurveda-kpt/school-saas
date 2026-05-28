@@ -13,13 +13,19 @@ export async function POST(request, { params }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token)
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   const session = await getSession(token);
   if (!session)
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
 
   if (!feeId)
-    return NextResponse.redirect(new URL("/fees", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/fees", request.url), {
+      status: 303,
+    });
 
   // Ownership check
   const ownRows = await db
@@ -27,7 +33,9 @@ export async function POST(request, { params }) {
     .from(schema.fees)
     .where(and(eq(schema.fees.id, feeId), eq(schema.fees.user_id, 2)));
   if (!ownRows.length)
-    return NextResponse.redirect(new URL("/fees", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/fees", request.url), {
+      status: 303,
+    });
 
   const formData = await request.formData();
   const fee_type = formData.get("fee_type") || "monthly";
@@ -40,11 +48,10 @@ export async function POST(request, { params }) {
   const receipt_no = formData.get("receipt_no") || null;
 
   if (!due_date_raw || isNaN(amount) || amount <= 0) {
-    await setFlash("error", "Due date और valid amount ज़रूरी है");
-    return NextResponse.redirect(
-      new URL(`/fees/${feeId}/edit`, request.url),
-      { status: 303 }
-    );
+    await setFlash("error", "Due date and valid amount are required");
+    return NextResponse.redirect(new URL(`/fees/${feeId}/edit`, request.url), {
+      status: 303,
+    });
   }
 
   const due_date = new Date(due_date_raw);
@@ -59,7 +66,17 @@ export async function POST(request, { params }) {
 
   await db
     .update(schema.fees)
-    .set({ fee_type, amount, month, academic_year, due_date, paid_date, status, receipt_no, paid_amount })
+    .set({
+      fee_type,
+      amount,
+      month,
+      academic_year,
+      due_date,
+      paid_date,
+      status,
+      receipt_no,
+      paid_amount,
+    })
     .where(eq(schema.fees.id, feeId));
 
   await setFlash("success", "Fee record updated!");

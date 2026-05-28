@@ -45,9 +45,9 @@ export default async function DashboardPage() {
     .from(fees)
     .where(and(sql`status = 'pending'`, eq(fees.user_id, 2)));
   const [paidFees] = await db
-    .select({ total: sql`SUM(amount)` })
+    .select({ total: sql`SUM(paid_amount)` })
     .from(fees)
-    .where(and(sql`status = 'paid'`, eq(fees.user_id, 2)));
+    .where(eq(fees.user_id, 2));
   // Student-wise fee totals (all fee_types combined) for fee snapshot
   const feeRows = await db
     .select({
@@ -55,6 +55,7 @@ export default async function DashboardPage() {
       name: students.name,
       class: students.class,
       amount: fees.amount,
+      paid_amount: fees.paid_amount,
       status: fees.status,
     })
     .from(fees)
@@ -77,9 +78,8 @@ export default async function DashboardPage() {
   });
   feeRows.forEach((r) => {
     if (!r.student_id || !feeByStudent[r.student_id]) return;
-    const amt = r.amount || 0;
-    feeByStudent[r.student_id].total += amt;
-    if (r.status === "paid") feeByStudent[r.student_id].paid += amt;
+    feeByStudent[r.student_id].total += r.amount || 0;
+    feeByStudent[r.student_id].paid += r.paid_amount || 0;
   });
 
   const feeClassMap = {};

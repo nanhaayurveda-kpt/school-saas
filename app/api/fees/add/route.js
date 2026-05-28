@@ -92,7 +92,7 @@ export async function POST(request) {
     });
   }
 
-  const feeType = parsed.data.fee_type || "tuition";
+  const feeType = parsed.data.fee_type || "monthly";
   const month = parsed.data.month || null;
   const academicYear = parsed.data.academic_year || null;
 
