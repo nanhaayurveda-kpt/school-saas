@@ -14,19 +14,28 @@ export async function POST(request) {
   const session = await getSession(token);
   if (!session) return NextResponse.redirect(new URL("/login", request.url));
 
-  const userResult = await db.select().from(users).where(eq(users.email, session.email));
+  const userResult = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, session.email));
   const user = userResult[0];
   if (!user) return NextResponse.redirect(new URL("/login", request.url));
 
   const formData = await request.formData();
   const date = formData.get("date");
 
-  if (!date) return NextResponse.redirect(new URL("/teacher-attendance", request.url));
+  if (!date)
+    return NextResponse.redirect(new URL("/teacher-attendance", request.url));
 
-  const allTeachers = await db.select().from(teachers).where(eq(teachers.user_id, 2));
+  const allTeachers = await db
+    .select()
+    .from(teachers)
+    .where(eq(teachers.user_id, 2));
 
   for (const t of allTeachers) {
-    const status = formData.get(`status_${t.id}`) || "present";
+    const raw = formData.get(`status_${t.id}`);
+    const status =
+      raw === "present" ? "present" : raw === "absent" ? "absent" : "na";
     const note = formData.get(`note_${t.id}`) || null;
 
     const existing = await db
@@ -35,9 +44,23 @@ export async function POST(request) {
       .where(
         and(
           eq(teacher_attendance.teacher_id, t.id),
-          eq(teacher_attendance.date, date)
-        )
+          eq(teacher_attendance.date, date),
+        ),
       );
+
+    if (status === "na") {
+      if (existing.length > 0) {
+        await db
+          .delete(teacher_attendance)
+          .where(
+            and(
+              eq(teacher_attendance.teacher_id, t.id),
+              eq(teacher_attendance.date, date),
+            ),
+          );
+      }
+      continue;
+    }
 
     if (existing.length > 0) {
       await db
@@ -46,8 +69,8 @@ export async function POST(request) {
         .where(
           and(
             eq(teacher_attendance.teacher_id, t.id),
-            eq(teacher_attendance.date, date)
-          )
+            eq(teacher_attendance.date, date),
+          ),
         );
     } else {
       await db.insert(teacher_attendance).values({
@@ -61,5 +84,7 @@ export async function POST(request) {
     }
   }
 
-  return NextResponse.redirect(new URL(`/teacher-attendance?date=${date}`, request.url));
+  return NextResponse.redirect(
+    new URL(`/teacher-attendance?date=${date}`, request.url),
+  );
 }

@@ -220,54 +220,7 @@ export default async function DashboardPage() {
         )}
 
       <div className="grid grid-cols-2 gap-3 mb-3">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-2xl mb-1">🎓</div>
-          <div className="text-2xl font-bold text-gray-900">
-            {studentCount?.count || 0}
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">Total Students</div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-2xl mb-1">👨‍🏫</div>
-          <div className="text-2xl font-bold text-gray-900">
-            {teacherCount?.count || 0}
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">Total Teachers</div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-2xl mb-1">⚠️</div>
-          <div className="text-2xl font-bold text-red-600">
-            ₹{pendingFees?.total || 0}
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            Pending Fees ({pendingFees?.count || 0})
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-2xl mb-1">✅</div>
-          <div className="text-2xl font-bold text-green-600">
-            ₹{paidFees?.total || 0}
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">Fees Collected</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-2xl mb-1">🟢</div>
-          <div className="text-2xl font-bold text-green-600">
-            {todayPresent?.count || 0}
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">Present Today</div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-          <div className="text-2xl mb-1">🔴</div>
-          <div className="text-2xl font-bold text-red-500">
-            {todayAbsent?.count || 0}
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">Absent Today</div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="text-2xl mb-1">📝</div>
           <div className="text-2xl font-bold text-gray-900">
             {examCount?.count || 0}

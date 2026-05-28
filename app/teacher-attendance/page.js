@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { teachers, teacher_attendance, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
+import StaffAttendanceForm from "./StaffAttendanceForm";
 
 export default async function TeacherAttendancePage({ searchParams }) {
   const cookieStore = await cookies();
@@ -96,68 +97,11 @@ export default async function TeacherAttendancePage({ searchParams }) {
       {allTeachers.length === 0 ? (
         <p className="text-center text-gray-400 mt-10">No teachers found.</p>
       ) : (
-        <form action="/api/teacher-attendance/save" method="POST">
-          <input type="hidden" name="date" value={selectedDate} />
-          <div className="space-y-3 mb-5">
-            {allTeachers.map((t) => {
-              const current = attendanceMap[t.id];
-              return (
-                <div
-                  key={t.id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-4"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-semibold text-gray-800 text-sm">
-                        {t.name}
-                      </p>
-                      <p className="text-xs text-gray-400">{t.phone || "—"}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <label className="flex items-center gap-1 text-xs">
-                        <input
-                          type="radio"
-                          name={`status_${t.id}`}
-                          value="present"
-                          defaultChecked={
-                            !current || current.status === "present"
-                          }
-                          className="accent-green-600"
-                        />
-                        <span className="text-green-700 font-medium">
-                          Present
-                        </span>
-                      </label>
-                      <label className="flex items-center gap-1 text-xs">
-                        <input
-                          type="radio"
-                          name={`status_${t.id}`}
-                          value="absent"
-                          defaultChecked={current?.status === "absent"}
-                          className="accent-red-600"
-                        />
-                        <span className="text-red-600 font-medium">Absent</span>
-                      </label>
-                    </div>
-                  </div>
-                  <input
-                    type="text"
-                    name={`note_${t.id}`}
-                    defaultValue={current?.note || ""}
-                    placeholder="Note (optional)"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                  />
-                </div>
-              );
-            })}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition text-sm"
-          >
-            Save Attendance
-          </button>
-        </form>
+        <StaffAttendanceForm
+          selectedDate={selectedDate}
+          allTeachers={allTeachers}
+          attendanceMap={attendanceMap}
+        />
       )}
     </div>
   );

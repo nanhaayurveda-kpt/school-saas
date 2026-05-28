@@ -90,6 +90,12 @@ export default async function FeeStructurePage() {
                         <p className="text-sm font-bold text-indigo-600">
                           ₹{s.amount}
                         </p>
+                        <Link
+                          href={`/fee-structure/${s.id}/edit`}
+                          className="text-xs text-indigo-600 font-medium"
+                        >
+                          Edit
+                        </Link>
                         <form method="POST" action="/api/fee-structure/delete">
                           <input type="hidden" name="id" value={s.id} />
                           <button

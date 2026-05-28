@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function AttendanceForm({
   selectedDate,
@@ -9,14 +9,43 @@ export default function AttendanceForm({
   grouped,
 }) {
   const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef(null);
+
+  function markAllNA() {
+    const form = formRef.current;
+    if (!form) return;
+    const naRadios = form.querySelectorAll('input[type="radio"][value="na"]');
+    naRadios.forEach((r) => {
+      r.checked = true;
+    });
+  }
 
   return (
     <form
+      ref={formRef}
       method="POST"
       action="/api/attendance/save"
       onSubmit={() => setSubmitting(true)}
     >
       <input type="hidden" name="date" value={selectedDate} />
+
+      {sortedKeys.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 px-4 py-2 mb-3 flex items-center">
+          <div className="flex-1" />
+          <div className="flex items-center gap-3 shrink-0 text-xs font-bold">
+            <span className="text-green-700 w-6 text-center">P</span>
+            <span className="text-red-600 w-6 text-center">A</span>
+            <button
+              type="button"
+              onClick={markAllNA}
+              className="text-yellow-700 w-8 text-center underline decoration-dotted"
+              title="Tap to mark all N/A (holiday)"
+            >
+              N/A
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4 mb-6">
         {sortedKeys.length === 0 ? (
@@ -48,7 +77,6 @@ export default function AttendanceForm({
                 <div className="divide-y divide-gray-50">
                   {sorted.map((student) => {
                     const status = attendanceMap[student.id];
-                    const defaultPresent = status !== "absent";
                     return (
                       <div
                         key={student.id}
@@ -67,31 +95,31 @@ export default function AttendanceForm({
                             Roll {student.roll_number || "—"}
                           </p>
                         </div>
-                        <div className="flex items-center gap-4 shrink-0">
-                          <label className="flex items-center gap-1.5 text-sm">
-                            <input
-                              type="radio"
-                              name={`status_${student.id}`}
-                              value="present"
-                              defaultChecked={defaultPresent}
-                              className="w-4 h-4 accent-green-600"
-                            />
-                            <span className="text-green-700 font-medium">
-                              Present
-                            </span>
-                          </label>
-                          <label className="flex items-center gap-1.5 text-sm">
-                            <input
-                              type="radio"
-                              name={`status_${student.id}`}
-                              value="absent"
-                              defaultChecked={status === "absent"}
-                              className="w-4 h-4 accent-red-500"
-                            />
-                            <span className="text-red-600 font-medium">
-                              Absent
-                            </span>
-                          </label>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <input
+                            type="radio"
+                            name={`status_${student.id}`}
+                            value="present"
+                            defaultChecked={status === "present"}
+                            className="w-5 h-5 accent-green-600"
+                            aria-label="Present"
+                          />
+                          <input
+                            type="radio"
+                            name={`status_${student.id}`}
+                            value="absent"
+                            defaultChecked={status === "absent"}
+                            className="w-5 h-5 accent-red-500"
+                            aria-label="Absent"
+                          />
+                          <input
+                            type="radio"
+                            name={`status_${student.id}`}
+                            value="na"
+                            defaultChecked={status === "na" || !status}
+                            className="w-5 h-5 accent-yellow-500"
+                            aria-label="N/A"
+                          />
                         </div>
                       </div>
                     );

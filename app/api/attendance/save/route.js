@@ -8,7 +8,6 @@ import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 
 export async function POST(request) {
-  // ─── Auth: accept admin session OR teacher session ─────────────────────
   const cookieStore = await cookies();
   const adminToken = cookieStore.get("session")?.value;
   const teacherToken = cookieStore.get("teacher_session")?.value;
@@ -46,7 +45,6 @@ export async function POST(request) {
     return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
 
-  // ─── Parse form ────────────────────────────────────────────────────────
   const formData = await request.formData();
   const date = formData.get("date");
   const studentIds = formData.getAll("student_id");
@@ -59,14 +57,12 @@ export async function POST(request) {
     );
   }
 
-  // ─── Ownership pre-fetch: which student_ids actually belong to user? ──
   const owned = await db
     .select({ id: schema.students.id })
     .from(schema.students)
     .where(eq(schema.students.user_id, userId));
   const ownedIds = new Set(owned.map((s) => s.id));
 
-  // ─── Pre-fetch existing attendance for this date+user ─────────────────
   const existingRows = await db
     .select({
       student_id: schema.attendance.student_id,
@@ -85,6 +81,7 @@ export async function POST(request) {
 
   let inserted = 0;
   let updated = 0;
+  let removed = 0;
   let skipped = 0;
 
   for (const idRaw of studentIds) {
@@ -94,11 +91,29 @@ export async function POST(request) {
       continue;
     }
 
-    // radio value per student: "present" or "absent"
     const raw = formData.get(`status_${idRaw}`);
-    const status = raw === "absent" ? "absent" : "present";
+    const status =
+      raw === "present" ? "present" : raw === "absent" ? "absent" : "na";
 
-    if (existingByStudent.has(studentId)) {
+    const hadExisting = existingByStudent.has(studentId);
+
+    if (status === "na") {
+      if (hadExisting) {
+        await db
+          .delete(schema.attendance)
+          .where(
+            and(
+              eq(schema.attendance.student_id, studentId),
+              eq(schema.attendance.date, date),
+              eq(schema.attendance.user_id, userId),
+            ),
+          );
+        removed++;
+      }
+      continue;
+    }
+
+    if (hadExisting) {
       if (existingByStudent.get(studentId) === status) {
         continue;
       }
@@ -126,7 +141,7 @@ export async function POST(request) {
 
   await setFlash(
     "success",
-    `Attendance saved: ${inserted} new, ${updated} updated${skipped > 0 ? `, ${skipped} skipped` : ""}.`,
+    `Attendance saved: ${inserted} new, ${updated} updated, ${removed} cleared${skipped > 0 ? `, ${skipped} skipped` : ""}.`,
   );
 
   return NextResponse.redirect(
