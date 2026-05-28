@@ -65,20 +65,30 @@ export default function AttendanceSnapshot({
               keyName="present"
               label="Present"
               list={staffPresentList}
-              color={{ bg: "bg-green-50", text: "text-green-700", sub: "text-green-600" }}
+              color={{
+                bg: "bg-green-50",
+                text: "text-green-700",
+                sub: "text-green-600",
+              }}
             />
             <StaffBox
               keyName="absent"
               label="Absent"
               list={staffAbsentList}
-              color={{ bg: "bg-red-50", text: "text-red-600", sub: "text-red-500" }}
+              color={{
+                bg: "bg-red-50",
+                text: "text-red-600",
+                sub: "text-red-500",
+              }}
             />
-            <StaffBox
-              keyName="na"
-              label="N/A"
-              list={staffNAList}
-              color={{ bg: "bg-yellow-50", text: "text-yellow-700", sub: "text-yellow-600" }}
-            />
+            <div className="bg-yellow-50 rounded-lg px-3 py-3">
+              <p className="text-xs font-semibold text-yellow-700">
+                N/A ({staffNAList.length})
+              </p>
+              <p className="text-[10px] text-yellow-600 mt-0.5">
+                Holiday/unmarked
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -89,9 +99,7 @@ export default function AttendanceSnapshot({
           Today's Attendance — Class-wise
         </h2>
         {classList.length === 0 ? (
-          <p className="text-xs text-gray-400">
-            No students found.
-          </p>
+          <p className="text-xs text-gray-400">No students found.</p>
         ) : (
           <div>
             <select
@@ -142,15 +150,7 @@ export default function AttendanceSnapshot({
                   <p className="text-xs font-semibold text-yellow-700 mb-1">
                     N/A ({classMap[selectedClass].na.length})
                   </p>
-                  {classMap[selectedClass].na.length === 0 ? (
-                    <p className="text-xs text-gray-400">—</p>
-                  ) : (
-                    classMap[selectedClass].na.map((n, i) => (
-                      <p key={i} className="text-xs text-gray-800">
-                        {n}
-                      </p>
-                    ))
-                  )}
+                  <p className="text-xs text-gray-400">Holiday/unmarked</p>
                 </div>
               </div>
             )}

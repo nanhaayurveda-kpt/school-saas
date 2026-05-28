@@ -62,16 +62,21 @@ export default async function DashboardPage() {
     .where(eq(fees.user_id, 2));
 
   const feeByStudent = {};
+  // start with ALL students so every class appears, even with no fee entry
+  const allStudentsForFee = await db
+    .select({ id: students.id, name: students.name, class: students.class })
+    .from(students)
+    .where(eq(students.user_id, 2));
+  allStudentsForFee.forEach((s) => {
+    feeByStudent[s.id] = {
+      name: s.name || "—",
+      class: s.class || "—",
+      total: 0,
+      paid: 0,
+    };
+  });
   feeRows.forEach((r) => {
-    if (!r.student_id) return;
-    if (!feeByStudent[r.student_id]) {
-      feeByStudent[r.student_id] = {
-        name: r.name || "—",
-        class: r.class || "—",
-        total: 0,
-        paid: 0,
-      };
-    }
+    if (!r.student_id || !feeByStudent[r.student_id]) return;
     const amt = r.amount || 0;
     feeByStudent[r.student_id].total += amt;
     if (r.status === "paid") feeByStudent[r.student_id].paid += amt;
