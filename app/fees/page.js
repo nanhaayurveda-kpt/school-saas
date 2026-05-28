@@ -131,6 +131,18 @@ export default async function FeesPage({ searchParams }) {
           {displayStatus !== "paid" && (
             <div className="flex flex-col gap-0.5 items-end">
               <Link
+                href={`/fees/${fee.id}/edit`}
+                className="text-xs text-gray-500 font-medium"
+              >
+                Edit
+              </Link>
+              <Link
+                href={`/fees/${fee.id}/edit`}
+                className="block text-xs font-medium text-gray-500"
+              >
+                Edit
+              </Link>
+              <Link
                 href={`/fees/${fee.id}/pay`}
                 className="text-xs text-indigo-600 font-medium"
               >
@@ -290,7 +302,7 @@ export default async function FeesPage({ searchParams }) {
                   </div>
                   {sections.map((sec) => {
                     const secFees = grouped[cls][sec];
-                  const secPaid = secFees.reduce(
+                    const secPaid = secFees.reduce(
                       (s, f) => s + (f.paid_amount || 0),
                       0,
                     );
@@ -341,13 +353,11 @@ export default async function FeesPage({ searchParams }) {
             <div className="space-y-3">
               {defaulters.map((fee) => {
                 const phone = fee.parent_phone?.replace(/\D/g, "") || "";
-                const fullPhone = phone.startsWith("91")
-                  ? phone
-                  : `91${phone}`;
+                const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
                 const overdueFlag = isOverdue(fee);
                 const balance = (fee.amount || 0) - (fee.paid_amount || 0);
                 const msg = encodeURIComponent(
-                  `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending.\n\n— School`
+                  `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending.\n\n— School`,
                 );
                 return (
                   <div
@@ -412,23 +422,21 @@ export default async function FeesPage({ searchParams }) {
           ) : (
             allFees.map((fee) => {
               const phone = fee.parent_phone?.replace(/\D/g, "") || "";
-              const fullPhone = phone.startsWith("91")
-                ? phone
-                : `91${phone}`;
+              const fullPhone = phone.startsWith("91") ? phone : `91${phone}`;
               const overdueFlag = isOverdue(fee);
               const displayStatus =
                 fee.status === "paid"
                   ? "paid"
                   : fee.status === "partial"
-                  ? overdueFlag
-                    ? "overdue"
-                    : "partial"
-                  : overdueFlag
-                  ? "overdue"
-                  : "pending";
+                    ? overdueFlag
+                      ? "overdue"
+                      : "partial"
+                    : overdueFlag
+                      ? "overdue"
+                      : "pending";
               const balance = (fee.amount || 0) - (fee.paid_amount || 0);
               const msg = encodeURIComponent(
-                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending.\n\n— School`
+                `Dear ${fee.parent_name || "Parent"},\n\nFees of ₹${balance} for ${fee.student_name} is pending.\n\n— School`,
               );
               return (
                 <div
@@ -446,10 +454,10 @@ export default async function FeesPage({ searchParams }) {
                             displayStatus === "paid"
                               ? "bg-green-100 text-green-700"
                               : displayStatus === "overdue"
-                              ? "bg-red-100 text-red-700"
-                              : displayStatus === "partial"
-                              ? "bg-orange-100 text-orange-700"
-                              : "bg-yellow-100 text-yellow-700"
+                                ? "bg-red-100 text-red-700"
+                                : displayStatus === "partial"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
                           {displayStatus}
@@ -480,7 +488,7 @@ export default async function FeesPage({ searchParams }) {
                         </Link>
                       )}
                       {displayStatus !== "paid" && (
-                       <div className="flex flex-col gap-0.5 items-end">
+                        <div className="flex flex-col gap-0.5 items-end">
                           <Link
                             href={`/fees/${fee.id}/pay`}
                             className="text-xs text-indigo-600 font-medium"
