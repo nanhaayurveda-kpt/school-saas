@@ -1,12 +1,38 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
-// 'next/headers' को हटा दिया गया है क्योंकि इसकी यहाँ ज़रूरत नहीं है
 
-// Next.js 16 का नया Proxy फ़ंक्शन (आपका लिखा नाम बिल्कुल सही था)
+const PROTECTED_PATHS = [
+  "/dashboard",
+  "/students",
+  "/teachers",
+  "/fees",
+  "/fee-structure",
+  "/attendance",
+  "/certificates",
+  "/exams",
+  "/settings",
+  "/reports",
+  "/notices",
+  "/timetable",
+  "/transport",
+  "/admissions",
+  "/marksheet",
+  "/promote",
+];
+
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") || "";
 
-  // Teacher routes — teacher_session से protect
+  // Hide Vercel default URL — redirect to custom domain
+  if (host === "shashwat-public.vercel.app") {
+    const url = new URL(request.url);
+    url.host = "erp.spsvaranasi.in";
+    url.protocol = "https:";
+    return NextResponse.redirect(url, { status: 308 });
+  }
+
+  // Teacher routes — teacher_session
   if (pathname.startsWith("/teacher/")) {
     const teacherToken = request.cookies.get("teacher_session")?.value;
     if (!teacherToken) {
@@ -15,33 +41,19 @@ export async function proxy(request) {
     return NextResponse.next();
   }
 
-  // Admin routes — session से protect
-  const token = request.cookies.get("session")?.value;
-  const session = token ? await getSession(token) : null;
-
-  if (!session) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // Admin protected routes — session
+  const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
+  if (isProtected) {
+    const token = request.cookies.get("session")?.value;
+    const session = token ? await getSession(token) : null;
+    if (!session) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
   }
 
   return NextResponse.next();
 }
+
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/students/:path*",
-    "/teachers/:path*",
-    "/fees/:path*",
-    "/attendance/:path*",
-    "/certificates/:path*",
-    "/exams/:path*",
-    "/settings/:path*",
-    "/reports/:path*",
-    "/notices/:path*",
-    "/timetable/:path*",
-    "/transport/:path*",
-    "/admissions/:path*",
-    "/marksheet/:path*",
-    "/promote/:path*",
-    "/teacher/:path*",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
