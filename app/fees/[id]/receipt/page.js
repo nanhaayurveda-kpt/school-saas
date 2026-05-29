@@ -11,6 +11,7 @@ import { eq, and, asc } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import PrintButton from "./PrintButton";
+import PaymentQR from "@/components/PaymentQR";
 import { fee_concessions } from "@/lib/schema";
 
 export const dynamic = "force-dynamic";
@@ -339,6 +340,10 @@ export default async function FeeReceiptPage({ params }) {
               </span>
             )}
           </div>
+
+          {balance > 0 && <PaymentQR />}
+
+          {/* Footer */}
 
           {/* Footer */}
           <div className="border-t border-gray-200 pt-5 flex justify-between items-end">

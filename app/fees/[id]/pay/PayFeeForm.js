@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import PaymentQR from "@/components/PaymentQR";
 
 export default function PayFeeForm({ feeId, balance, today }) {
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +26,8 @@ export default function PayFeeForm({ feeId, balance, today }) {
     >
       <input type="hidden" name="fee_id" value={feeId} />
       <input type="hidden" name="client_token" value={clientToken} />
+
+      <PaymentQR />
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
