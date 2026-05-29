@@ -250,7 +250,7 @@ export default function FeeAddForm({
                     <input type="number" name={`amount_${ft.value}`} value={amounts[ft.value] || ""}
                       onChange={(e) => setAmounts((prev) => ({ ...prev, [ft.value]: e.target.value }))}
                       min="1" required placeholder="₹"
-                      className="w-24 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                      className="w-32 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                   )}
                 </div>
               ))}
@@ -280,7 +280,7 @@ export default function FeeAddForm({
                       <input type="number" name={`custom_amount_${i}`} value={it.amount}
                         onChange={(e) => updateCustom(i, "amount", e.target.value)}
                         min="1" required placeholder="₹"
-                        className="w-24 border border-amber-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                        className="w-32 border border-amber-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400" />
                       <button type="button" onClick={() => removeCustom(i)} className="text-red-500 text-lg font-bold w-6" title="Remove">×</button>
                     </div>
                     {!it.fromTemplate && (
@@ -320,7 +320,7 @@ export default function FeeAddForm({
                       <input type="number" name={`amount_${ft.value}`} value={amounts[ft.value] || ""}
                         onChange={(e) => setAmounts((prev) => ({ ...prev, [ft.value]: e.target.value }))}
                         min="1" required placeholder="₹"
-                        className="w-24 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400" />
+                        className="w-32 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400" />
                     )}
                   </div>
                   {checkedTypes[ft.value] && (
