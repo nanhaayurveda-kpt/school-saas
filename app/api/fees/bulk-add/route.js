@@ -105,10 +105,14 @@ export async function POST(request) {
     return NextResponse.redirect(new URL("/fees/add", request.url), { status: 303 });
   }
 
-  let inserted = 0;
-  let skipped = 0;
+  // CONSOLIDATED RECEIPT — one receipt_no for the entire submission
   const now = new Date();
   const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const randPart = Math.floor(1000 + Math.random() * 9000);
+  const receiptNo = `RCP-${datePart}-${randPart}`;
+
+  let inserted = 0;
+  let skipped = 0;
 
   for (const row of rowsToInsert) {
     const conditions = [
@@ -126,9 +130,6 @@ export async function POST(request) {
       skipped++;
       continue;
     }
-
-    const randPart = Math.floor(1000 + Math.random() * 9000);
-    const receiptNo = `RCP-${datePart}-${randPart}`;
 
     await db.insert(schema.fees).values({
       student_id: studentId,
@@ -229,7 +230,7 @@ export async function POST(request) {
     const parts = [`${inserted} entries added`];
     if (skipped > 0) parts.push(`${skipped} skipped`);
     if (templateSaved > 0) parts.push(`${templateSaved} saved to template`);
-    await setFlash("success", `${parts.join(", ")} — ${monthLabel}`);
+    await setFlash("success", `${parts.join(", ")} — ${monthLabel} · Receipt ${receiptNo}`);
   }
 
   return NextResponse.redirect(new URL("/fees", request.url), { status: 303 });
