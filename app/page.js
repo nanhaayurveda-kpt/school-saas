@@ -57,6 +57,11 @@ const features = [
     desc: "प्राथमिकता के साथ विद्यालय की सूचनाएं पोस्ट करें। अत्यावश्यक सूचनाएं लाल बैज के साथ।",
   },
   {
+    icon: "🌐",
+    title: "ऑनलाइन एडमिशन",
+    desc: "स्कूल वेबसाइट से ही अभिभावक एडमिशन फॉर्म भरें। आपके पास सीधे ERP में आ जाएगा — Approve दबाकर बच्चे को students में जोड़ दें।",
+  },
+  {
     icon: "📱",
     title: "मोबाइल और डेस्कटॉप",
     desc: "मोबाइल पर Android ऐप की तरह और कंप्यूटर पर ब्राउजर से चलता है।",
@@ -164,7 +169,8 @@ export default async function HomePage() {
             className="text-gray-500 max-w-2xl mx-auto mb-8"
             style={{ fontSize: "18px" }}
           >
-            फीस · विद्यार्थी · उपस्थिति · परीक्षा · प्रमाण पत्र · रिपोर्ट — सब एक जगह, सब अपने आप।
+            फीस · विद्यार्थी · उपस्थिति · परीक्षा · प्रमाण पत्र · रिपोर्ट — सब
+            एक जगह, सब अपने आप।
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <Link
@@ -213,7 +219,8 @@ export default async function HomePage() {
               className="text-gray-600 max-w-2xl mx-auto"
               style={{ fontSize: "17px" }}
             >
-              न कैलकुलेटर, न कागज़ पर हिसाब, न पुरानी फीस याद रखने की झंझट। बच्चा चुनो, बस।
+              न कैलकुलेटर, न कागज़ पर हिसाब, न पुरानी फीस याद रखने की झंझट।
+              बच्चा चुनो, बस।
             </p>
           </div>
 
@@ -260,19 +267,30 @@ export default async function HomePage() {
               style={{ fontSize: "15px" }}
             >
               <li>
-                <strong>+ Add Item</strong> — रसीद बनाते समय कोई नई मद (i-card, यूनिफॉर्म, किताबें) टाइप करें और चाहें तो उसी समय टेम्पलेट में सेव कर दें। अगली बार अपने आप आएगी।
+                <strong>+ Add Item</strong> — रसीद बनाते समय कोई नई मद (i-card,
+                यूनिफॉर्म, किताबें) टाइप करें और चाहें तो उसी समय टेम्पलेट में
+                सेव कर दें। अगली बार अपने आप आएगी।
               </li>
               <li>
-                <strong>आंशिक पेमेंट</strong> — पूरा पैसा न मिले तो आधा-अधूरा भी रिकॉर्ड हो। Balance अपने आप दिखेगा।
+                <strong>आंशिक पेमेंट</strong> — पूरा पैसा न मिले तो आधा-अधूरा भी
+                रिकॉर्ड हो। Balance अपने आप दिखेगा।
               </li>
               <li>
-                <strong>WhatsApp रिमाइंडर</strong> — बकायेदारों के कार्ड में Remind बटन, एक क्लिक में अभिभावक को संदेश।
+                <strong>WhatsApp रिमाइंडर</strong> — बकायेदारों के कार्ड में
+                Remind बटन, एक क्लिक में अभिभावक को संदेश।
               </li>
               <li>
-                <strong>एक नज़र में स्थिति</strong> — Collected, Pending, Overdue तीनों आँकड़े ऊपर, बच्चे-वार कार्ड में Total / Paid / Balance।
+                <strong>एक नज़र में स्थिति</strong> — Collected, Pending,
+                Overdue तीनों आँकड़े ऊपर, बच्चे-वार कार्ड में Total / Paid /
+                Balance।
               </li>
               <li>
-                <strong>Defaulters टैब</strong> — सिर्फ बकायेदार बच्चे एक क्लिक में।
+                <strong>Defaulters टैब</strong> — सिर्फ बकायेदार बच्चे एक क्लिक
+                में।
+              </li>
+              <li>
+                <strong>QR Code Payment</strong> — Bank, Trust और UPI तीनों QR
+                रसीद पर और pay screen पर। अभिभावक स्कैन करके सीधा भुगतान करे।
               </li>
             </ul>
           </div>
@@ -290,7 +308,7 @@ export default async function HomePage() {
             className="text-center text-gray-400 mb-8"
             style={{ fontSize: "18px" }}
           >
-            11 सुविधाएं — एक सॉफ्टवेयर, एक कीमत
+            12 सुविधाएं — एक सॉफ्टवेयर, एक कीमत
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {features.map((f, i) => (
@@ -377,10 +395,22 @@ export default async function HomePage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-              { step: "1", text: "प्रधानाचार्य हर शिक्षक को जोड़ते समय 6 अंकों का PIN सेट करते हैं।" },
-              { step: "2", text: "शिक्षक अपने मोबाइल पर वेबसाइट खोलते हैं और Teacher Login पर जाते हैं।" },
-              { step: "3", text: "शिक्षक अपना PIN डालते हैं — केवल अपनी असाइन कक्षा दिखती है।" },
-              { step: "4", text: "शिक्षक उपस्थिति दर्ज करके Save करते हैं — प्रधानाचार्य तुरंत देख सकते हैं।" },
+              {
+                step: "1",
+                text: "प्रधानाचार्य हर शिक्षक को जोड़ते समय 6 अंकों का PIN सेट करते हैं।",
+              },
+              {
+                step: "2",
+                text: "शिक्षक अपने मोबाइल पर वेबसाइट खोलते हैं और Teacher Login पर जाते हैं।",
+              },
+              {
+                step: "3",
+                text: "शिक्षक अपना PIN डालते हैं — केवल अपनी असाइन कक्षा दिखती है।",
+              },
+              {
+                step: "4",
+                text: "शिक्षक उपस्थिति दर्ज करके Save करते हैं — प्रधानाचार्य तुरंत देख सकते हैं।",
+              },
             ].map((s) => (
               <div
                 key={s.step}

@@ -53,13 +53,7 @@ export default async function SettingsPage() {
             <span className="text-xs text-indigo-400">
               School-wide schedule
             </span>
-          </Link>
-          <Link
-            href="/fees/structure"
-            className="inline-flex items-center gap-2 bg-gray-50 text-gray-700 border border-gray-100 px-4 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium"
-          >
-            💰 Fee Structure
-          </Link>
+          </Link>{" "}
         </div>
       </div>
 
