@@ -13,11 +13,15 @@ const FEE_LABEL = {
   monthly: "Monthly",
   transport: "Transport",
   amenity: "Amenity",
-  misc: "Misc",
   exam: "Exam",
   admission: "Admission",
   late: "Late Payment",
 };
+
+function labelOf(type) {
+  if (FEE_LABEL[type]) return FEE_LABEL[type];
+  return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default async function FeesPage({ searchParams }) {
   const params = await searchParams;
@@ -226,7 +230,8 @@ export default async function FeesPage({ searchParams }) {
         <div className="bg-gray-50 px-4 py-2.5 flex justify-between items-center text-xs">
           <div className="flex gap-4">
             <span className="text-gray-500">
-              Total: <span className="font-bold text-gray-900">₹{grp.total}</span>
+              Total:{" "}
+              <span className="font-bold text-gray-900">₹{grp.total}</span>
             </span>
             <span className="text-green-600">
               Paid: <span className="font-bold">₹{grp.paid}</span>

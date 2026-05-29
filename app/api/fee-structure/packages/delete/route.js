@@ -1,4 +1,3 @@
-// app/api/fee-structure/delete/route.js
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
@@ -17,11 +16,7 @@ export async function POST(request) {
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
-
-  const userResult = await db
-    .select()
-    .from(schema.users)
-    .where(eq(schema.users.email, session.email));
+  const userResult = await db.select().from(schema.users).where(eq(schema.users.email, session.email));
   const user = userResult[0];
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
@@ -33,16 +28,20 @@ export async function POST(request) {
     return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
   }
 
-  // Ownership-scoped delete
-  await db
-    .delete(schema.fee_structures)
-    .where(
-      and(
-        eq(schema.fee_structures.id, id),
-        eq(schema.fee_structures.user_id, 2),
-      ),
-    );
+  const ownRows = await db
+    .select({ id: schema.fee_packages.id })
+    .from(schema.fee_packages)
+    .where(and(eq(schema.fee_packages.id, id), eq(schema.fee_packages.user_id, 2)));
+  if (ownRows.length === 0) {
+    return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
+  }
 
-  await setFlash("success", "Fee structure deleted!");
+  await db.delete(schema.fee_package_items).where(eq(schema.fee_package_items.package_id, id));
+
+  await db
+    .delete(schema.fee_packages)
+    .where(and(eq(schema.fee_packages.id, id), eq(schema.fee_packages.user_id, 2)));
+
+  await setFlash("success", "Package deleted");
   return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
 }

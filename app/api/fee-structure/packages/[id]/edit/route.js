@@ -1,29 +1,21 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
 
-const FIXED_TYPES = [
-  "monthly",
-  "transport",
-  "amenity",
-  "exam",
-  "admission",
-  "late",
-];
+const FIXED_TYPES = ["monthly", "transport", "amenity", "exam", "admission", "late"];
 
 function slugify(s) {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+  return s.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
-export async function POST(request) {
+export async function POST(request, { params }) {
+  const { id } = await params;
+  const packageId = parseInt(id, 10);
+
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token) {
@@ -33,13 +25,22 @@ export async function POST(request) {
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
-  const userResult = await db
-    .select()
-    .from(schema.users)
-    .where(eq(schema.users.email, session.email));
+  const userResult = await db.select().from(schema.users).where(eq(schema.users.email, session.email));
   const user = userResult[0];
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+  }
+
+  if (!packageId) {
+    return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
+  }
+
+  const ownRows = await db
+    .select({ id: schema.fee_packages.id })
+    .from(schema.fee_packages)
+    .where(and(eq(schema.fee_packages.id, packageId), eq(schema.fee_packages.user_id, 2)));
+  if (ownRows.length === 0) {
+    return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
   }
 
   const formData = await request.formData();
@@ -48,10 +49,7 @@ export async function POST(request) {
 
   if (!cls || !academic_year) {
     await setFlash("error", "Class and academic year are required");
-    return NextResponse.redirect(
-      new URL("/fee-structure/packages/add", request.url),
-      { status: 303 },
-    );
+    return NextResponse.redirect(new URL(`/fee-structure/packages/${packageId}/edit`, request.url), { status: 303 });
   }
 
   const items = [];
@@ -62,10 +60,7 @@ export async function POST(request) {
     const amt = parseInt(formData.get(`amount_${feeType}`), 10);
     if (isNaN(amt) || amt <= 0) {
       await setFlash("error", `Invalid amount for ${feeType}`);
-      return NextResponse.redirect(
-        new URL("/fee-structure/packages/add", request.url),
-        { status: 303 },
-      );
+      return NextResponse.redirect(new URL(`/fee-structure/packages/${packageId}/edit`, request.url), { status: 303 });
     }
     items.push({ fee_type: feeType, amount: amt });
   }
@@ -80,18 +75,12 @@ export async function POST(request) {
     if (!slug) continue;
     if (usedTypes.has(slug)) {
       await setFlash("error", `Duplicate item name: ${nameRaw}`);
-      return NextResponse.redirect(
-        new URL("/fee-structure/packages/add", request.url),
-        { status: 303 },
-      );
+      return NextResponse.redirect(new URL(`/fee-structure/packages/${packageId}/edit`, request.url), { status: 303 });
     }
     const amt = parseInt(amtRaw, 10);
     if (isNaN(amt) || amt <= 0) {
       await setFlash("error", `Invalid amount for ${nameRaw}`);
-      return NextResponse.redirect(
-        new URL("/fee-structure/packages/add", request.url),
-        { status: 303 },
-      );
+      return NextResponse.redirect(new URL(`/fee-structure/packages/${packageId}/edit`, request.url), { status: 303 });
     }
     usedTypes.add(slug);
     items.push({ fee_type: slug, amount: amt });
@@ -99,13 +88,10 @@ export async function POST(request) {
 
   if (items.length === 0) {
     await setFlash("error", "Select at least one fee type");
-    return NextResponse.redirect(
-      new URL("/fee-structure/packages/add", request.url),
-      { status: 303 },
-    );
+    return NextResponse.redirect(new URL(`/fee-structure/packages/${packageId}/edit`, request.url), { status: 303 });
   }
 
-  const existing = await db
+  const dupRows = await db
     .select({ id: schema.fee_packages.id })
     .from(schema.fee_packages)
     .where(
@@ -113,49 +99,22 @@ export async function POST(request) {
         eq(schema.fee_packages.user_id, 2),
         eq(schema.fee_packages.class, cls),
         eq(schema.fee_packages.academic_year, academic_year),
+        ne(schema.fee_packages.id, packageId),
       ),
     );
-
-  if (existing.length > 0) {
-    await setFlash(
-      "error",
-      `Package for Class ${cls} (${academic_year}) already exists. Edit it instead.`,
-    );
-    return NextResponse.redirect(
-      new URL("/fee-structure", request.url),
-      { status: 303 },
-    );
+  if (dupRows.length > 0) {
+    await setFlash("error", `Another package for Class ${cls} (${academic_year}) already exists.`);
+    return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
   }
 
   const computedTotal = items.reduce((sum, i) => sum + i.amount, 0);
 
-  await db.insert(schema.fee_packages).values({
-    user_id: 2,
-    class: cls,
-    academic_year,
-    total_amount: computedTotal,
-    created_at: new Date(),
-  });
+  await db
+    .update(schema.fee_packages)
+    .set({ class: cls, academic_year, total_amount: computedTotal })
+    .where(and(eq(schema.fee_packages.id, packageId), eq(schema.fee_packages.user_id, 2)));
 
-  const inserted = await db
-    .select({ id: schema.fee_packages.id })
-    .from(schema.fee_packages)
-    .where(
-      and(
-        eq(schema.fee_packages.user_id, 2),
-        eq(schema.fee_packages.class, cls),
-        eq(schema.fee_packages.academic_year, academic_year),
-      ),
-    );
-  const packageId = inserted[0]?.id;
-
-  if (!packageId) {
-    await setFlash("error", "Package insert failed");
-    return NextResponse.redirect(
-      new URL("/fee-structure", request.url),
-      { status: 303 },
-    );
-  }
+  await db.delete(schema.fee_package_items).where(eq(schema.fee_package_items.package_id, packageId));
 
   await db.insert(schema.fee_package_items).values(
     items.map((it) => ({
@@ -165,11 +124,6 @@ export async function POST(request) {
     })),
   );
 
-  await setFlash(
-    "success",
-    `Package saved — Class ${cls} (${academic_year}), ₹${computedTotal}`,
-  );
-  return NextResponse.redirect(new URL("/fee-structure", request.url), {
-    status: 303,
-  });
+  await setFlash("success", `Package updated — Class ${cls} (${academic_year}), ₹${computedTotal}`);
+  return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
 }

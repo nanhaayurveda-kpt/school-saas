@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import { db } from "@/lib/db";
 import {
   students,
-  fee_structures,
   fee_packages,
   fee_package_items,
   fees,
@@ -26,12 +25,7 @@ export default async function AddFeePage() {
     .where(eq(students.user_id, 2))
     .orderBy(students.name);
 
-  const feeStructures = await db
-    .select()
-    .from(fee_structures)
-    .where(eq(fee_structures.user_id, 2));
-
-  // क्लास-वाइज टेम्पलेट (पैकेज + आइटम)
+  // Class-wise template (packages + items)
   const allPackages = await db
     .select()
     .from(fee_packages)
@@ -49,7 +43,7 @@ export default async function AddFeePage() {
     items: allItems.filter((i) => i.package_id === p.id),
   }));
 
-  // हर बच्चे का पुराना बकाया (unpaid/partial) — auto Previous Dues
+  // Each student's outstanding (unpaid/partial) — auto Previous Dues
   const unpaid = await db
     .select({
       student_id: fees.student_id,
@@ -92,7 +86,6 @@ export default async function AddFeePage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
         <FeeAddForm
           allStudents={allStudents}
-          feeStructures={feeStructures}
           packages={packages}
           duesMap={duesMap}
           concessions={concessions}
