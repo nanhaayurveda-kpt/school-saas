@@ -7,19 +7,19 @@ import { getSession } from "@/lib/session";
 
 const features = [
   {
-    icon: "🎓",
-    title: "विद्यार्थी प्रबंधन",
-    desc: "हर विद्यार्थी का पूरा रिकॉर्ड — नाम, कक्षा, अनुभाग, रोल नंबर, पिता का नाम और फोन। एक-एक करके या एक साथ सैकड़ों विद्यार्थी जोड़ें।",
+    icon: "💰",
+    title: "फीस संग्रह — पूरी तरह स्वचालित",
+    desc: "क्लास टेम्पलेट एक बार सेट करें। हर बार बच्चा चुनते ही फीस अपने आप भर जाती है। पिछला बकाया, लेट पेमेंट और टोटल — सब अपने आप जुड़ता है।",
   },
   {
-    icon: "💰",
-    title: "फीस संग्रह और रसीद",
-    desc: "मासिक फीस रिकॉर्ड करें, तुरंत रसीद प्रिंट करें। देखें किसने भुगतान किया, किसने नहीं। बकायेदारों को एक क्लिक में WhatsApp रिमाइंडर भेजें।",
+    icon: "🎓",
+    title: "विद्यार्थी प्रबंधन",
+    desc: "हर विद्यार्थी का पूरा रिकॉर्ड — नाम, कक्षा, अनुभाग, रोल नंबर, पिता का नाम और फोन। एक-एक करके या एक साथ सैकड़ों जोड़ें।",
   },
   {
     icon: "✅",
     title: "दैनिक उपस्थिति",
-    desc: "हर दिन कक्षावार उपस्थिति दर्ज करें। उपस्थित, अनुपस्थित की संख्या तुरंत देखें। अनुपस्थित विद्यार्थियों के अभिभावकों को WhatsApp अलर्ट भेजें।",
+    desc: "कक्षावार उपस्थिति दर्ज करें। उपस्थित-अनुपस्थित संख्या तुरंत दिखे। अनुपस्थित बच्चों के अभिभावकों को WhatsApp अलर्ट।",
   },
   {
     icon: "🔑",
@@ -29,22 +29,22 @@ const features = [
   {
     icon: "📝",
     title: "परीक्षा और परिणाम",
-    desc: "परीक्षा निर्धारित करें, अंक दर्ज करें — ग्रेड, पास/फेल और कक्षा औसत स्वचालित रूप से गणना होता है। रिपोर्ट कार्ड प्रिंट करें।",
+    desc: "परीक्षा निर्धारित करें, अंक दर्ज करें — ग्रेड, पास/फेल और कक्षा औसत स्वचालित गणना। रिपोर्ट कार्ड प्रिंट।",
   },
   {
     icon: "📄",
     title: "मार्कशीट",
-    desc: "त्रैमासिक, अर्धवार्षिक और वार्षिक मार्कशीट पूरी कक्षा के लिए एक साथ। सीधे प्रिंट करें या WhatsApp पर PDF शेयर करें।",
+    desc: "त्रैमासिक, अर्धवार्षिक और वार्षिक मार्कशीट पूरी कक्षा के लिए एक साथ। प्रिंट या WhatsApp पर PDF शेयर।",
   },
   {
     icon: "🏅",
     title: "प्रमाण पत्र",
-    desc: "स्थानांतरण प्रमाण पत्र, चरित्र, बोनाफाइड और जन्म प्रमाण पत्र — एक क्लिक में विद्यालय के नाम, लोगो और प्रधानाचार्य के नाम के साथ तैयार।",
+    desc: "स्थानांतरण, चरित्र, बोनाफाइड और जन्म प्रमाण पत्र — एक क्लिक में विद्यालय के नाम, लोगो और प्रधानाचार्य के नाम के साथ।",
   },
   {
     icon: "🚌",
     title: "परिवहन प्रबंधन",
-    desc: "बस मार्ग, स्टॉप, मासिक शुल्क, चालक और वाहन विवरण प्रबंधित करें। विद्यार्थियों को मार्ग पर असाइन करें और परिवहन रसीद बनाएं।",
+    desc: "बस मार्ग, स्टॉप, मासिक शुल्क, चालक और वाहन विवरण। बच्चों को मार्ग पर असाइन करें।",
   },
   {
     icon: "📊",
@@ -54,7 +54,7 @@ const features = [
   {
     icon: "📣",
     title: "सूचना पट्ट",
-    desc: "प्राथमिकता के साथ विद्यालय की सूचनाएं पोस्ट करें। अत्यावश्यक सूचनाएं लाल बैज के साथ दिखती हैं।",
+    desc: "प्राथमिकता के साथ विद्यालय की सूचनाएं पोस्ट करें। अत्यावश्यक सूचनाएं लाल बैज के साथ।",
   },
   {
     icon: "📱",
@@ -63,36 +63,75 @@ const features = [
   },
 ];
 
+const feeFlow = [
+  {
+    step: "1",
+    icon: "🏷️",
+    title: "क्लास टेम्पलेट बनाएं (एक बार)",
+    desc: "Fees पेज पर 🏷️ Templates खोलें। हर क्लास के लिए एक बार Monthly, Transport, Amenity, Exam, Admission, Late Payment की राशि भरें। अगर i-card, यूनिफॉर्म जैसी कोई अलग मद है तो + Add Item से जोड़ें।",
+  },
+  {
+    step: "2",
+    icon: "👶",
+    title: "बच्चा चुनें",
+    desc: "Fees → + Record → क्लास → सेक्शन → बच्चे का नाम। बस इतना करते ही उस क्लास का पूरा टेम्पलेट अपने आप खुल जाएगा — सब checkbox टिक, सब amount भरे हुए।",
+  },
+  {
+    step: "3",
+    icon: "📅",
+    title: "महीना और मद चुनें",
+    desc: "जिस-जिस महीने की फीस लेनी है, उन पर टिक करें। जो मद नहीं चाहिए (जैसे ट्रांसपोर्ट नहीं तो), उससे टिक हटा दें। Exam या Admission जैसी एक-बार वाली मद के लिए महीना चुनें।",
+  },
+  {
+    step: "4",
+    icon: "🧮",
+    title: "टोटल खुद बने",
+    desc: "Previous Dues (पिछला बकाया) अपने आप ऊपर दिखेगा। चुनी हुई सब मदों का जोड़ + पुराना बकाया = Total Payable नीचे साफ दिखेगा। कोई जोड़-घटाव हाथ से नहीं।",
+  },
+  {
+    step: "5",
+    icon: "🧾",
+    title: "पेमेंट और रसीद",
+    desc: "पूरा पैसा मिले या आधा — दोनों चलता है। Cash, UPI, Online, Cheque — कोई भी मोड। Save दबाते ही रसीद नंबर बनकर तैयार, प्रिंट करें या WhatsApp पर भेजें।",
+  },
+  {
+    step: "6",
+    icon: "⏰",
+    title: "लेट पेमेंट खुद-ब-खुद",
+    desc: "महीना बीतने तक अगर फीस नहीं आई, तो अगले महीने ₹100 लेट पेमेंट अपने आप उस बच्चे की फीस में जुड़ जाएगा। अभिभावक से कहने की जरूरत नहीं, सॉफ्टवेयर खुद याद रखता है।",
+  },
+];
+
 const howTo = [
   {
     step: "1",
     icon: "🔐",
     title: "Google से लॉगिन करें",
-    desc: "वेबसाइट खोलें और Admin Login पर क्लिक करें। अपने विद्यालय के Gmail खाते से साइन इन करें — कोई पासवर्ड बनाने की जरूरत नहीं।",
+    desc: "Admin Login पर क्लिक करें। विद्यालय के Gmail खाते से साइन इन — कोई पासवर्ड बनाने की जरूरत नहीं।",
   },
   {
     step: "2",
     icon: "⚙️",
-    title: "विद्यालय की जानकारी सेट करें",
-    desc: "Settings में जाएं — विद्यालय का नाम, पता, प्रधानाचार्य का नाम दर्ज करें और लोगो अपलोड करें। एक बार सेट होने पर हर रसीद और प्रमाण पत्र पर अपने आप आएगा।",
+    title: "विद्यालय की जानकारी",
+    desc: "Settings में विद्यालय का नाम, पता, प्रधानाचार्य का नाम और लोगो डालें। हर रसीद और प्रमाण पत्र पर अपने आप आएगा।",
   },
   {
     step: "3",
     icon: "🎓",
     title: "विद्यार्थी और शिक्षक जोड़ें",
-    desc: "विद्यार्थियों को एक-एक करके या फाइल से सैकड़ों एक साथ जोड़ें। शिक्षक जोड़ें और हर शिक्षक को 6 अंकों का PIN दें — उनकी मोबाइल लॉगिन कुंजी।",
+    desc: "विद्यार्थियों को एक-एक करके या फाइल से सैकड़ों एक साथ जोड़ें। शिक्षकों को 6 अंकों का PIN दें।",
   },
   {
     step: "4",
-    icon: "👨‍🏫",
-    title: "शिक्षकों को कक्षाएं असाइन करें",
-    desc: "हर शिक्षक की प्रोफाइल में जाएं और असाइन करें कि वे कौन सी कक्षा और विषय पढ़ाते हैं। लॉगिन पर शिक्षक केवल अपनी कक्षा देखेंगे।",
+    icon: "🏷️",
+    title: "फीस टेम्पलेट सेट करें",
+    desc: "हर क्लास के लिए एक टेम्पलेट बनाएं। यही टेम्पलेट हर बच्चे की रसीद बनाते वक्त अपने आप खुलेगा।",
   },
   {
     step: "5",
     icon: "📱",
-    title: "दैनिक कार्य शुरू करें",
-    desc: "उपस्थिति दर्ज करें, फीस लें, परीक्षा निर्धारित करें — मोबाइल पर, कहीं से भी, कभी भी।",
+    title: "दैनिक कार्य शुरू",
+    desc: "उपस्थिति लें, फीस लें, परीक्षा निर्धारित करें — मोबाइल पर, कहीं से भी।",
   },
 ];
 
@@ -105,7 +144,6 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-white" style={{ fontSize: "18px" }}>
       <div className="max-w-5xl mx-auto px-4 py-12">
-
         {/* Hero */}
         <div className="text-center mb-14">
           <div
@@ -126,7 +164,7 @@ export default async function HomePage() {
             className="text-gray-500 max-w-2xl mx-auto mb-8"
             style={{ fontSize: "18px" }}
           >
-            विद्यार्थी · फीस · उपस्थिति · परीक्षा · प्रमाण पत्र · रिपोर्ट — सब एक जगह।
+            फीस · विद्यार्थी · उपस्थिति · परीक्षा · प्रमाण पत्र · रिपोर्ट — सब एक जगह, सब अपने आप।
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
             <Link
@@ -156,13 +194,97 @@ export default async function HomePage() {
           </p>
         </div>
 
+        {/* Fees Module — Dedicated Section */}
+        <div className="mb-14 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 md:p-8 border border-amber-200">
+          <div className="text-center mb-8">
+            <div
+              className="inline-block px-3 py-1 bg-amber-600 text-white rounded-full font-medium mb-3"
+              style={{ fontSize: "14px" }}
+            >
+              💰 सबसे ज़रूरी मॉड्यूल
+            </div>
+            <h2
+              className="font-bold text-gray-900 mb-2"
+              style={{ fontSize: "28px" }}
+            >
+              फीस लेना — अब बहुत आसान
+            </h2>
+            <p
+              className="text-gray-600 max-w-2xl mx-auto"
+              style={{ fontSize: "17px" }}
+            >
+              न कैलकुलेटर, न कागज़ पर हिसाब, न पुरानी फीस याद रखने की झंझट। बच्चा चुनो, बस।
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {feeFlow.map((f) => (
+              <div
+                key={f.step}
+                className="bg-white rounded-xl p-5 shadow-sm border border-amber-100"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="w-9 h-9 bg-amber-600 text-white font-black rounded-full flex items-center justify-center shrink-0"
+                    style={{ fontSize: "16px" }}
+                  >
+                    {f.step}
+                  </div>
+                  <div style={{ fontSize: "28px" }}>{f.icon}</div>
+                </div>
+                <h3
+                  className="font-bold text-gray-900 mb-2"
+                  style={{ fontSize: "17px" }}
+                >
+                  {f.title}
+                </h3>
+                <p
+                  className="text-gray-600 leading-relaxed"
+                  style={{ fontSize: "14px" }}
+                >
+                  {f.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 bg-white rounded-xl p-5 border border-amber-200">
+            <h3
+              className="font-bold text-gray-900 mb-3"
+              style={{ fontSize: "18px" }}
+            >
+              ✨ इसके अलावा क्या मिलेगा?
+            </h3>
+            <ul
+              className="text-gray-700 space-y-2"
+              style={{ fontSize: "15px" }}
+            >
+              <li>
+                <strong>+ Add Item</strong> — रसीद बनाते समय कोई नई मद (i-card, यूनिफॉर्म, किताबें) टाइप करें और चाहें तो उसी समय टेम्पलेट में सेव कर दें। अगली बार अपने आप आएगी।
+              </li>
+              <li>
+                <strong>आंशिक पेमेंट</strong> — पूरा पैसा न मिले तो आधा-अधूरा भी रिकॉर्ड हो। Balance अपने आप दिखेगा।
+              </li>
+              <li>
+                <strong>WhatsApp रिमाइंडर</strong> — बकायेदारों के कार्ड में Remind बटन, एक क्लिक में अभिभावक को संदेश।
+              </li>
+              <li>
+                <strong>एक नज़र में स्थिति</strong> — Collected, Pending, Overdue तीनों आँकड़े ऊपर, बच्चे-वार कार्ड में Total / Paid / Balance।
+              </li>
+              <li>
+                <strong>Defaulters टैब</strong> — सिर्फ बकायेदार बच्चे एक क्लिक में।
+              </li>
+            </ul>
+          </div>
+        </div>
+
         {/* Features */}
         <div className="mb-14">
           <h2
             className="font-bold text-center text-gray-900 mb-2"
             style={{ fontSize: "24px" }}
           >
-            क्या-क्या शामिल है?
+            और क्या-क्या शामिल है?
           </h2>
           <p
             className="text-center text-gray-400 mb-8"
@@ -208,7 +330,7 @@ export default async function HomePage() {
             className="text-center text-gray-400 mb-8"
             style={{ fontSize: "18px" }}
           >
-            5 कदम — 10 मिनट में तैयार
+            5 कदम — 15 मिनट में तैयार
           </p>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {howTo.map((h) => (
@@ -317,7 +439,6 @@ export default async function HomePage() {
             </a>
           </div>
         </div>
-
       </div>
     </div>
   );
