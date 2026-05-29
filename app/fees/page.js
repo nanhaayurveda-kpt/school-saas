@@ -264,12 +264,20 @@ export default async function FeesPage({ searchParams }) {
             Student-wise fee tracking
           </p>
         </div>
-        <Link
-          href="/fees/add"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
-        >
-          + Record
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/fee-structure"
+            className="bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium"
+          >
+            🏷️ Templates
+          </Link>
+          <Link
+            href="/fees/add"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            + Record
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">

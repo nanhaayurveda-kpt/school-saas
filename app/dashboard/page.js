@@ -342,7 +342,6 @@ export default async function DashboardPage() {
               { href: "/teacher-login", icon: "🔑", label: "Teacher Login" },
               { href: "/student/login", icon: "🎓", label: "Student Login" },
               { href: "/fees", icon: "💰", label: "Fees" },
-              { href: "/fee-structure", icon: "🏷️", label: "Fee Structure" },
               { href: "/attendance", icon: "✅", label: "Student Attend." },
               {
                 href: `/teacher-attendance?date=${today}`,
