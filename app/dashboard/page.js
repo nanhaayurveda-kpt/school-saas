@@ -340,6 +340,7 @@ export default async function DashboardPage() {
               { href: "/admissions", icon: "📋", label: "Admissions" },
               { href: "/teachers", icon: "👨‍🏫", label: "Teachers" },
               { href: "/teacher-login", icon: "🔑", label: "Teacher Login" },
+              { href: "/student/login", icon: "🎓", label: "Student Login" },
               { href: "/fees", icon: "💰", label: "Fees" },
               { href: "/fee-structure", icon: "🏷️", label: "Fee Structure" },
               { href: "/attendance", icon: "✅", label: "Student Attend." },
