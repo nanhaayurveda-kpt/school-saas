@@ -175,16 +175,6 @@ export default function AddStudentForm({ classes, today }) {
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Admission/Scholor Number
-              </label>
-              <input
-                type="text"
-                name="admission_no"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-          </div>
 
           {/* PEN */}
           <div>
