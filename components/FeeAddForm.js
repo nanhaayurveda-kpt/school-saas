@@ -199,6 +199,7 @@ export default function FeeAddForm({
       onSubmit={() => setSubmitting(true)}
       className="space-y-4"
     >
+      {/* Class + Section */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -211,7 +212,9 @@ export default function FeeAddForm({
           >
             <option value="">Select class...</option>
             {classOptions.map((c) => (
-              <option key={c} value={c}>Class {c}</option>
+              <option key={c} value={c}>
+                Class {c}
+              </option>
             ))}
           </select>
         </div>
@@ -225,12 +228,15 @@ export default function FeeAddForm({
           >
             <option value="">All</option>
             {sectionOptions.map((s) => (
-              <option key={s} value={s}>Section {s}</option>
+              <option key={s} value={s}>
+                Section {s}
+              </option>
             ))}
           </select>
         </div>
       </div>
 
+      {/* Student */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Student <span className="text-red-500">*</span>
@@ -243,17 +249,23 @@ export default function FeeAddForm({
           disabled={!selectedClass}
           className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50 disabled:text-gray-400"
         >
-          <option value="">{selectedClass ? "Select student..." : "Select class first"}</option>
+          <option value="">
+            {selectedClass ? "Select student..." : "Select class first"}
+          </option>
           {filteredStudents.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name} — Class {s.class} {s.section || ""}
             </option>
           ))}
         </select>
+        {selectedClass && filteredStudents.length === 0 && (
+          <p className="text-xs text-amber-600 mt-1">No students found.</p>
+        )}
       </div>
 
       {selectedStudentId && (
         <>
+          {/* Previous Dues + Settle checkbox */}
           {previousDues > 0 && (
             <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3">
               <div className="flex justify-between items-center">
@@ -278,6 +290,7 @@ export default function FeeAddForm({
             </div>
           )}
 
+          {/* Months */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -315,16 +328,22 @@ export default function FeeAddForm({
             </div>
           </div>
 
+          {/* Regular fees */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Monthly Fees <span className="text-gray-400 text-xs font-normal">(applies to all selected months)</span>
+              Monthly Fees{" "}
+              <span className="text-gray-400 text-xs font-normal">
+                (applies to all selected months)
+              </span>
             </label>
             <div className="space-y-2">
               {REGULAR_FEE_TYPES.map((ft) => (
                 <div
                   key={ft.value}
                   className={`border rounded-lg px-3 py-2.5 flex items-center gap-3 ${
-                    checkedTypes[ft.value] ? "border-indigo-400 bg-indigo-50" : "border-gray-200"
+                    checkedTypes[ft.value]
+                      ? "border-indigo-400 bg-indigo-50"
+                      : "border-gray-200"
                   }`}
                 >
                   <input
@@ -334,7 +353,10 @@ export default function FeeAddForm({
                     onChange={() => toggleType(ft.value)}
                     className="w-4 h-4 accent-indigo-600"
                   />
-                  <label htmlFor={`t_${ft.value}`} className="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+                  <label
+                    htmlFor={`t_${ft.value}`}
+                    className="flex-1 text-sm font-medium text-gray-700 cursor-pointer"
+                  >
                     {ft.label}
                   </label>
                   {checkedTypes[ft.value] && (
@@ -342,7 +364,12 @@ export default function FeeAddForm({
                       type="number"
                       name={`amount_${ft.value}`}
                       value={amounts[ft.value] || ""}
-                      onChange={(e) => setAmounts((prev) => ({ ...prev, [ft.value]: e.target.value }))}
+                      onChange={(e) =>
+                        setAmounts((prev) => ({
+                          ...prev,
+                          [ft.value]: e.target.value,
+                        }))
+                      }
                       min="1"
                       required
                       placeholder="₹"
@@ -354,12 +381,20 @@ export default function FeeAddForm({
             </div>
           </div>
 
+          {/* Custom items */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-gray-700">
-                Custom Items <span className="text-gray-400 text-xs font-normal">(i-card, uniform, books, etc.)</span>
+                Custom Items{" "}
+                <span className="text-gray-400 text-xs font-normal">
+                  (i-card, uniform, books, etc.)
+                </span>
               </label>
-              <button type="button" onClick={addCustomItem} className="text-xs text-indigo-600 font-medium">
+              <button
+                type="button"
+                onClick={addCustomItem}
+                className="text-xs text-indigo-600 font-medium"
+              >
                 + Add Item
               </button>
             </div>
@@ -368,7 +403,10 @@ export default function FeeAddForm({
             ) : (
               <div className="space-y-2">
                 {customItems.map((it, idx) => (
-                  <div key={idx} className="border border-amber-200 bg-amber-50 rounded-lg p-2.5 space-y-1.5">
+                  <div
+                    key={idx}
+                    className="border border-amber-200 bg-amber-50 rounded-lg p-2.5 space-y-1.5"
+                  >
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
@@ -387,7 +425,13 @@ export default function FeeAddForm({
                         placeholder="₹"
                         className="w-24 border border-amber-300 rounded-lg px-2 py-1.5 text-sm text-right text-amber-700 font-bold focus:outline-none focus:ring-2 focus:ring-amber-400"
                       />
-                      <button type="button" onClick={() => removeCustomItem(idx)} className="text-red-500 text-xs px-1">✕</button>
+                      <button
+                        type="button"
+                        onClick={() => removeCustomItem(idx)}
+                        className="text-red-500 text-xs px-1"
+                      >
+                        ✕
+                      </button>
                     </div>
                     <label className="flex items-center gap-1.5 text-xs text-amber-700">
                       <input
@@ -406,13 +450,24 @@ export default function FeeAddForm({
             <input type="hidden" name="custom_count" value={customItems.length} />
           </div>
 
+          {/* Occasional fees */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Extra Fees <span className="text-gray-400 text-xs font-normal">(for a specific month)</span>
+              Extra Fees{" "}
+              <span className="text-gray-400 text-xs font-normal">
+                (for a specific month)
+              </span>
             </label>
             <div className="space-y-2">
               {OCCASIONAL_FEE_TYPES.map((ft) => (
-                <div key={ft.value} className={`border rounded-lg px-3 py-2.5 ${checkedTypes[ft.value] ? "border-amber-400 bg-amber-50" : "border-gray-200"}`}>
+                <div
+                  key={ft.value}
+                  className={`border rounded-lg px-3 py-2.5 ${
+                    checkedTypes[ft.value]
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-gray-200"
+                  }`}
+                >
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
@@ -421,13 +476,23 @@ export default function FeeAddForm({
                       onChange={() => toggleType(ft.value)}
                       className="w-4 h-4 accent-amber-500"
                     />
-                    <label htmlFor={`t_${ft.value}`} className="flex-1 text-sm font-medium text-gray-700 cursor-pointer">{ft.label}</label>
+                    <label
+                      htmlFor={`t_${ft.value}`}
+                      className="flex-1 text-sm font-medium text-gray-700 cursor-pointer"
+                    >
+                      {ft.label}
+                    </label>
                     {checkedTypes[ft.value] && (
                       <input
                         type="number"
                         name={`amount_${ft.value}`}
                         value={amounts[ft.value] || ""}
-                        onChange={(e) => setAmounts((prev) => ({ ...prev, [ft.value]: e.target.value }))}
+                        onChange={(e) =>
+                          setAmounts((prev) => ({
+                            ...prev,
+                            [ft.value]: e.target.value,
+                          }))
+                        }
                         min="1"
                         required
                         placeholder="₹"
@@ -437,16 +502,27 @@ export default function FeeAddForm({
                   </div>
                   {checkedTypes[ft.value] && (
                     <div className="mt-2 ml-7">
-                      <label className="text-xs text-amber-700 font-medium mb-1 block">Which month?</label>
+                      <label className="text-xs text-amber-700 font-medium mb-1 block">
+                        Which month?
+                      </label>
                       <select
                         name={`month_${ft.value}`}
                         value={occasionalMonths[ft.value] || ""}
-                        onChange={(e) => setOccasionalMonths((prev) => ({ ...prev, [ft.value]: e.target.value }))}
+                        onChange={(e) =>
+                          setOccasionalMonths((prev) => ({
+                            ...prev,
+                            [ft.value]: e.target.value,
+                          }))
+                        }
                         required
                         className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
                       >
                         <option value="">Select month...</option>
-                        {MONTHS.map((m) => (<option key={m} value={m}>{m}</option>))}
+                        {MONTHS.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   )}
@@ -458,12 +534,16 @@ export default function FeeAddForm({
           {concessionInfo && (
             <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2.5">
               <p className="text-xs font-semibold text-green-700">
-                💸 Concession: {concessionInfo.discount_type === "percent" ? `${concessionInfo.discount_value}%` : `₹${concessionInfo.discount_value}`}
+                💸 Concession:{" "}
+                {concessionInfo.discount_type === "percent"
+                  ? `${concessionInfo.discount_value}%`
+                  : `₹${concessionInfo.discount_value}`}
                 {concessionInfo.reason ? ` — ${concessionInfo.reason}` : ""}
               </p>
             </div>
           )}
 
+          {/* Total + Discount + Net */}
           <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-indigo-700">Gross Total</span>
@@ -499,9 +579,12 @@ export default function FeeAddForm({
             )}
           </div>
 
+          {/* Payment fields */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Academic Year</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Academic Year
+              </label>
               <input
                 type="text"
                 name="academic_year"
@@ -525,7 +608,10 @@ export default function FeeAddForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Paid Date <span className="text-gray-400 font-normal text-xs">(empty = all pending)</span>
+              Paid Date{" "}
+              <span className="text-gray-400 font-normal text-xs">
+                (empty = all pending)
+              </span>
             </label>
             <input
               type="date"
@@ -539,7 +625,10 @@ export default function FeeAddForm({
           {paidDate && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Amount Paid Now <span className="text-gray-400 font-normal text-xs">(empty = full ₹{netPayable})</span>
+                Amount Paid Now{" "}
+                <span className="text-gray-400 font-normal text-xs">
+                  (empty = full ₹{netPayable})
+                </span>
               </label>
               <input
                 type="number"
@@ -558,7 +647,8 @@ export default function FeeAddForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Payment Mode <span className="text-gray-400 font-normal text-xs">(if paid)</span>
+              Payment Mode{" "}
+              <span className="text-gray-400 font-normal text-xs">(if paid)</span>
             </label>
             <div className="grid grid-cols-4 gap-2">
               {["cash", "online", "upi", "cheque"].map((mode) => (
@@ -589,7 +679,7 @@ export default function FeeAddForm({
         >
           {submitting ? "Saving..." : "Save Fee Package"}
         </button>
-        <abbr
+        <a
           href="/fees"
           className="flex-1 bg-gray-100 text-gray-700 py-2.5 rounded-lg text-sm font-medium text-center"
         >
