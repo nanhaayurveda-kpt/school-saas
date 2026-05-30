@@ -163,20 +163,18 @@ export default function AddStudentForm({ classes, today }) {
             </div>
           </div>
 
-          {/* Roll + Scholar No */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Roll Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="roll_number"
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
+         {/* Roll Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Roll Number <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="roll_number"
+              required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Admission/Scholor Number
               </label>

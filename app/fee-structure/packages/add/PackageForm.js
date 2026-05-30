@@ -163,7 +163,7 @@ export default function PackageForm({ currentAcademicYear }) {
                     min="1"
                     required
                     placeholder="₹"
-                    className="w-32 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-24 border border-gray-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </>
               )}
@@ -214,7 +214,7 @@ export default function PackageForm({ currentAcademicYear }) {
                   min="1"
                   required
                   placeholder="₹"
-                  className="w-32 border border-amber-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="w-24 border border-amber-300 rounded-lg px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-amber-400"
                 />
                 <button
                   type="button"

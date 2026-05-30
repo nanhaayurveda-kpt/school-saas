@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/absent-alert",
-      "schedule": "30 7 * * *"
+      "schedule": "30 5 * * *"
     }
   ]
 }

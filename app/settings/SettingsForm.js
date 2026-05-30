@@ -123,6 +123,28 @@ export default function SettingsForm({ settings }) {
         </p>
       </div>
 
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Principal Signature
+        </label>
+        {s.principal_signature_url && (
+          <img
+            src={s.principal_signature_url}
+            alt="Current Signature"
+            className="mb-3 h-20 object-contain border border-gray-200 rounded bg-white p-2"
+          />
+        )}
+        <input
+          type="file"
+          name="principal_signature"
+          accept="image/*"
+          className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm"
+        />
+        <p className="text-xs text-gray-400 mt-1">
+          Will appear on fee receipts, marksheets, and certificates. Transparent PNG recommended.
+        </p>
+      </div>
+
       <div className="pt-2">
         <button
           type="submit"

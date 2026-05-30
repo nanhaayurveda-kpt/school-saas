@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
@@ -37,6 +37,9 @@ export async function POST(request) {
   const paymentMode = formData.get("payment_mode") || "cash";
   const academicYear = formData.get("academic_year")?.trim() || null;
   const selectedMonths = formData.getAll("months[]");
+  const discount = Math.max(0, parseInt(formData.get("discount"), 10) || 0);
+  const amountPaidNowRaw = formData.get("amount_paid_now");
+  const settlePrevious = formData.get("settle_previous_dues") === "on";
 
   if (!studentId || isNaN(studentId)) {
     await setFlash("error", "Student required");
@@ -111,8 +114,23 @@ export async function POST(request) {
   const randPart = Math.floor(1000 + Math.random() * 9000);
   const receiptNo = `RCP-${datePart}-${randPart}`;
 
+  const grossTotal = rowsToInsert.reduce((s, r) => s + r.amount, 0);
+  const effectiveDiscount = Math.min(discount, grossTotal);
+  const netDue = grossTotal - effectiveDiscount;
+
+  let paidNowTotal = 0;
+  if (paidDate) {
+    if (amountPaidNowRaw === null || amountPaidNowRaw === "") {
+      paidNowTotal = netDue;
+    } else {
+      paidNowTotal = Math.max(0, Math.min(netDue, parseInt(amountPaidNowRaw, 10) || 0));
+    }
+  }
+
+  let remainingPaid = paidNowTotal;
   let inserted = 0;
   let skipped = 0;
+  let firstRow = true;
 
   for (const row of rowsToInsert) {
     const conditions = [
@@ -131,21 +149,39 @@ export async function POST(request) {
       continue;
     }
 
+    const rowDiscount = firstRow ? effectiveDiscount : 0;
+    const rowNet = row.amount - rowDiscount;
+    const rowPaid = paidDate ? Math.min(rowNet, remainingPaid) : 0;
+    remainingPaid = Math.max(0, remainingPaid - rowPaid);
+
+    let status;
+    if (!paidDate) {
+      status = "pending";
+    } else if (rowPaid >= rowNet) {
+      status = "paid";
+    } else if (rowPaid > 0) {
+      status = "partial";
+    } else {
+      status = "pending";
+    }
+
     await db.insert(schema.fees).values({
       student_id: studentId,
       user_id: 2,
       amount: row.amount,
-      paid_amount: paidDate ? row.amount : 0,
+      paid_amount: rowPaid,
+      discount: rowDiscount,
       fee_type: row.feeType,
       month: row.month,
       academic_year: academicYear,
       due_date: new Date(dueDate),
-      paid_date: paidDate ? new Date(paidDate) : null,
-      status: paidDate ? "paid" : "pending",
+      paid_date: paidDate && rowPaid > 0 ? new Date(paidDate) : null,
+      status,
       receipt_no: receiptNo,
     });
+    firstRow = false;
 
-    if (paidDate) {
+    if (paidDate && rowPaid > 0) {
       const findRows = await db.select({ id: schema.fees.id }).from(schema.fees).where(and(...conditions)).orderBy(schema.fees.id);
       const feeRow = findRows[findRows.length - 1];
       if (feeRow) {
@@ -153,7 +189,7 @@ export async function POST(request) {
           fee_id: feeRow.id,
           student_id: studentId,
           user_id: 2,
-          amount: row.amount,
+          amount: rowPaid,
           payment_mode: paymentMode,
           paid_date: new Date(paidDate),
           receipt_no: receiptNo,
@@ -163,6 +199,50 @@ export async function POST(request) {
     inserted++;
   }
 
+  // Settle previous dues if requested
+  let settledCount = 0;
+  if (settlePrevious) {
+    const oldRows = await db
+      .select({
+        id: schema.fees.id,
+        amount: schema.fees.amount,
+        paid_amount: schema.fees.paid_amount,
+        receipt_no: schema.fees.receipt_no,
+      })
+      .from(schema.fees)
+      .where(
+        and(
+          eq(schema.fees.user_id, 2),
+          eq(schema.fees.student_id, studentId),
+          inArray(schema.fees.status, ["pending", "partial", "overdue"]),
+        ),
+      );
+    for (const oldRow of oldRows) {
+      if (oldRow.receipt_no === receiptNo) continue;
+      const remaining = (oldRow.amount || 0) - (oldRow.paid_amount || 0);
+      if (remaining <= 0) continue;
+      await db
+        .update(schema.fees)
+        .set({
+          paid_amount: oldRow.amount,
+          status: "paid",
+          paid_date: new Date(paidDate || dueDate),
+        })
+        .where(eq(schema.fees.id, oldRow.id));
+      await db.insert(schema.fee_payments).values({
+        fee_id: oldRow.id,
+        student_id: studentId,
+        user_id: 2,
+        amount: remaining,
+        payment_mode: paymentMode,
+        paid_date: new Date(paidDate || dueDate),
+        receipt_no: oldRow.receipt_no || receiptNo,
+      });
+      settledCount++;
+    }
+  }
+
+  // Save custom items to template
   let templateSaved = 0;
   if (customsToSaveInTemplate.length > 0 && academicYear && student.class) {
     const pkgRows = await db
@@ -220,17 +300,15 @@ export async function POST(request) {
     }
   }
 
-  const monthLabel = selectedMonths.length === 1
-    ? selectedMonths[0]
-    : `${selectedMonths[0]} – ${selectedMonths[selectedMonths.length - 1]}`;
-
-  if (inserted === 0) {
-    await setFlash("warning", `All ${skipped} entries already exist (${monthLabel})`);
+  if (inserted === 0 && settledCount === 0) {
+    await setFlash("warning", `All ${skipped} entries already exist`);
   } else {
-    const parts = [`${inserted} entries added`];
+    const parts = [];
+    if (inserted > 0) parts.push(`${inserted} entries added`);
     if (skipped > 0) parts.push(`${skipped} skipped`);
     if (templateSaved > 0) parts.push(`${templateSaved} saved to template`);
-    await setFlash("success", `${parts.join(", ")} — ${monthLabel} · Receipt ${receiptNo}`);
+    if (settledCount > 0) parts.push(`${settledCount} previous dues cleared`);
+    await setFlash("success", `${parts.join(", ")} — Receipt ${receiptNo}`);
   }
 
   return NextResponse.redirect(new URL("/fees", request.url), { status: 303 });

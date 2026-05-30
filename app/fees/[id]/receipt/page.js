@@ -71,7 +71,8 @@ export default async function FeeReceiptPage({ params }) {
     .leftJoin(students, eq(fees.student_id, students.id))
     .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, 2)));
 
-  if (!anchor) return <div className="p-8 text-red-500">Receipt not found.</div>;
+  if (!anchor)
+    return <div className="p-8 text-red-500">Receipt not found.</div>;
 
   // Consolidated — all fees with same receipt_no + student_id
   const consolidated = await db
@@ -84,6 +85,7 @@ export default async function FeeReceiptPage({ params }) {
       status: fees.status,
       due_date: fees.due_date,
       paid_date: fees.paid_date,
+      discount: fees.discount,
     })
     .from(fees)
     .where(
@@ -103,7 +105,8 @@ export default async function FeeReceiptPage({ params }) {
     : [];
   const concession = concessionResult[0] || null;
 
-  const receiptNo = anchor.receipt_no || `RCP-${String(anchor.id).padStart(5, "0")}`;
+  const receiptNo =
+    anchor.receipt_no || `RCP-${String(anchor.id).padStart(5, "0")}`;
   const receiptDate = anchor.paid_date
     ? new Date(anchor.paid_date).toLocaleDateString("en-IN", {
         day: "numeric",
@@ -117,9 +120,10 @@ export default async function FeeReceiptPage({ params }) {
       });
 
   const totalAmount = consolidated.reduce((s, f) => s + (f.amount || 0), 0);
+  const totalDiscount = consolidated.reduce((s, f) => s + (f.discount || 0), 0);
+  const netPayable = totalAmount - totalDiscount;
   const totalPaid = consolidated.reduce((s, f) => s + (f.paid_amount || 0), 0);
-  const balance = totalAmount - totalPaid;
-
+  const balance = netPayable - totalPaid;
   return (
     <div>
       <div className="flex justify-between items-center mb-6 print:hidden">
@@ -174,7 +178,9 @@ export default async function FeeReceiptPage({ params }) {
             </div>
             <div>
               <span className="text-gray-500">Date:</span>
-              <span className="font-medium text-gray-900 ml-2">{receiptDate}</span>
+              <span className="font-medium text-gray-900 ml-2">
+                {receiptDate}
+              </span>
             </div>
           </div>
 
@@ -254,13 +260,42 @@ export default async function FeeReceiptPage({ params }) {
                   </tr>
                 ))}
                 <tr className="border-t-2 border-gray-300 bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-bold text-gray-900" colSpan={2}>
+                  <td
+                    className="px-4 py-3 text-sm font-bold text-gray-900"
+                    colSpan={2}
+                  >
                     Grand Total
                   </td>
                   <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">
                     ₹{totalAmount}
                   </td>
                 </tr>
+                {totalDiscount > 0 && (
+                  <>
+                    <tr className="border-t border-gray-100">
+                      <td
+                        className="px-4 py-3 text-sm text-amber-700"
+                        colSpan={2}
+                      >
+                        Discount
+                      </td>
+                      <td className="px-4 py-3 text-sm text-amber-700 text-right font-bold">
+                        −₹{totalDiscount}
+                      </td>
+                    </tr>
+                    <tr className="border-t border-gray-100 bg-indigo-50">
+                      <td
+                        className="px-4 py-3 text-sm font-bold text-indigo-700"
+                        colSpan={2}
+                      >
+                        Net Payable
+                      </td>
+                      <td className="px-4 py-3 text-sm font-bold text-indigo-700 text-right">
+                        ₹{netPayable}
+                      </td>
+                    </tr>
+                  </>
+                )}
                 <tr className="border-t border-gray-100">
                   <td className="px-4 py-3 text-sm text-gray-600" colSpan={2}>
                     Amount Paid
@@ -271,7 +306,10 @@ export default async function FeeReceiptPage({ params }) {
                 </tr>
                 {concession && (
                   <tr className="border-t border-gray-100 bg-green-50">
-                    <td className="px-4 py-3 text-sm text-green-600" colSpan={2}>
+                    <td
+                      className="px-4 py-3 text-sm text-green-600"
+                      colSpan={2}
+                    >
                       Concession{" "}
                       {concession.reason ? `(${concession.reason})` : ""}
                     </td>
@@ -317,8 +355,16 @@ export default async function FeeReceiptPage({ params }) {
               <p>nishantsoftwares.in</p>
             </div>
             <div className="text-right text-xs text-gray-500">
-              <p className="mb-6">Authorised Signature</p>
-              <p>___________________</p>
+              <p className="mb-2">Authorised Signature</p>
+              {settings.principal_signature_url ? (
+                <img
+                  src={settings.principal_signature_url}
+                  alt="Signature"
+                  className="h-12 ml-auto mb-1 object-contain"
+                />
+              ) : (
+                <p className="mb-6">___________________</p>
+              )}
               {settings.principal_name && (
                 <p className="font-medium text-gray-700">
                   {settings.principal_name}

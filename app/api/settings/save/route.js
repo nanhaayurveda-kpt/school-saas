@@ -16,7 +16,6 @@ const settingsSchema = z.object({
   principal_name: z.string().optional(),
   affiliation_no: z.string().optional(),
   school_code: z.string().optional(),
-  upi_id: z.string().optional(),
 });
 
 async function uploadToCloudinary(file) {
@@ -35,7 +34,6 @@ async function uploadToCloudinary(file) {
 }
 
 export async function POST(request) {
-  // ─── Auth ──────────────────────────────────────────────────────────────
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
   if (!token) {
@@ -55,30 +53,26 @@ export async function POST(request) {
     return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
   }
 
-  // ─── Get existing settings ─────────────────────────────────────────────
   const existing = await db
     .select()
     .from(schema.school_settings)
     .where(eq(schema.school_settings.user_id, 2));
   const current = existing[0] || {};
 
-  // ─── Parse form ────────────────────────────────────────────────────────
   const formData = await request.formData();
 
-  // ─── Handle file uploads (logo and QR code) ────────────────────────────
   const logoFile = formData.get("logo");
-  const qrFile = formData.get("qr_code");
+  const signatureFile = formData.get("principal_signature");
 
   let logo_url = current.logo_url || null;
-  let qr_code_url = current.qr_code_url || null;
+  let principal_signature_url = current.principal_signature_url || null;
 
   const uploadedLogo = await uploadToCloudinary(logoFile);
   if (uploadedLogo) logo_url = uploadedLogo;
 
-  const uploadedQr = await uploadToCloudinary(qrFile);
-  if (uploadedQr) qr_code_url = uploadedQr;
+  const uploadedSignature = await uploadToCloudinary(signatureFile);
+  if (uploadedSignature) principal_signature_url = uploadedSignature;
 
-  // ─── Validate fields ───────────────────────────────────────────────────
   const raw = {
     school_name: formData.get("school_name"),
     address: formData.get("address") || undefined,
@@ -87,7 +81,6 @@ export async function POST(request) {
     principal_name: formData.get("principal_name") || undefined,
     affiliation_no: formData.get("affiliation_no") || undefined,
     school_code: formData.get("school_code") || undefined,
-    upi_id: formData.get("upi_id") || undefined,
   };
 
   const parsed = settingsSchema.safeParse(raw);
@@ -103,13 +96,10 @@ export async function POST(request) {
     user_id: 2,
     ...parsed.data,
     logo_url,
-    qr_code_url,
+    principal_signature_url,
     updated_at: new Date(),
   };
 
-  // ─── UPDATE existing OR INSERT new (idempotent) ────────────────────────
-  // Since settings are per-user, retry will always go through UPDATE path
-  // after first save — this is naturally retry-safe.
   if (existing.length > 0) {
     await db
       .update(schema.school_settings)
