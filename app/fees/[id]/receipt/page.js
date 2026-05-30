@@ -351,8 +351,8 @@ export default async function FeeReceiptPage({ params }) {
 
           <div className="border-t border-gray-200 pt-5 flex justify-between items-end">
             <div className="text-xs text-gray-400">
-              <p>Powered by Nishant School Software</p>
-              <p>nishantsoftwares.in</p>
+              <p className="font-medium">{settings.school_name || "School"}</p>
+              {settings.address && <p>{settings.address}</p>}
             </div>
             <div className="text-right text-xs text-gray-500">
               <p className="mb-2">Authorised Signature</p>
