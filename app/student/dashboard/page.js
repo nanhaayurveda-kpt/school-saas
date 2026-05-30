@@ -16,6 +16,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import PaymentQR from "@/components/PaymentQR";
 
 export default async function StudentDashboardPage() {
   const cookieStore = await cookies();
@@ -180,30 +181,18 @@ export default async function StudentDashboardPage() {
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-800">💰 Fees Status</h2>
             </div>
-
-            {feeSummary.pending + feeSummary.overdue > 0 &&
-              (settings.qr_code_url || settings.upi_id) && (
-                <div className="bg-blue-50 border-b border-blue-100 px-6 py-5 text-center">
-                  <p className="text-sm font-semibold text-gray-700 mb-3">
-                    Pay ₹{feeSummary.pending + feeSummary.overdue} via UPI
-                  </p>
-                  {settings.qr_code_url && (
-                    <img
-                      src={settings.qr_code_url}
-                      alt="UPI QR Code"
-                      className="w-48 mx-auto rounded-lg mb-3"
-                    />
-                  )}
-                  {settings.upi_id && (
-                    <p className="text-sm font-semibold text-gray-700">
-                      UPI ID: {settings.upi_id}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-2">
-                    Scan QR or use UPI ID. Inform school after payment.
-                  </p>
-                </div>
-              )}
+            {feeSummary.pending + feeSummary.overdue > 0 && (
+              <div className="bg-blue-50 border-b border-blue-100 px-6 py-5">
+                <p className="text-sm font-semibold text-gray-700 mb-1 text-center">
+                  Pending ₹{feeSummary.pending + feeSummary.overdue} — Pay
+                  Online
+                </p>
+                <PaymentQR />
+                <p className="text-xs text-gray-500 mt-3 text-center">
+                  Scan any QR. Inform school after payment.
+                </p>
+              </div>
+            )}{" "}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100">
               <div className="bg-white px-4 py-4 text-center">
                 <div className="text-xs text-gray-500">Total</div>
@@ -230,7 +219,6 @@ export default async function StudentDashboardPage() {
                 </div>
               </div>
             </div>
-
             <div className="px-6 py-4 border-t border-gray-100">
               <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">
                 Fee Records
@@ -288,7 +276,6 @@ export default async function StudentDashboardPage() {
                 })}
               </div>
             </div>
-
             {myPayments.length > 0 && (
               <div className="px-6 py-4 border-t border-gray-100">
                 <h3 className="text-xs font-semibold text-gray-500 uppercase mb-3">
