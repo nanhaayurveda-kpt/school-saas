@@ -5,6 +5,7 @@ import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { ALLOWED_EMAILS } from "@/lib/config";
 
 function redirectWithCookie(request, path, token) {
   const response = NextResponse.redirect(new URL(path, request.url));
@@ -44,17 +45,13 @@ export async function GET(request) {
       return NextResponse.redirect(new URL("/login?error=invalid", request.url));
     }
 
-    const allowedEmails = (process.env.DEVELOPER_EMAIL || "")
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
+    const allowedEmails = ALLOWED_EMAILS.map((e) => e.toLowerCase());
 
     if (!allowedEmails.includes(googleUser.email.toLowerCase())) {
       return NextResponse.redirect(new URL("/login?error=unauthorized", request.url));
     }
 
     let existing = await db.select().from(users).where(eq(users.email, googleUser.email));
-    let user;
 
     if (existing.length === 0) {
       await db.insert(users).values({
@@ -67,7 +64,7 @@ export async function GET(request) {
       existing = await db.select().from(users).where(eq(users.email, googleUser.email));
     }
 
-    user = existing[0];
+    const user = existing[0];
 
     const token = await createSession(
       user.id,
