@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { timetable, period_timings, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import Link from "next/link";
@@ -66,14 +67,14 @@ export default async function TimetablePage({ searchParams }) {
           .where(
             and(
               eq(timetable.class, selectedClass),
-              eq(timetable.user_id, 2),
+              eq(timetable.user_id, MASTER_USER_ID),
             ),
           )
       : Promise.resolve([]),
     db
       .select()
       .from(period_timings)
-      .where(eq(period_timings.user_id, 2))
+      .where(eq(period_timings.user_id, MASTER_USER_ID))
       .orderBy(period_timings.period_no),
   ]);
 

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { results, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -63,7 +64,7 @@ export async function POST(request) {
           and(
             eq(results.exam_id, exam_id),
             eq(results.student_id, parseInt(sid)),
-            eq(results.user_id, 2),
+            eq(results.user_id, MASTER_USER_ID),
           ),
         );
     } else {
@@ -73,7 +74,7 @@ export async function POST(request) {
         marks_obtained: marksNum,
         grade,
         remarks,
-        user_id: 2,
+        user_id: MASTER_USER_ID,
       });
     }
   }

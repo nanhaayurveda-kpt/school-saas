@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { exams, results } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 import Link from "next/link";
@@ -38,7 +39,7 @@ export default async function ExamsPage({ searchParams }) {
       result_count: sql`(SELECT COUNT(*) FROM results WHERE results.exam_id = ${exams.id})`,
     })
     .from(exams)
-    .where(eq(exams.user_id, 2))
+    .where(eq(exams.user_id, MASTER_USER_ID))
     .orderBy(sql`${exams.exam_date} DESC`);
 
   const classes = [

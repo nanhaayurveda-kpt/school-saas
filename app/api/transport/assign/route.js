@@ -1,5 +1,6 @@
 // app/api/transport/assign/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -52,7 +53,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, student_id),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
   if (!studentCheck.length) {
@@ -66,7 +67,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.transport.id, transport_id),
-        eq(schema.transport.user_id, 2),
+        eq(schema.transport.user_id, MASTER_USER_ID),
       ),
     );
   if (!transportCheck.length) {
@@ -75,7 +76,7 @@ export async function POST(request) {
 
   // ─── Duplicate check: same student already on same route this year? ────
   const conditions = [
-    eq(schema.student_transport.user_id, 2),
+    eq(schema.student_transport.user_id, MASTER_USER_ID),
     eq(schema.student_transport.student_id, student_id),
     eq(schema.student_transport.transport_id, transport_id),
   ];
@@ -100,7 +101,7 @@ export async function POST(request) {
     transport_id,
     academic_year,
     joined_date,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Student assigned to transport successfully!");

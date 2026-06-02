@@ -1,5 +1,6 @@
 // app/api/fees/mark-paid/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -60,7 +61,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.fees.id, fee_id),
-        eq(schema.fees.user_id, 2),
+        eq(schema.fees.user_id, MASTER_USER_ID),
       ),
     );
   const fee = feeResult[0];
@@ -78,7 +79,7 @@ export async function POST(request) {
       .where(
         and(
           eq(schema.fee_payments.fee_id, fee_id),
-          eq(schema.fee_payments.user_id, 2),
+          eq(schema.fee_payments.user_id, MASTER_USER_ID),
           eq(schema.fee_payments.note, `token:${clientToken}`),
         ),
       );
@@ -92,7 +93,7 @@ export async function POST(request) {
   await db.insert(schema.fee_payments).values({
     fee_id,
     student_id: fee.student_id,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     amount: paid_amount,
     payment_mode,
     paid_date: new Date(paid_date),
@@ -109,7 +110,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.fee_payments.fee_id, fee_id),
-        eq(schema.fee_payments.user_id, 2),
+        eq(schema.fee_payments.user_id, MASTER_USER_ID),
       ),
     );
   const newPaidAmount = allPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
@@ -127,7 +128,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.fees.id, fee_id),
-        eq(schema.fees.user_id, 2),
+        eq(schema.fees.user_id, MASTER_USER_ID),
       ),
     );
 

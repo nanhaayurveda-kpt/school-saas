@@ -1,5 +1,6 @@
 // app/api/concessions/delete/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -41,7 +42,7 @@ export async function POST(request) {
       and(
         eq(schema.fee_concessions.id, id),
         eq(schema.fee_concessions.student_id, student_id),
-        eq(schema.fee_concessions.user_id, 2),
+        eq(schema.fee_concessions.user_id, MASTER_USER_ID),
       ),
     );
 

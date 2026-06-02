@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { teachers, timetable, teacher_subjects } from "@/lib/schema";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -21,17 +22,17 @@ export default async function TeachersPage() {
   const allTeachers = await db
     .select()
     .from(teachers)
-    .where(eq(teachers.user_id, 2))
+    .where(eq(teachers.user_id, MASTER_USER_ID))
     .orderBy(teachers.name);
   const allPeriods = await db
     .select()
     .from(timetable)
-    .where(eq(timetable.user_id, 2));
+    .where(eq(timetable.user_id, MASTER_USER_ID));
 
   const allSubjects = await db
     .select()
     .from(teacher_subjects)
-    .where(eq(teacher_subjects.user_id, 2));
+    .where(eq(teacher_subjects.user_id, MASTER_USER_ID));
   const subjectCount = {};
   allSubjects.forEach((s) => {
     subjectCount[s.subject] = (subjectCount[s.subject] || 0) + 1;

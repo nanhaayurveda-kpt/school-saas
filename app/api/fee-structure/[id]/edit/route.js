@@ -1,5 +1,6 @@
 // app/api/fee-structure/[id]/edit/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, ne } from "drizzle-orm";
@@ -58,7 +59,7 @@ export async function POST(request, { params }) {
     .where(
       and(
         eq(schema.fee_structures.id, structureId),
-        eq(schema.fee_structures.user_id, 2),
+        eq(schema.fee_structures.user_id, MASTER_USER_ID),
       ),
     );
   if (ownRows.length === 0) {
@@ -67,7 +68,7 @@ export async function POST(request, { params }) {
 
   // ─── Duplicate check (exclude self) ────────────────────────────────────
   const conditions = [
-    eq(schema.fee_structures.user_id, 2),
+    eq(schema.fee_structures.user_id, MASTER_USER_ID),
     eq(schema.fee_structures.class, cls),
     eq(schema.fee_structures.fee_type, fee_type),
     ne(schema.fee_structures.id, structureId),
@@ -94,7 +95,7 @@ export async function POST(request, { params }) {
     .where(
       and(
         eq(schema.fee_structures.id, structureId),
-        eq(schema.fee_structures.user_id, 2),
+        eq(schema.fee_structures.user_id, MASTER_USER_ID),
       ),
     );
 

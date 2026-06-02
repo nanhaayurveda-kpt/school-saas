@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -33,7 +34,7 @@ export async function POST(request, { params }) {
     .where(
       and(
         eq(schema.admission_applications.id, applicationId),
-        eq(schema.admission_applications.user_id, 2),
+        eq(schema.admission_applications.user_id, MASTER_USER_ID),
       ),
     );
   const app = rows[0];
@@ -58,7 +59,7 @@ export async function POST(request, { params }) {
   const academicYear = `${baseYear}-${String(baseYear + 1).slice(-2)}`;
 
   await db.insert(schema.students).values({
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     name: app.name,
     class: app.applying_class,
     section: null,

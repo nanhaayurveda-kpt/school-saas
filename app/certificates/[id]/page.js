@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { certificates, students, school_settings } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
@@ -57,7 +58,7 @@ export default async function CertificatePrintPage({ params }) {
     .from(certificates)
     .leftJoin(students, eq(certificates.student_id, students.id))
     .where(
-      and(eq(certificates.id, Number(id)), eq(certificates.user_id, 2)),
+      and(eq(certificates.id, Number(id)), eq(certificates.user_id, MASTER_USER_ID)),
     );
 
   if (rows.length === 0) notFound();
@@ -66,7 +67,7 @@ export default async function CertificatePrintPage({ params }) {
   const settingsRows = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, 2));
+    .where(eq(school_settings.user_id, MASTER_USER_ID));
   const school = settingsRows[0] || {};
 
   const title = CERT_TITLES[c.cert_type] || "CERTIFICATE";

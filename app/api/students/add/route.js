@@ -1,5 +1,6 @@
 // app/api/students/add/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -104,7 +105,7 @@ export async function POST(request) {
       .from(schema.students)
       .where(
         and(
-          eq(schema.students.user_id, 2),
+          eq(schema.students.user_id, MASTER_USER_ID),
           eq(schema.students.class, data.class),
           eq(schema.students.section, data.section),
           eq(schema.students.roll_number, data.roll_number),
@@ -128,7 +129,7 @@ export async function POST(request) {
       .from(schema.students)
       .where(
         and(
-          eq(schema.students.user_id, 2),
+          eq(schema.students.user_id, MASTER_USER_ID),
           eq(schema.students.admission_no, data.admission_no),
         ),
       );
@@ -150,7 +151,7 @@ export async function POST(request) {
       ? new Date(data.admission_date)
       : new Date(),
     fee_status: "pending",
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Student added successfully!");

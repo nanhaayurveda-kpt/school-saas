@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { students, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -26,7 +27,7 @@ export default async function PromotePage() {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, 2));
+    .where(eq(students.user_id, MASTER_USER_ID));
 
   const classes = [
     "Nursery",

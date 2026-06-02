@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { students } from "@/lib/schema";
 import Link from "next/link";
 import DeleteStudentButton from "./DeleteStudentButton";
@@ -30,7 +31,7 @@ export default async function StudentsPage({ searchParams }) {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, 2));
+    .where(eq(students.user_id, MASTER_USER_ID));
   const classes = [...new Set(allStudents.map((s) => s.class))].sort();
   const sections = [
     ...new Set(allStudents.map((s) => s.section).filter(Boolean)),

@@ -1,5 +1,6 @@
 // app/api/teachers/save-schedule/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -44,7 +45,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.teachers.id, teacherId),
-        eq(schema.teachers.user_id, 2),
+        eq(schema.teachers.user_id, MASTER_USER_ID),
       ),
     );
   const teacher = teacherResult[0];
@@ -67,7 +68,7 @@ export async function POST(request) {
   const timings = await db
     .select()
     .from(schema.period_timings)
-    .where(eq(schema.period_timings.user_id, 2));
+    .where(eq(schema.period_timings.user_id, MASTER_USER_ID));
   const timingMap = {};
   timings.forEach((t) => {
     timingMap[t.period_no] = { start: t.start_time, end: t.end_time };
@@ -78,7 +79,7 @@ export async function POST(request) {
     .delete(schema.timetable)
     .where(
       and(
-        eq(schema.timetable.user_id, 2),
+        eq(schema.timetable.user_id, MASTER_USER_ID),
         eq(schema.timetable.teacher_name, teacher.name),
       ),
     );
@@ -108,7 +109,7 @@ export async function POST(request) {
       const endTime = timing?.end || "00:00";
       const fullClass = section ? `${className}-${section}` : className;
       rows.push({
-        user_id: 2,
+        user_id: MASTER_USER_ID,
         class: fullClass,
         day: targetDay,
         period: p,

@@ -1,5 +1,6 @@
 // app/api/fees/bulk-add/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -57,7 +58,7 @@ export async function POST(request) {
   const studentRows = await db
     .select()
     .from(schema.students)
-    .where(and(eq(schema.students.id, studentId), eq(schema.students.user_id, 2)));
+    .where(and(eq(schema.students.id, studentId), eq(schema.students.user_id, MASTER_USER_ID)));
   const student = studentRows[0];
   if (!student) {
     await setFlash("error", "Student not found");
@@ -134,7 +135,7 @@ export async function POST(request) {
 
   for (const row of rowsToInsert) {
     const conditions = [
-      eq(schema.fees.user_id, 2),
+      eq(schema.fees.user_id, MASTER_USER_ID),
       eq(schema.fees.student_id, studentId),
       eq(schema.fees.month, row.month),
       eq(schema.fees.fee_type, row.feeType),
@@ -167,7 +168,7 @@ export async function POST(request) {
 
     await db.insert(schema.fees).values({
       student_id: studentId,
-      user_id: 2,
+      user_id: MASTER_USER_ID,
       amount: row.amount,
       paid_amount: rowPaid,
       discount: rowDiscount,
@@ -188,7 +189,7 @@ export async function POST(request) {
         await db.insert(schema.fee_payments).values({
           fee_id: feeRow.id,
           student_id: studentId,
-          user_id: 2,
+          user_id: MASTER_USER_ID,
           amount: rowPaid,
           payment_mode: paymentMode,
           paid_date: new Date(paidDate),
@@ -212,7 +213,7 @@ export async function POST(request) {
       .from(schema.fees)
       .where(
         and(
-          eq(schema.fees.user_id, 2),
+          eq(schema.fees.user_id, MASTER_USER_ID),
           eq(schema.fees.student_id, studentId),
           inArray(schema.fees.status, ["pending", "partial", "overdue"]),
         ),
@@ -232,7 +233,7 @@ export async function POST(request) {
       await db.insert(schema.fee_payments).values({
         fee_id: oldRow.id,
         student_id: studentId,
-        user_id: 2,
+        user_id: MASTER_USER_ID,
         amount: remaining,
         payment_mode: paymentMode,
         paid_date: new Date(paidDate || dueDate),
@@ -249,7 +250,7 @@ export async function POST(request) {
       .select({ id: schema.fee_packages.id })
       .from(schema.fee_packages)
       .where(and(
-        eq(schema.fee_packages.user_id, 2),
+        eq(schema.fee_packages.user_id, MASTER_USER_ID),
         eq(schema.fee_packages.class, student.class),
         eq(schema.fee_packages.academic_year, academicYear),
       ));
@@ -257,7 +258,7 @@ export async function POST(request) {
 
     if (!packageId) {
       await db.insert(schema.fee_packages).values({
-        user_id: 2,
+        user_id: MASTER_USER_ID,
         class: student.class,
         academic_year: academicYear,
         total_amount: 0,
@@ -267,7 +268,7 @@ export async function POST(request) {
         .select({ id: schema.fee_packages.id })
         .from(schema.fee_packages)
         .where(and(
-          eq(schema.fee_packages.user_id, 2),
+          eq(schema.fee_packages.user_id, MASTER_USER_ID),
           eq(schema.fee_packages.class, student.class),
           eq(schema.fee_packages.academic_year, academicYear),
         ));

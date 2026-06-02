@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { period_timings, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -28,7 +29,7 @@ export default async function PeriodTimingsPage() {
   const existing = await db
     .select()
     .from(period_timings)
-    .where(eq(period_timings.user_id, 2))
+    .where(eq(period_timings.user_id, MASTER_USER_ID))
     .orderBy(period_timings.period_no);
 
   // Map period_no -> {start, end, label}

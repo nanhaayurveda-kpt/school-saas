@@ -1,5 +1,6 @@
 // app/api/settings/save/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -56,7 +57,7 @@ export async function POST(request) {
   const existing = await db
     .select()
     .from(schema.school_settings)
-    .where(eq(schema.school_settings.user_id, 2));
+    .where(eq(schema.school_settings.user_id, MASTER_USER_ID));
   const current = existing[0] || {};
 
   const formData = await request.formData();
@@ -93,7 +94,7 @@ export async function POST(request) {
   }
 
   const data = {
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     ...parsed.data,
     logo_url,
     principal_signature_url,
@@ -104,7 +105,7 @@ export async function POST(request) {
     await db
       .update(schema.school_settings)
       .set(data)
-      .where(eq(schema.school_settings.user_id, 2));
+      .where(eq(schema.school_settings.user_id, MASTER_USER_ID));
   } else {
     await db.insert(schema.school_settings).values(data);
   }

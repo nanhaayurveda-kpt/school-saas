@@ -1,5 +1,6 @@
 // app/api/students/next-admission-no/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, like } from "drizzle-orm";
@@ -38,7 +39,7 @@ export async function GET(request) {
     .from(schema.students)
     .where(
       and(
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
         like(schema.students.admission_no, `${prefix}%`),
       ),
     );

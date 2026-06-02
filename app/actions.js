@@ -2,6 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -94,7 +95,7 @@ export async function addStudent(formData) {
       ? new Date(parsed.data.admission_date)
       : new Date(),
     fee_status: parsed.data.fee_status || "pending",
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Student added successfully!");
@@ -113,7 +114,7 @@ export async function updateStudent(formData) {
     .where(
       and(
         eq(schema.students.id, Number(id)),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
   if (!studentCheck.length) redirect("/students");
@@ -152,7 +153,7 @@ export async function updateStudent(formData) {
     .where(
       and(
         eq(schema.students.id, Number(id)),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
 
@@ -195,7 +196,7 @@ export async function importStudents(formData) {
         roll_number: roll_number || null,
         phone: phone || null,
         fee_status: "pending",
-        user_id: 2,
+        user_id: MASTER_USER_ID,
       });
       count++;
     } catch {
@@ -226,7 +227,7 @@ export async function promoteStudents(formData) {
     .where(
       and(
         eq(schema.students.class, from_class),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
 
@@ -250,7 +251,7 @@ export async function saveParent(formData) {
     .where(
       and(
         eq(schema.students.id, student_id),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
   if (!studentCheck.length) redirect("/students");
@@ -260,7 +261,7 @@ export async function saveParent(formData) {
     phone: formData.get("phone"),
     email: formData.get("email"),
     password: formData.get("password"),
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   };
 
   const existing = await db
@@ -269,7 +270,7 @@ export async function saveParent(formData) {
     .where(
       and(
         eq(schema.parents.student_id, student_id),
-        eq(schema.parents.user_id, 2),
+        eq(schema.parents.user_id, MASTER_USER_ID),
       ),
     );
 
@@ -298,7 +299,7 @@ export async function addTeacher(formData) {
     phone: formData.get("phone"),
     email: formData.get("email"),
     pin: formData.get("pin"),
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Teacher added successfully!");
@@ -356,21 +357,21 @@ export async function addPayment(formData) {
     academic_year: parsed.data.academic_year || null,
     month: parsed.data.month || null,
     receipt_no: parsed.data.receipt_no || null,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   if (paidDate) {
     const insertedFee = await db
       .select()
       .from(schema.fees)
-      .where(eq(schema.fees.user_id, 2))
+      .where(eq(schema.fees.user_id, MASTER_USER_ID))
       .orderBy(schema.fees.id);
     const lastFee = insertedFee[insertedFee.length - 1];
     if (lastFee) {
       await db.insert(schema.fee_payments).values({
         fee_id: lastFee.id,
         student_id: parseInt(parsed.data.student_id),
-        user_id: 2,
+        user_id: MASTER_USER_ID,
         amount: net_amount,
         payment_mode: formData.get("payment_mode") || "cash",
         paid_date: new Date(paidDate),
@@ -467,7 +468,7 @@ export async function addPeriod(formData) {
     teacher_name: formData.get("teacher_name"),
     start_time: formData.get("start_time"),
     end_time: formData.get("end_time"),
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Period added successfully!");
@@ -486,7 +487,7 @@ export async function createExam(formData) {
     academic_year: formData.get("academic_year") || null,
     max_marks: parseInt(formData.get("max_marks")),
     passing_marks: parseInt(formData.get("passing_marks")),
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Exam scheduled successfully!");
@@ -503,7 +504,7 @@ export async function createNotice(formData) {
     content: formData.get("content"),
     category: formData.get("category"),
     priority: formData.get("priority"),
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Notice posted successfully!");
@@ -524,7 +525,7 @@ export async function savePeriodTimings(formData) {
   // Delete all existing timings first (re-save support)
   await db
     .delete(schema.period_timings)
-    .where(eq(schema.period_timings.user_id, 2));
+    .where(eq(schema.period_timings.user_id, MASTER_USER_ID));
 
   // Insert new timings
   const rows = [];
@@ -534,7 +535,7 @@ export async function savePeriodTimings(formData) {
     const label = formData.get(`label_${i}`) || "teaching";
     if (!start || !end) continue;
     rows.push({
-      user_id: 2,
+      user_id: MASTER_USER_ID,
       period_no: i,
       start_time: start,
       end_time: end,
@@ -565,7 +566,7 @@ export async function saveTeacherWeekSchedule(formData) {
     .where(
       and(
         eq(schema.teachers.id, teacherId),
-        eq(schema.teachers.user_id, 2),
+        eq(schema.teachers.user_id, MASTER_USER_ID),
       ),
     );
   const teacher = teacherResult[0];
@@ -584,7 +585,7 @@ export async function saveTeacherWeekSchedule(formData) {
   const timings = await db
     .select()
     .from(schema.period_timings)
-    .where(eq(schema.period_timings.user_id, 2));
+    .where(eq(schema.period_timings.user_id, MASTER_USER_ID));
 
   const timingMap = {};
   timings.forEach((t) => {
@@ -596,7 +597,7 @@ export async function saveTeacherWeekSchedule(formData) {
     .delete(schema.timetable)
     .where(
       and(
-        eq(schema.timetable.user_id, 2),
+        eq(schema.timetable.user_id, MASTER_USER_ID),
         eq(schema.timetable.teacher_name, teacher.name),
       ),
     );
@@ -630,7 +631,7 @@ export async function saveTeacherWeekSchedule(formData) {
       const endTime = timing?.end || "00:00";
       const fullClass = section ? `${className}-${section}` : className;
       rows.push({
-        user_id: 2,
+        user_id: MASTER_USER_ID,
         class: fullClass,
         day: targetDay,
         period: p,
@@ -675,7 +676,7 @@ export async function addRoute(formData) {
     monthly_fee: parseFloat(formData.get("monthly_fee")) || 0,
     driver_name: formData.get("driver_name") || null,
     vehicle_no: formData.get("vehicle_no") || null,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Route added successfully!");
@@ -695,7 +696,7 @@ export async function assignStudent(formData) {
     transport_id,
     academic_year: formData.get("academic_year") || null,
     joined_date: formData.get("joined_date") || null,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Student assigned to transport successfully!");
@@ -717,7 +718,7 @@ export async function issueCertificate(formData) {
     last_exam_passed: formData.get("last_exam_passed") || null,
     conduct: formData.get("conduct") || "Good",
     custom_content: formData.get("custom_content") || null,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Certificate issued successfully!");
@@ -745,7 +746,7 @@ export async function saveSettings(formData) {
   const existing = await db
     .select()
     .from(schema.school_settings)
-    .where(eq(schema.school_settings.user_id, 2));
+    .where(eq(schema.school_settings.user_id, MASTER_USER_ID));
   const current = existing[0] || {};
 
   let logo_url = current.logo_url || null;
@@ -801,7 +802,7 @@ export async function saveSettings(formData) {
   }
 
   const data = {
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     ...parsed.data,
     logo_url,
     qr_code_url,
@@ -812,7 +813,7 @@ export async function saveSettings(formData) {
     await db
       .update(schema.school_settings)
       .set(data)
-      .where(eq(schema.school_settings.user_id, 2));
+      .where(eq(schema.school_settings.user_id, MASTER_USER_ID));
   } else {
     await db.insert(schema.school_settings).values(data);
   }
@@ -839,7 +840,7 @@ export async function addTeacherSubject(formData) {
     subject,
     class: className,
     section,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Subject assigned successfully!");
@@ -854,7 +855,7 @@ export async function deleteStudent(formData) {
     .select()
     .from(schema.students)
     .where(
-      and(eq(schema.students.id, id), eq(schema.students.user_id, 2)),
+      and(eq(schema.students.id, id), eq(schema.students.user_id, MASTER_USER_ID)),
     );
   if (!studentCheck.length) redirect("/students");
 
@@ -886,7 +887,7 @@ export async function deleteTeacher(formData) {
     .select()
     .from(schema.teachers)
     .where(
-      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, 2)),
+      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, MASTER_USER_ID)),
     );
   if (!teacherCheck.length) redirect("/teachers");
 
@@ -907,7 +908,7 @@ export async function updateTeacher(formData) {
     .select()
     .from(schema.teachers)
     .where(
-      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, 2)),
+      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, MASTER_USER_ID)),
     );
   if (!teacherCheck.length) redirect("/teachers");
 
@@ -920,7 +921,7 @@ export async function updateTeacher(formData) {
       email: formData.get("email") || null,
     })
     .where(
-      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, 2)),
+      and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, MASTER_USER_ID)),
     );
 
   await setFlash("success", "Teacher updated successfully!");
@@ -941,7 +942,7 @@ export async function deleteTeacherSubject(formData) {
     .where(
       and(
         eq(schema.teachers.id, teacher_id),
-        eq(schema.teachers.user_id, 2),
+        eq(schema.teachers.user_id, MASTER_USER_ID),
       ),
     );
   if (!teacherOwner.length) redirect(`/teachers/${teacher_id}`);
@@ -970,7 +971,7 @@ export async function markFeePaid(formData) {
   await db.insert(schema.fee_payments).values({
     fee_id,
     student_id: fee.student_id,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     amount: paid_amount,
     payment_mode,
     paid_date: new Date(paid_date),
@@ -1005,7 +1006,7 @@ export async function addFeeStructure(formData) {
   if (!cls || !fee_type || !amount) redirect("/fee-structure/add");
 
   await db.insert(schema.fee_structures).values({
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     class: cls,
     fee_type,
     amount,
@@ -1026,7 +1027,7 @@ export async function deleteFeeStructure(formData) {
     .where(
       and(
         eq(schema.fee_structures.id, id),
-        eq(schema.fee_structures.user_id, 2),
+        eq(schema.fee_structures.user_id, MASTER_USER_ID),
       ),
     );
 
@@ -1048,7 +1049,7 @@ export async function addConcession(formData) {
     reason,
     discount_type,
     discount_value,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     created_at: new Date(),
   });
 

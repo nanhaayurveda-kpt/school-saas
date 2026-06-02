@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { MASTER_USER_ID } from "@/lib/config";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -35,19 +36,19 @@ export default async function DashboardPage() {
   const [studentCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(students)
-    .where(eq(students.user_id, 2));
+    .where(eq(students.user_id, MASTER_USER_ID));
   const [teacherCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(teachers)
-    .where(eq(teachers.user_id, 2));
+    .where(eq(teachers.user_id, MASTER_USER_ID));
   const [pendingFees] = await db
     .select({ total: sql`SUM(amount)`, count: sql`COUNT(*)` })
     .from(fees)
-    .where(and(sql`status = 'pending'`, eq(fees.user_id, 2)));
+    .where(and(sql`status = 'pending'`, eq(fees.user_id, MASTER_USER_ID)));
   const [paidFees] = await db
     .select({ total: sql`SUM(paid_amount)` })
     .from(fees)
-    .where(eq(fees.user_id, 2));
+    .where(eq(fees.user_id, MASTER_USER_ID));
   // Student-wise fee totals (all fee_types combined) for fee snapshot
   const feeRows = await db
     .select({
@@ -60,14 +61,14 @@ export default async function DashboardPage() {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(eq(fees.user_id, 2));
+    .where(eq(fees.user_id, MASTER_USER_ID));
 
   const feeByStudent = {};
   // start with ALL students so every class appears, even with no fee entry
   const allStudentsForFee = await db
     .select({ id: students.id, name: students.name, class: students.class })
     .from(students)
-    .where(eq(students.user_id, 2));
+    .where(eq(students.user_id, MASTER_USER_ID));
   allStudentsForFee.forEach((s) => {
     feeByStudent[s.id] = {
       name: s.name || "—",
@@ -104,7 +105,7 @@ export default async function DashboardPage() {
     .from(attendance)
     .where(
       and(
-        eq(attendance.user_id, 2),
+        eq(attendance.user_id, MASTER_USER_ID),
         sql`date = ${today} AND status = 'present'`,
       ),
     );
@@ -113,7 +114,7 @@ export default async function DashboardPage() {
     .from(attendance)
     .where(
       and(
-        eq(attendance.user_id, 2),
+        eq(attendance.user_id, MASTER_USER_ID),
         sql`date = ${today} AND status = 'absent'`,
       ),
     );
@@ -126,7 +127,7 @@ export default async function DashboardPage() {
     })
     .from(attendance)
     .leftJoin(students, eq(attendance.student_id, students.id))
-    .where(and(eq(attendance.user_id, 2), eq(attendance.date, today)));
+    .where(and(eq(attendance.user_id, MASTER_USER_ID), eq(attendance.date, today)));
 
   const classMap = {};
   const markedStudentNames = {};
@@ -146,7 +147,7 @@ export default async function DashboardPage() {
   const allStudentsForNA = await db
     .select({ name: students.name, class: students.class })
     .from(students)
-    .where(eq(students.user_id, 2));
+    .where(eq(students.user_id, MASTER_USER_ID));
   allStudentsForNA.forEach((s) => {
     const cls = s.class || "—";
     if (!classMap[cls]) classMap[cls] = { present: [], absent: [], na: [] };
@@ -170,7 +171,7 @@ export default async function DashboardPage() {
     .leftJoin(teachers, eq(teacher_attendance.teacher_id, teachers.id))
     .where(
       and(
-        eq(teacher_attendance.user_id, 2),
+        eq(teacher_attendance.user_id, MASTER_USER_ID),
         eq(teacher_attendance.date, today),
       ),
     );
@@ -185,29 +186,29 @@ export default async function DashboardPage() {
   const allTeachersForNA = await db
     .select({ name: teachers.name })
     .from(teachers)
-    .where(eq(teachers.user_id, 2));
+    .where(eq(teachers.user_id, MASTER_USER_ID));
   const staffNAList = allTeachersForNA
     .map((t) => t.name)
     .filter((n) => !markedStaffNames.has(n));
   const [examCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(exams)
-    .where(eq(exams.user_id, 2));
+    .where(eq(exams.user_id, MASTER_USER_ID));
   const [noticeCount] = await db
     .select({ count: sql`COUNT(*)` })
     .from(notices)
-    .where(eq(notices.user_id, 2));
+    .where(eq(notices.user_id, MASTER_USER_ID));
 
   const recentNotices = await db
     .select()
     .from(notices)
-    .where(eq(notices.user_id, 2))
+    .where(eq(notices.user_id, MASTER_USER_ID))
     .orderBy(sql`created_at DESC`)
     .limit(3);
   const upcomingExams = await db
     .select()
     .from(exams)
-    .where(and(sql`exam_date >= ${today}`, eq(exams.user_id, 2)))
+    .where(and(sql`exam_date >= ${today}`, eq(exams.user_id, MASTER_USER_ID)))
     .orderBy(sql`exam_date ASC`)
     .limit(3);
 
@@ -215,7 +216,7 @@ export default async function DashboardPage() {
     ? await db
         .select()
         .from(school_settings)
-        .where(eq(school_settings.user_id, 2))
+        .where(eq(school_settings.user_id, MASTER_USER_ID))
     : [];
   const settings = settingsRows[0] || null;
   const settingsIncomplete =

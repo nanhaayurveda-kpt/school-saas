@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { fee_structures } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -17,7 +18,7 @@ export default async function EditFeeStructurePage({ params }) {
     .where(
       and(
         eq(fee_structures.id, structureId),
-        eq(fee_structures.user_id, 2),
+        eq(fee_structures.user_id, MASTER_USER_ID),
       ),
     );
   const structure = rows[0];

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { students, attendance } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import AttendanceForm from "./AttendanceForm";
@@ -27,7 +28,7 @@ export default async function MarkAttendancePage({ searchParams }) {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, 2));
+    .where(eq(students.user_id, MASTER_USER_ID));
   const classes = [
     "Nursery",
     "LKG",
@@ -54,7 +55,7 @@ export default async function MarkAttendancePage({ searchParams }) {
     .from(attendance)
     .leftJoin(students, eq(attendance.student_id, students.id))
     .where(
-      and(eq(attendance.date, selectedDate), eq(students.user_id, 2)),
+      and(eq(attendance.date, selectedDate), eq(students.user_id, MASTER_USER_ID)),
     );
   const attendanceMap = {};
   existing.forEach((a) => {

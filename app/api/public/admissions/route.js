@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 
@@ -27,7 +28,7 @@ export async function POST(request) {
   }
 
   await db.insert(schema.admission_applications).values({
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     name,
     dob: body.dob?.trim() || null,
     applying_class,

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { notices } from "@/lib/schema";
 import { desc } from "drizzle-orm";
 import Link from "next/link";
@@ -22,7 +23,7 @@ export default async function NoticesPage() {
   const allNotices = await db
     .select()
     .from(notices)
-    .where(eq(notices.user_id, 2))
+    .where(eq(notices.user_id, MASTER_USER_ID))
     .orderBy(desc(notices.created_at));
 
   return (

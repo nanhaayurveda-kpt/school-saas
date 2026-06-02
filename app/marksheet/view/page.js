@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { exams, students, results, school_settings, users } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
@@ -34,14 +35,14 @@ export default async function MarksheetViewPage({ searchParams }) {
   const settingsRows = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, 2));
+    .where(eq(school_settings.user_id, MASTER_USER_ID));
   const school = settingsRows[0] || {};
 
   const classStudents = await db
     .select()
     .from(students)
     .where(
-      and(eq(students.class, selectedClass), eq(students.user_id, 2)),
+      and(eq(students.class, selectedClass), eq(students.user_id, MASTER_USER_ID)),
     )
     .orderBy(students.roll_number, students.name);
   if (classStudents.length === 0) {
@@ -73,7 +74,7 @@ export default async function MarksheetViewPage({ searchParams }) {
   const conditions = [
     eq(exams.class, selectedClass),
     eq(exams.exam_type, selectedType),
-    eq(exams.user_id, 2),
+    eq(exams.user_id, MASTER_USER_ID),
   ];
   if (selectedYear) conditions.push(eq(exams.academic_year, selectedYear));
 

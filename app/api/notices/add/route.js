@@ -1,5 +1,6 @@
 // app/api/notices/add/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -45,7 +46,7 @@ export async function POST(request) {
   // legitimately weeks later), so we just protect against rapid retries.
   const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
   const conditions = [
-    eq(schema.notices.user_id, 2),
+    eq(schema.notices.user_id, MASTER_USER_ID),
     eq(schema.notices.title, title),
     eq(schema.notices.content, content),
   ];
@@ -70,7 +71,7 @@ export async function POST(request) {
     content,
     category,
     priority,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Notice posted successfully!");

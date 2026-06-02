@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { students, teachers, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -27,8 +28,8 @@ export default async function AddPeriodPage({ searchParams }) {
   if (!user) redirect("/login");
 
   const [allStudents, allTeachers] = await Promise.all([
-    db.select().from(students).where(eq(students.user_id, 2)),
-    db.select().from(teachers).where(eq(teachers.user_id, 2)),
+    db.select().from(students).where(eq(students.user_id, MASTER_USER_ID)),
+    db.select().from(teachers).where(eq(teachers.user_id, MASTER_USER_ID)),
   ]);
   const classes = [...new Set(allStudents.map((s) => s.class))].sort();
   const days = [

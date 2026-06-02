@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { students, fee_concessions, users, fees } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -28,7 +29,7 @@ export default async function StudentDetailPage({ params }) {
   const result = await db
     .select()
     .from(students)
-    .where(and(eq(students.id, Number(id)), eq(students.user_id, 2)));
+    .where(and(eq(students.id, Number(id)), eq(students.user_id, MASTER_USER_ID)));
   if (result.length === 0) notFound();
   const s = result[0];
 

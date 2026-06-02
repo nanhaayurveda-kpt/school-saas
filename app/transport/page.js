@@ -3,6 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { transport, student_transport, students } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
@@ -23,7 +24,7 @@ export default async function TransportPage() {
   const allRoutes = await db
     .select()
     .from(transport)
-    .where(eq(transport.user_id, 2))
+    .where(eq(transport.user_id, MASTER_USER_ID))
     .orderBy(transport.route_name);
 
   const allAssignments = await db

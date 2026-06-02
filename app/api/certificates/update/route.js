@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { certificates, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -35,7 +36,7 @@ export async function POST(request) {
   const existing = await db
     .select()
     .from(certificates)
-    .where(and(eq(certificates.id, id), eq(certificates.user_id, 2)));
+    .where(and(eq(certificates.id, id), eq(certificates.user_id, MASTER_USER_ID)));
   if (existing.length === 0) {
     return NextResponse.redirect(new URL("/certificates", request.url), 303);
   }
@@ -51,7 +52,7 @@ export async function POST(request) {
       conduct: formData.get("conduct") || "Good",
       custom_content: formData.get("custom_content") || null,
     })
-    .where(and(eq(certificates.id, id), eq(certificates.user_id, 2)));
+    .where(and(eq(certificates.id, id), eq(certificates.user_id, MASTER_USER_ID)));
 
   return NextResponse.redirect(new URL("/certificates", request.url), 303);
 }

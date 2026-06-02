@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { admission_applications } from "@/lib/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -19,7 +20,7 @@ export default async function ApplicationsPage({ searchParams }) {
   const all = await db
     .select()
     .from(admission_applications)
-    .where(eq(admission_applications.user_id, 2))
+    .where(eq(admission_applications.user_id, MASTER_USER_ID))
     .orderBy(desc(admission_applications.created_at));
 
   const counts = {

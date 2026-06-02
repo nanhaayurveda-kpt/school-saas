@@ -1,5 +1,6 @@
 // app/api/teachers/delete-subject/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -50,7 +51,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.teachers.id, teacher_id),
-        eq(schema.teachers.user_id, 2),
+        eq(schema.teachers.user_id, MASTER_USER_ID),
       ),
     );
   if (!teacherOwner.length) {

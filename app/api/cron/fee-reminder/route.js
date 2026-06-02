@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { fees, students, school_settings } from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -22,7 +23,7 @@ export async function GET(req) {
     const settingsRows = await db
       .select()
       .from(school_settings)
-      .where(eq(school_settings.user_id, 2));
+      .where(eq(school_settings.user_id, MASTER_USER_ID));
     const schoolName = settingsRows[0]?.school_name || "School";
     const lateFeeAmount = settingsRows[0]?.late_fee_amount || 100;
 
@@ -34,7 +35,7 @@ export async function GET(req) {
       .from(fees)
       .where(
         and(
-          eq(fees.user_id, 2),
+          eq(fees.user_id, MASTER_USER_ID),
           eq(fees.fee_type, "monthly"),
           inArray(fees.status, ["pending", "partial", "overdue"]),
         ),
@@ -49,7 +50,7 @@ export async function GET(req) {
 
       // पहले से इसी बच्चे+महीने की late row न हो
       const lateConditions = [
-        eq(fees.user_id, 2),
+        eq(fees.user_id, MASTER_USER_ID),
         eq(fees.student_id, fee.student_id),
         eq(fees.fee_type, "late"),
         eq(fees.month, fee.month),
@@ -74,7 +75,7 @@ export async function GET(req) {
 
       await db.insert(fees).values({
         student_id: fee.student_id,
-        user_id: 2,
+        user_id: MASTER_USER_ID,
         amount: lateFeeAmount,
         paid_amount: 0,
         fee_type: "late",
@@ -101,7 +102,7 @@ export async function GET(req) {
       .from(fees)
       .where(
         and(
-          eq(fees.user_id, 2),
+          eq(fees.user_id, MASTER_USER_ID),
           inArray(fees.status, ["pending", "overdue"]),
         ),
       );
@@ -109,7 +110,7 @@ export async function GET(req) {
     const allStudents = await db
       .select()
       .from(students)
-      .where(eq(students.user_id, 2));
+      .where(eq(students.user_id, MASTER_USER_ID));
     const studentMap = {};
     allStudents.forEach((s) => {
       studentMap[s.id] = s;

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { school_settings, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -27,7 +28,7 @@ export default async function SettingsPage() {
   const result = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, 2));
+    .where(eq(school_settings.user_id, MASTER_USER_ID));
   const s = result[0] || {};
 
   return (

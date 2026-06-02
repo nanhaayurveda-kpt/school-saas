@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { certificates, students, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
@@ -50,7 +51,7 @@ export default async function EditCertificatePage({ params }) {
     .from(certificates)
     .leftJoin(students, eq(certificates.student_id, students.id))
     .where(
-      and(eq(certificates.id, certId), eq(certificates.user_id, 2)),
+      and(eq(certificates.id, certId), eq(certificates.user_id, MASTER_USER_ID)),
     );
 
   if (rows.length === 0) notFound();

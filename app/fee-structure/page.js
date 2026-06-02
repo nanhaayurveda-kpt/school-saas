@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { fee_packages, fee_package_items, users } from "@/lib/schema";
 import { eq, inArray } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -36,7 +37,7 @@ export default async function FeeStructurePage() {
   const allPackages = await db
     .select()
     .from(fee_packages)
-    .where(eq(fee_packages.user_id, 2))
+    .where(eq(fee_packages.user_id, MASTER_USER_ID))
     .orderBy(fee_packages.class);
 
   const packageIds = allPackages.map((p) => p.id);

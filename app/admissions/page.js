@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { students, users } from "@/lib/schema";
 import { desc, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -25,7 +26,7 @@ export default async function AdmissionsPage() {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, 2))
+    .where(eq(students.user_id, MASTER_USER_ID))
     .orderBy(desc(students.admission_date));
 
   const now = new Date();

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { fee_packages, fee_package_items } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -20,7 +21,7 @@ export default async function EditPackagePage({ params }) {
   const pkgRows = await db
     .select()
     .from(fee_packages)
-    .where(and(eq(fee_packages.id, packageId), eq(fee_packages.user_id, 2)));
+    .where(and(eq(fee_packages.id, packageId), eq(fee_packages.user_id, MASTER_USER_ID)));
   const pkg = pkgRows[0];
   if (!pkg) redirect("/fee-structure");
 

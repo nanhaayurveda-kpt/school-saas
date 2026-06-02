@@ -1,5 +1,6 @@
 // app/api/parents/save/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -58,7 +59,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, student_id),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
   if (!studentCheck.length) {
@@ -70,7 +71,7 @@ export async function POST(request) {
     phone,
     email: email || null,
     password,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
   };
 
   // ─── UPSERT pattern (naturally retry-safe) ─────────────────────────────
@@ -82,7 +83,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.parents.student_id, student_id),
-        eq(schema.parents.user_id, 2),
+        eq(schema.parents.user_id, MASTER_USER_ID),
       ),
     );
 
@@ -98,7 +99,7 @@ export async function POST(request) {
       .where(
         and(
           eq(schema.parents.student_id, student_id),
-          eq(schema.parents.user_id, 2),
+          eq(schema.parents.user_id, MASTER_USER_ID),
         ),
       );
     await setFlash("success", "Parent account updated successfully!");

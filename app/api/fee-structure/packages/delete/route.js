@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -31,7 +32,7 @@ export async function POST(request) {
   const ownRows = await db
     .select({ id: schema.fee_packages.id })
     .from(schema.fee_packages)
-    .where(and(eq(schema.fee_packages.id, id), eq(schema.fee_packages.user_id, 2)));
+    .where(and(eq(schema.fee_packages.id, id), eq(schema.fee_packages.user_id, MASTER_USER_ID)));
   if (ownRows.length === 0) {
     return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
   }
@@ -40,7 +41,7 @@ export async function POST(request) {
 
   await db
     .delete(schema.fee_packages)
-    .where(and(eq(schema.fee_packages.id, id), eq(schema.fee_packages.user_id, 2)));
+    .where(and(eq(schema.fee_packages.id, id), eq(schema.fee_packages.user_id, MASTER_USER_ID)));
 
   await setFlash("success", "Package deleted");
   return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });

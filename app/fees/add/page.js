@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import {
   students,
   fee_packages,
@@ -22,14 +23,14 @@ export default async function AddFeePage() {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, 2))
+    .where(eq(students.user_id, MASTER_USER_ID))
     .orderBy(students.name);
 
   // Class-wise template (packages + items)
   const allPackages = await db
     .select()
     .from(fee_packages)
-    .where(eq(fee_packages.user_id, 2));
+    .where(eq(fee_packages.user_id, MASTER_USER_ID));
   const packageIds = allPackages.map((p) => p.id);
   const allItems =
     packageIds.length > 0
@@ -51,7 +52,7 @@ export default async function AddFeePage() {
       paid_amount: fees.paid_amount,
     })
     .from(fees)
-    .where(and(eq(fees.user_id, 2), ne(fees.status, "paid")));
+    .where(and(eq(fees.user_id, MASTER_USER_ID), ne(fees.status, "paid")));
   const duesMap = {};
   for (const f of unpaid) {
     const bal = (f.amount || 0) - (f.paid_amount || 0);
@@ -62,7 +63,7 @@ export default async function AddFeePage() {
   const allConcessions = await db
     .select()
     .from(fee_concessions)
-    .where(eq(fee_concessions.user_id, 2));
+    .where(eq(fee_concessions.user_id, MASTER_USER_ID));
   const studentIds = allStudents.map((s) => s.id);
   const concessions = allConcessions.filter((c) =>
     studentIds.includes(c.student_id),

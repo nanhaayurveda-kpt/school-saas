@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { redirect } from "next/navigation";
 import {
   fees,
@@ -48,7 +49,7 @@ export default async function FeeReceiptPage({ params }) {
   const settingsResult = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, 2));
+    .where(eq(school_settings.user_id, MASTER_USER_ID));
   const settings = settingsResult[0] || {};
 
   const [anchor] = await db
@@ -69,7 +70,7 @@ export default async function FeeReceiptPage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, 2)));
+    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, MASTER_USER_ID)));
 
   if (!anchor)
     return <div className="p-8 text-red-500">Receipt not found.</div>;
@@ -90,7 +91,7 @@ export default async function FeeReceiptPage({ params }) {
     .from(fees)
     .where(
       and(
-        eq(fees.user_id, 2),
+        eq(fees.user_id, MASTER_USER_ID),
         eq(fees.student_id, anchor.student_id),
         eq(fees.receipt_no, anchor.receipt_no),
       ),

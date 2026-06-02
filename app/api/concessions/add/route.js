@@ -1,5 +1,6 @@
 // app/api/concessions/add/route.js
 import { NextResponse } from "next/server";
+import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -66,7 +67,7 @@ export async function POST(request) {
     .where(
       and(
         eq(schema.students.id, student_id),
-        eq(schema.students.user_id, 2),
+        eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
   if (!studentCheck.length) {
@@ -80,7 +81,7 @@ export async function POST(request) {
     .from(schema.fee_concessions)
     .where(
       and(
-        eq(schema.fee_concessions.user_id, 2),
+        eq(schema.fee_concessions.user_id, MASTER_USER_ID),
         eq(schema.fee_concessions.student_id, student_id),
       ),
     );
@@ -101,7 +102,7 @@ export async function POST(request) {
     reason,
     discount_type,
     discount_value,
-    user_id: 2,
+    user_id: MASTER_USER_ID,
     created_at: new Date(),
   });
 

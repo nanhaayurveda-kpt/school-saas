@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
+import { MASTER_USER_ID } from "@/lib/config";
 import { students, fees, attendance, results, exams } from "@/lib/schema";
 import { sql, eq } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -21,7 +22,7 @@ export default async function ReportsPage() {
   const classWiseStudents = await db
     .select({ class: students.class, count: sql`COUNT(*)` })
     .from(students)
-    .where(eq(students.user_id, 2))
+    .where(eq(students.user_id, MASTER_USER_ID))
     .groupBy(students.class)
     .orderBy(students.class);
 
@@ -35,7 +36,7 @@ export default async function ReportsPage() {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(eq(students.user_id, 2))
+    .where(eq(students.user_id, MASTER_USER_ID))
     .groupBy(students.class)
     .orderBy(students.class);
 
@@ -47,7 +48,7 @@ export default async function ReportsPage() {
     })
     .from(attendance)
     .leftJoin(students, eq(attendance.student_id, students.id))
-    .where(eq(students.user_id, 2))
+    .where(eq(students.user_id, MASTER_USER_ID))
     .groupBy(students.class)
     .orderBy(students.class);
 
@@ -66,7 +67,7 @@ export default async function ReportsPage() {
     })
     .from(exams)
     .leftJoin(results, eq(results.exam_id, exams.id))
-    .where(eq(exams.user_id, 2))
+    .where(eq(exams.user_id, MASTER_USER_ID))
     .groupBy(exams.id)
     .orderBy(sql`${exams.exam_date} DESC`);
 
