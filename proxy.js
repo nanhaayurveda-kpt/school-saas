@@ -24,15 +24,7 @@ export async function proxy(request) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") || "";
 
-  // Hide Vercel default URL — redirect to custom domain
-  if (host === "shashwat-public.vercel.app") {
-    const url = new URL(request.url);
-    url.host = "erp.spsvaranasi.in";
-    url.protocol = "https:";
-    return NextResponse.redirect(url, { status: 308 });
-  }
-
-  // Teacher routes — teacher_session
+   // Teacher routes — teacher_session
   if (pathname.startsWith("/teacher/")) {
     const teacherToken = request.cookies.get("teacher_session")?.value;
     if (!teacherToken) {
