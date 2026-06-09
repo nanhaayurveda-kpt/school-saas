@@ -16,7 +16,7 @@ export default function DeleteStudentButton({ studentId, studentName }) {
       method="POST"
       action="/api/students/delete"
       onSubmit={handleSubmit}
-      className="inline"
+      className="inline-flex items-center"
     >
       <input type="hidden" name="id" value={studentId} />
       <button type="submit" className="text-xs text-red-500 font-medium">

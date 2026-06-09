@@ -65,7 +65,11 @@ export default async function FeesPage({ searchParams }) {
   const summary = {
     total_collected: allFees.reduce((s, f) => s + (f.paid_amount || 0), 0),
     total_pending: allFees
-      .filter((f) => f.status !== "paid")
+      .filter(
+        (f) =>
+          f.status !== "paid" &&
+          !(f.due_date && new Date(f.due_date) < todayDate),
+      )
       .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
     total_overdue: allFees
       .filter(isOverdue)
