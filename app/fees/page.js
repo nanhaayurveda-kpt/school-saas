@@ -252,7 +252,7 @@ export default async function FeesPage({ searchParams }) {
               rel="noopener noreferrer"
               className="text-green-600 font-medium"
             >
-              Remind
+              📲 Remind via WhatsApp
             </a>
           )}
         </div>
@@ -285,19 +285,14 @@ export default async function FeesPage({ searchParams }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-2 gap-3 mb-5">
         <div className="bg-green-50 rounded-xl p-3 border border-green-100">
           <p className="text-xs text-green-600 font-medium">Collected</p>
           <p className="text-lg font-bold text-green-700 mt-1">
             ₹{summary.total_collected || 0}
           </p>
         </div>
-        <div className="bg-red-50 rounded-xl p-3 border border-red-100">
-          <p className="text-xs text-red-500 font-medium">Pending</p>
-          <p className="text-lg font-bold text-red-600 mt-1">
-            ₹{summary.total_pending || 0}
-          </p>
-        </div>
+
         <div className="bg-red-50 rounded-xl p-3 border border-red-200">
           <p className="text-xs text-red-700 font-medium">Overdue</p>
           <p className="text-lg font-bold text-red-700 mt-1">
