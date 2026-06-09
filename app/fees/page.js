@@ -197,7 +197,11 @@ export default async function FeesPage({ searchParams }) {
                       >
                         Pay
                       </Link>
-                      <form method="POST" action="/api/fees/delete">
+                      <form
+                        method="POST"
+                        action="/api/fees/delete"
+                        className="inline-flex items-center"
+                      >
                         <input type="hidden" name="id" value={f.id} />
                         <button
                           type="submit"
@@ -215,7 +219,11 @@ export default async function FeesPage({ searchParams }) {
                       >
                         Receipt
                       </Link>
-                      <form method="POST" action="/api/fees/delete">
+                      <form
+                        method="POST"
+                        action="/api/fees/delete"
+                        className="inline-flex items-center"
+                      >
                         <input type="hidden" name="id" value={f.id} />
                         <button
                           type="submit"
