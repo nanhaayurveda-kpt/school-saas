@@ -96,7 +96,11 @@ export default async function StudentDashboardPage() {
     total: myFees.reduce((s, f) => s + (f.amount || 0), 0),
     paid: myFees.reduce((s, f) => s + (f.paid_amount || 0), 0),
     pending: myFees
-      .filter((f) => f.status !== "paid")
+      .filter(
+        (f) =>
+          f.status !== "paid" &&
+          !(f.due_date && new Date(f.due_date) < todayDate),
+      )
       .reduce((s, f) => s + ((f.amount || 0) - (f.paid_amount || 0)), 0),
     overdue: myFees
       .filter(
@@ -193,13 +197,7 @@ export default async function StudentDashboardPage() {
                 </p>
               </div>
             )}{" "}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-gray-100">
-              <div className="bg-white px-4 py-4 text-center">
-                <div className="text-xs text-gray-500">Total</div>
-                <div className="text-lg font-bold text-gray-900 mt-1">
-                  ₹{feeSummary.total}
-                </div>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-gray-100">
               <div className="bg-white px-4 py-4 text-center">
                 <div className="text-xs text-green-600">Paid</div>
                 <div className="text-lg font-bold text-green-700 mt-1">
