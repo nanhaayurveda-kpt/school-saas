@@ -246,7 +246,10 @@ export default async function StudentDashboardPage() {
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-gray-900">
-                          ₹{f.amount}
+                          ₹
+                          {(f.amount || 0) - (f.paid_amount || 0) > 0
+                            ? `₹${(f.amount || 0) - (f.paid_amount || 0)} due`
+                            : `₹${f.amount}`}
                         </div>
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${
