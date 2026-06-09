@@ -199,18 +199,6 @@ export default async function StudentDashboardPage() {
             )}{" "}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-gray-100">
               <div className="bg-white px-4 py-4 text-center">
-                <div className="text-xs text-green-600">Paid</div>
-                <div className="text-lg font-bold text-green-700 mt-1">
-                  ₹{feeSummary.paid}
-                </div>
-              </div>
-              <div className="bg-white px-4 py-4 text-center">
-                <div className="text-xs text-orange-600">Pending</div>
-                <div className="text-lg font-bold text-orange-600 mt-1">
-                  ₹{feeSummary.pending}
-                </div>
-              </div>
-              <div className="bg-white px-4 py-4 text-center">
                 <div className="text-xs text-red-600">Overdue</div>
                 <div className="text-lg font-bold text-red-600 mt-1">
                   ₹{feeSummary.overdue}
