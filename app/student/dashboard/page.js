@@ -188,8 +188,7 @@ export default async function StudentDashboardPage() {
             {feeSummary.pending + feeSummary.overdue > 0 && (
               <div className="bg-blue-50 border-b border-blue-100 px-6 py-5">
                 <p className="text-sm font-semibold text-gray-700 mb-1 text-center">
-                  Pending ₹{feeSummary.pending + feeSummary.overdue} — Pay
-                  Online
+                  Due ₹{feeSummary.pending + feeSummary.overdue} — Pay Online
                 </p>
                 <PaymentQR />
                 <p className="text-xs text-gray-500 mt-3 text-center">
@@ -197,7 +196,19 @@ export default async function StudentDashboardPage() {
                 </p>
               </div>
             )}{" "}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-gray-100">
+            <div className="grid grid-cols-3 gap-px bg-gray-100">
+              <div className="bg-white px-4 py-4 text-center">
+                <div className="text-xs text-gray-500">Total</div>
+                <div className="text-lg font-bold text-gray-900 mt-1">
+                  ₹{feeSummary.total}
+                </div>
+              </div>
+              <div className="bg-white px-4 py-4 text-center">
+                <div className="text-xs text-green-600">Paid</div>
+                <div className="text-lg font-bold text-green-700 mt-1">
+                  ₹{feeSummary.paid}
+                </div>
+              </div>
               <div className="bg-white px-4 py-4 text-center">
                 <div className="text-xs text-red-600">Overdue</div>
                 <div className="text-lg font-bold text-red-600 mt-1">
