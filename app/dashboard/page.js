@@ -127,7 +127,9 @@ export default async function DashboardPage() {
     })
     .from(attendance)
     .leftJoin(students, eq(attendance.student_id, students.id))
-    .where(and(eq(attendance.user_id, MASTER_USER_ID), eq(attendance.date, today)));
+    .where(
+      and(eq(attendance.user_id, MASTER_USER_ID), eq(attendance.date, today)),
+    );
 
   const classMap = {};
   const markedStudentNames = {};
@@ -434,6 +436,44 @@ export default async function DashboardPage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* All Features */}
+        <div className="mt-6">
+          <h2 className="font-semibold text-gray-900 text-sm mb-3">
+            All Features
+          </h2>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { href: "/students", icon: "🎓", label: "Students" },
+              { href: "/admissions", icon: "📋", label: "Admissions" },
+              { href: "/teachers", icon: "👨‍🏫", label: "Teachers" },
+              { href: "/teacher-login", icon: "🔑", label: "Teacher Login" },
+              { href: "/fees", icon: "💰", label: "Fees" },
+              { href: "/fee-structure", icon: "🏷️", label: "Fee Structure" },
+              { href: "/attendance", icon: "✅", label: "Attendance" },
+              { href: "/exams", icon: "📝", label: "Exams & Results" },
+              { href: "/marksheet", icon: "📄", label: "Marksheet" },
+              { href: "/certificates", icon: "🏅", label: "Certificates" },
+              { href: "/transport", icon: "🚌", label: "Transport" },
+              { href: "/promote", icon: "⬆️", label: "Promote" },
+              { href: "/notices", icon: "📢", label: "Notice Board" },
+              { href: "/timetable", icon: "🗓️", label: "Timetable" },
+              { href: "/reports", icon: "📊", label: "Reports" },
+              { href: "/settings", icon: "⚙️", label: "Settings" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col items-center justify-center text-center active:scale-95 transition aspect-square"
+              >
+                <span className="text-3xl mb-2">{item.icon}</span>
+                <span className="text-xs font-medium text-gray-700 leading-tight">
+                  {item.label}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

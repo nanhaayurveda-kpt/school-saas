@@ -48,11 +48,11 @@ export default async function RootLayout({ children }) {
             {/* Top Bar — only Logout */}
             <div className="fixed top-0 left-0 right-0 z-50 bg-indigo-900 shadow-md">
               <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-3">
-                <a
-                  href="/menu"
+               <a
+               href="/dashboard"
                   className="text-indigo-200 text-sm font-medium hover:text-white transition"
                 >
-                  ☰ Menu
+                  🏠 Home
                 </a>
                 <form action="/logout" method="POST">
                   <button type="submit" className="text-red-300 text-sm">
