@@ -46,7 +46,7 @@ export default async function StudentDashboardPage() {
     .select()
     .from(notices)
     .where(eq(notices.user_id, student.user_id))
-    .orderBy(notices.created_at)
+    .orderBy(desc(notices.created_at))
     .limit(5);
 
   const examResults = await db
@@ -71,7 +71,7 @@ export default async function StudentDashboardPage() {
         eq(teachers.user_id, student.user_id),
       ),
     )
-    .orderBy(homeworks.created_at);
+    .orderBy(desc(homeworks.created_at));
 
   const myFees = await db
     .select()
@@ -246,7 +246,6 @@ export default async function StudentDashboardPage() {
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-gray-900">
-                          ₹
                           {(f.amount || 0) - (f.paid_amount || 0) > 0
                             ? `₹${(f.amount || 0) - (f.paid_amount || 0)} due`
                             : `₹${f.amount}`}

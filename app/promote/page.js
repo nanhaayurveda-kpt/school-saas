@@ -57,24 +57,6 @@ export default async function PromotePage() {
     classCounts[s.class] = (classCounts[s.class] || 0) + 1;
   });
 
-  const allClassOptions = [
-    "Nursery",
-    "LKG",
-    "UKG",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-  ];
-
   return (
     <div>
       <div className="mb-4">
@@ -85,8 +67,8 @@ export default async function PromotePage() {
       </div>
 
       <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4 text-xs text-yellow-800">
-        ⚠️ This action will move all students of the selected class to the next
-        class. This cannot be undone.
+        ⚠️ This action will move the selected students to the next class. This
+        cannot be undone.
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-4">
@@ -114,9 +96,16 @@ export default async function PromotePage() {
         </p>
         <PromoteForm
           classes={classes}
-          allClassOptions={allClassOptions}
           classCounts={classCounts}
           nextAcademicYear={nextAcademicYear}
+          students={allStudents.map((s) => ({
+            id: s.id,
+            name: s.name,
+            roll_number: s.roll_number,
+            class: s.class,
+            section: s.section,
+            academic_year: s.academic_year,
+          }))}
         />
       </div>
     </div>

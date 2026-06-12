@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { setFlash } from "@/lib/flash";
@@ -34,6 +34,10 @@ export async function POST(request) {
   const from_class = formData.get("from_class");
   const to_class = formData.get("to_class");
   const new_academic_year = formData.get("new_academic_year");
+  const student_ids = formData
+    .getAll("student_ids")
+    .map((v) => parseInt(v, 10))
+    .filter((n) => !isNaN(n));
 
   if (!from_class || !to_class || !new_academic_year) {
     await setFlash("error", "All fields are required.");
@@ -45,23 +49,29 @@ export async function POST(request) {
     return NextResponse.redirect(new URL("/promote", request.url), { status: 303 });
   }
 
-  // ─── Count students before promotion (for confirmation message) ────────
+  if (student_ids.length === 0) {
+    await setFlash("error", "Select at least one student to promote.");
+    return NextResponse.redirect(new URL("/promote", request.url), { status: 303 });
+  }
+
+  // ─── Verify: चुने students उसी class + इसी school के हों ──────────────────
   const toPromote = await db
     .select({ id: schema.students.id })
     .from(schema.students)
     .where(
       and(
+        inArray(schema.students.id, student_ids),
         eq(schema.students.class, from_class),
         eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );
 
   if (toPromote.length === 0) {
-    await setFlash("error", `No students in Class ${from_class} to promote.`);
+    await setFlash("error", `No valid students in Class ${from_class} to promote.`);
     return NextResponse.redirect(new URL("/promote", request.url), { status: 303 });
   }
 
-  // ─── Promote ───────────────────────────────────────────────────────────
+  // ─── Promote (सिर्फ चुने हुए) ─────────────────────────────────────────────
   await db
     .update(schema.students)
     .set({
@@ -71,7 +81,7 @@ export async function POST(request) {
     })
     .where(
       and(
-        eq(schema.students.class, from_class),
+        inArray(schema.students.id, toPromote.map((s) => s.id)),
         eq(schema.students.user_id, MASTER_USER_ID),
       ),
     );

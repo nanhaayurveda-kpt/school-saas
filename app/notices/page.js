@@ -5,6 +5,7 @@ import { MASTER_USER_ID } from "@/lib/config";
 import { notices } from "@/lib/schema";
 import { desc } from "drizzle-orm";
 import Link from "next/link";
+import DeleteNotice from "./DeleteNotice";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -90,12 +91,7 @@ export default async function NoticesPage() {
                     })}
                   </p>
                 </div>
-                <Link
-                  href={`/notices/${notice.id}/delete`}
-                  className="ml-3 shrink-0 text-red-400 text-lg"
-                >
-                  🗑️
-                </Link>
+                <DeleteNotice noticeId={notice.id} title={notice.title} />
               </div>
             </div>
           ))}

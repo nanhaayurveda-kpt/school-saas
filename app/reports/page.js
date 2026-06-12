@@ -29,10 +29,11 @@ export default async function ReportsPage() {
   const classWiseFees = await db
     .select({
       class: students.class,
-      total_pending: sql`SUM(CASE WHEN ${fees.status} = 'pending' THEN ${fees.amount} ELSE 0 END)`,
-      total_paid: sql`SUM(CASE WHEN ${fees.status} = 'paid' THEN ${fees.amount} ELSE 0 END)`,
-      pending_count: sql`SUM(CASE WHEN ${fees.status} = 'pending' THEN 1 ELSE 0 END)`,
+      total_paid: sql`SUM(CASE WHEN ${fees.status} = 'paid' THEN ${fees.amount} WHEN ${fees.status} = 'partial' THEN ${fees.paid_amount} ELSE 0 END)`,
+      total_pending: sql`SUM(CASE WHEN ${fees.status} = 'pending' THEN ${fees.amount} WHEN ${fees.status} = 'partial' THEN ${fees.amount} - ${fees.paid_amount} ELSE 0 END)`,
       paid_count: sql`SUM(CASE WHEN ${fees.status} = 'paid' THEN 1 ELSE 0 END)`,
+      partial_count: sql`SUM(CASE WHEN ${fees.status} = 'partial' THEN 1 ELSE 0 END)`,
+      pending_count: sql`SUM(CASE WHEN ${fees.status} = 'pending' THEN 1 ELSE 0 END)`,
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
@@ -123,12 +124,18 @@ export default async function ReportsPage() {
                   <p className="text-sm font-semibold text-gray-900 mb-1">
                     Class {row.class || "—"}
                   </p>
-                  <div className="flex gap-4 text-xs">
+                  <div className="flex flex-wrap gap-4 text-xs">
                     <span className="text-green-600">
-                      ✓ ₹{row.total_paid || 0} ({row.paid_count || 0})
+                      ✓ Collected ₹{row.total_paid || 0} ({row.paid_count || 0}{" "}
+                      paid
+                      {Number(row.partial_count) > 0
+                        ? ` + ${row.partial_count} partial`
+                        : ""}
+                      )
                     </span>
                     <span className="text-red-500">
-                      ✗ ₹{row.total_pending || 0} ({row.pending_count || 0})
+                      ✗ Pending ₹{row.total_pending || 0} (
+                      {row.pending_count || 0})
                     </span>
                   </div>
                 </div>
