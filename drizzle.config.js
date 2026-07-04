@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 /** @type { import("drizzle-kit").Config } */
 export default {
   dialect: "turso",

@@ -178,7 +178,7 @@ export default async function HomePage() {
               className="bg-amber-600 text-white px-8 py-3 rounded-lg hover:bg-amber-700 font-medium shadow-sm"
               style={{ fontSize: "18px" }}
             >
-              प्रशासक लॉगिन →
+              एडमिन लॉगिन →
             </Link>
             <Link
               href="/teacher-login"
