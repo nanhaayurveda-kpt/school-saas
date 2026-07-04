@@ -1,6 +1,5 @@
 // app/api/teachers/add/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -58,7 +57,6 @@ export async function POST(request) {
   // ─── Duplicate check 2: same name + phone in this user's teachers ──────
   if (phone) {
     const conditions = [
-      eq(schema.teachers.user_id, MASTER_USER_ID),
       eq(schema.teachers.name, name),
       eq(schema.teachers.phone, phone),
     ];
@@ -82,7 +80,6 @@ export async function POST(request) {
     phone,
     email,
     pin,
-    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Teacher added successfully!");

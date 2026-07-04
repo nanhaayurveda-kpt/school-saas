@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -110,11 +109,7 @@ export async function POST(request) {
     .select({ id: schema.fee_packages.id })
     .from(schema.fee_packages)
     .where(
-      and(
-        eq(schema.fee_packages.user_id, MASTER_USER_ID),
-        eq(schema.fee_packages.class, cls),
-        eq(schema.fee_packages.academic_year, academic_year),
-      ),
+      and(eq(schema.fee_packages.class, cls), eq(schema.fee_packages.academic_year, academic_year), ),
     );
 
   if (existing.length > 0) {
@@ -131,7 +126,6 @@ export async function POST(request) {
   const computedTotal = items.reduce((sum, i) => sum + i.amount, 0);
 
   await db.insert(schema.fee_packages).values({
-    user_id: MASTER_USER_ID,
     class: cls,
     academic_year,
     total_amount: computedTotal,
@@ -142,11 +136,7 @@ export async function POST(request) {
     .select({ id: schema.fee_packages.id })
     .from(schema.fee_packages)
     .where(
-      and(
-        eq(schema.fee_packages.user_id, MASTER_USER_ID),
-        eq(schema.fee_packages.class, cls),
-        eq(schema.fee_packages.academic_year, academic_year),
-      ),
+      and(eq(schema.fee_packages.class, cls), eq(schema.fee_packages.academic_year, academic_year), ),
     );
   const packageId = inserted[0]?.id;
 

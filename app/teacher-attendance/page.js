@@ -2,7 +2,6 @@
 export const dynamic = "force-dynamic";
 
 import { cookies } from "next/headers";
-import { MASTER_USER_ID } from "@/lib/config";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -32,16 +31,13 @@ export default async function TeacherAttendancePage({ searchParams }) {
   const allTeachers = await db
     .select()
     .from(teachers)
-    .where(eq(teachers.user_id, MASTER_USER_ID));
+    ;
 
   const existing = await db
     .select()
     .from(teacher_attendance)
     .where(
-      and(
-        eq(teacher_attendance.date, selectedDate),
-        eq(teacher_attendance.user_id, MASTER_USER_ID),
-      ),
+      and(eq(teacher_attendance.date, selectedDate), ),
     );
 
   const attendanceMap = {};

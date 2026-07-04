@@ -1,6 +1,5 @@
 // app/api/fees/delete/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -38,7 +37,7 @@ export async function POST(request) {
   const ownRows = await db
     .select({ id: schema.fees.id })
     .from(schema.fees)
-    .where(and(eq(schema.fees.id, id), eq(schema.fees.user_id, MASTER_USER_ID)));
+    .where(eq(schema.fees.id, id));
   if (!ownRows.length) {
     return NextResponse.redirect(new URL("/fees", request.url), { status: 303 });
   }
@@ -46,11 +45,11 @@ export async function POST(request) {
   // Delete child payments first, then the fee
   await db
     .delete(schema.fee_payments)
-    .where(and(eq(schema.fee_payments.fee_id, id), eq(schema.fee_payments.user_id, MASTER_USER_ID)));
+    .where(eq(schema.fee_payments.fee_id, id));
 
   await db
     .delete(schema.fees)
-    .where(and(eq(schema.fees.id, id), eq(schema.fees.user_id, MASTER_USER_ID)));
+    .where(eq(schema.fees.id, id));
 
   await setFlash("success", "Fee record deleted!");
   return NextResponse.redirect(new URL("/fees", request.url), { status: 303 });

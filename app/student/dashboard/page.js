@@ -45,7 +45,7 @@ export default async function StudentDashboardPage() {
   const allNotices = await db
     .select()
     .from(notices)
-    .where(eq(notices.user_id, student.user_id))
+    
     .orderBy(desc(notices.created_at))
     .limit(5);
 
@@ -66,10 +66,7 @@ export default async function StudentDashboardPage() {
     .from(homeworks)
     .leftJoin(teachers, eq(homeworks.teacher_id, teachers.id))
     .where(
-      and(
-        eq(homeworks.class, student.class),
-        eq(teachers.user_id, student.user_id),
-      ),
+      and(eq(homeworks.class, student.class), ),
     )
     .orderBy(desc(homeworks.created_at));
 
@@ -82,7 +79,7 @@ export default async function StudentDashboardPage() {
   const settingsResult = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, student.user_id));
+    ;
   const settings = settingsResult[0] || {};
 
   const myPayments = await db

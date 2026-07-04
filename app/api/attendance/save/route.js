@@ -12,7 +12,9 @@ export async function POST(request) {
   const adminToken = cookieStore.get("session")?.value;
   const teacherToken = cookieStore.get("teacher_session")?.value;
   if (!adminToken && !teacherToken) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
 
   let userId = null;
@@ -21,7 +23,9 @@ export async function POST(request) {
   if (adminToken) {
     const session = await getSession(adminToken);
     if (!session) {
-      return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+      return NextResponse.redirect(new URL("/login", request.url), {
+        status: 303,
+      });
     }
     const userResult = await db
       .select()
@@ -31,18 +35,22 @@ export async function POST(request) {
   } else if (teacherToken) {
     const teacherSession = await getSession(teacherToken);
     if (!teacherSession) {
-      return NextResponse.redirect(new URL("/teacher-login", request.url), { status: 303 });
+      return NextResponse.redirect(new URL("/teacher-login", request.url), {
+        status: 303,
+      });
     }
     const teacherResult = await db
       .select()
       .from(schema.teachers)
       .where(eq(schema.teachers.id, teacherSession.teacherId));
-    userId = teacherResult[0]?.user_id;
+    userId = teacherResult[0]?.id;
     isTeacher = true;
   }
 
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+    return NextResponse.redirect(new URL("/login", request.url), {
+      status: 303,
+    });
   }
 
   const formData = await request.formData();
@@ -59,8 +67,7 @@ export async function POST(request) {
 
   const owned = await db
     .select({ id: schema.students.id })
-    .from(schema.students)
-    .where(eq(schema.students.user_id, userId));
+    .from(schema.students);
   const ownedIds = new Set(owned.map((s) => s.id));
 
   const existingRows = await db
@@ -69,12 +76,7 @@ export async function POST(request) {
       status: schema.attendance.status,
     })
     .from(schema.attendance)
-    .where(
-      and(
-        eq(schema.attendance.date, date),
-        eq(schema.attendance.user_id, userId),
-      ),
-    );
+    .where(and(eq(schema.attendance.date, date)));
   const existingByStudent = new Map(
     existingRows.map((r) => [r.student_id, r.status]),
   );
@@ -105,7 +107,6 @@ export async function POST(request) {
             and(
               eq(schema.attendance.student_id, studentId),
               eq(schema.attendance.date, date),
-              eq(schema.attendance.user_id, userId),
             ),
           );
         removed++;
@@ -124,7 +125,6 @@ export async function POST(request) {
           and(
             eq(schema.attendance.student_id, studentId),
             eq(schema.attendance.date, date),
-            eq(schema.attendance.user_id, userId),
           ),
         );
       updated++;
@@ -133,7 +133,6 @@ export async function POST(request) {
         student_id: studentId,
         date,
         status,
-        user_id: userId,
       });
       inserted++;
     }

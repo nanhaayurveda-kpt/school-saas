@@ -1,6 +1,5 @@
 // app/api/timetable/add-period/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -47,7 +46,6 @@ export async function POST(request) {
 
   // ─── Duplicate check: same class + day + period already taken? ─────────
   const conditions = [
-    eq(schema.timetable.user_id, MASTER_USER_ID),
     eq(schema.timetable.class, className),
     eq(schema.timetable.day, day),
     eq(schema.timetable.period, period),
@@ -73,7 +71,6 @@ export async function POST(request) {
     teacher_name: teacher_name || null,
     start_time: start_time || "00:00",
     end_time: end_time || "00:00",
-    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Period added successfully!");

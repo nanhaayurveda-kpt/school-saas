@@ -1,6 +1,5 @@
 // app/api/fee-structure/[id]/edit/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, ne } from "drizzle-orm";
@@ -57,10 +56,7 @@ export async function POST(request, { params }) {
     .select()
     .from(schema.fee_structures)
     .where(
-      and(
-        eq(schema.fee_structures.id, structureId),
-        eq(schema.fee_structures.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.fee_structures.id, structureId), ),
     );
   if (ownRows.length === 0) {
     return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
@@ -68,7 +64,6 @@ export async function POST(request, { params }) {
 
   // ─── Duplicate check (exclude self) ────────────────────────────────────
   const conditions = [
-    eq(schema.fee_structures.user_id, MASTER_USER_ID),
     eq(schema.fee_structures.class, cls),
     eq(schema.fee_structures.fee_type, fee_type),
     ne(schema.fee_structures.id, structureId),
@@ -93,10 +88,7 @@ export async function POST(request, { params }) {
     .update(schema.fee_structures)
     .set({ class: cls, fee_type, amount, academic_year })
     .where(
-      and(
-        eq(schema.fee_structures.id, structureId),
-        eq(schema.fee_structures.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.fee_structures.id, structureId), ),
     );
 
   await setFlash("success", "Fee structure updated!");

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { exams, results, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -36,14 +35,14 @@ export async function POST(request) {
   const examResult = await db
     .select()
     .from(exams)
-    .where(and(eq(exams.id, examId), eq(exams.user_id, MASTER_USER_ID)));
+    .where(eq(exams.id, examId));
   if (examResult.length === 0) {
     return NextResponse.redirect(new URL("/exams", request.url), 303);
   }
 
   // Delete child rows first (results), then exam
   await db.delete(results).where(eq(results.exam_id, examId));
-  await db.delete(exams).where(and(eq(exams.id, examId), eq(exams.user_id, MASTER_USER_ID)));
+  await db.delete(exams).where(eq(exams.id, examId));
 
   return NextResponse.redirect(new URL("/exams", request.url), 303);
 }

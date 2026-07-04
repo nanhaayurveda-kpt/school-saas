@@ -1,6 +1,5 @@
 // app/api/concessions/add/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -65,10 +64,7 @@ export async function POST(request) {
     .select()
     .from(schema.students)
     .where(
-      and(
-        eq(schema.students.id, student_id),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.students.id, student_id), ),
     );
   if (!studentCheck.length) {
     return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
@@ -80,10 +76,7 @@ export async function POST(request) {
     .select()
     .from(schema.fee_concessions)
     .where(
-      and(
-        eq(schema.fee_concessions.user_id, MASTER_USER_ID),
-        eq(schema.fee_concessions.student_id, student_id),
-      ),
+      and(eq(schema.fee_concessions.student_id, student_id), ),
     );
   if (existing.length > 0) {
     await setFlash(
@@ -102,7 +95,6 @@ export async function POST(request) {
     reason,
     discount_type,
     discount_value,
-    user_id: MASTER_USER_ID,
     created_at: new Date(),
   });
 

@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { students, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -31,13 +30,13 @@ export default async function IssueCertificatePage({ searchParams }) {
         .select()
         .from(students)
         .where(
-          and(eq(students.class, selectedClass), eq(students.user_id, MASTER_USER_ID)),
+          eq(students.class, selectedClass),
         )
         .orderBy(students.name)
     : await db
         .select()
         .from(students)
-        .where(eq(students.user_id, MASTER_USER_ID))
+        
         .orderBy(students.name);
 
   const today = new Date().toISOString().split("T")[0];

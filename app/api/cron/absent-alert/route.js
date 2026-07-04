@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { attendance, students, school_settings } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -20,25 +19,20 @@ export async function GET(req) {
     const settingsRows = await db
       .select()
       .from(school_settings)
-      .where(eq(school_settings.user_id, MASTER_USER_ID));
+      ;
     const schoolName = settingsRows[0]?.school_name || "School";
 
     const absentToday = await db
       .select()
       .from(attendance)
       .where(
-        and(
-          eq(attendance.user_id, MASTER_USER_ID),
-          eq(attendance.date, today),
-          eq(attendance.status, "absent"),
-          eq(attendance.alert_sent, 0),
-        ),
+        and(eq(attendance.date, today), eq(attendance.status, "absent"), eq(attendance.alert_sent, 0), ),
       );
 
     const allStudents = await db
       .select()
       .from(students)
-      .where(eq(students.user_id, MASTER_USER_ID));
+      ;
     const studentMap = {};
     allStudents.forEach((s) => {
       studentMap[s.id] = s;

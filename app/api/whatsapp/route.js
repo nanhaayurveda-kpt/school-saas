@@ -1,6 +1,5 @@
 // app/api/whatsapp/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { students, attendance, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -26,7 +25,7 @@ export async function GET(request) {
   const absentRecords = await db
     .select()
     .from(attendance)
-    .where(and(eq(attendance.date, date), eq(attendance.user_id, MASTER_USER_ID)));
+    .where(eq(attendance.date, date));
 
   const absentIds = absentRecords
     .filter((a) => a.status === "absent")
@@ -39,7 +38,7 @@ export async function GET(request) {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, MASTER_USER_ID));
+    ;
 
   const absentStudents = allStudents.filter((s) => absentIds.includes(s.id));
 

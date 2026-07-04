@@ -36,10 +36,7 @@ export default async function TeacherEditStudentPage({ params }) {
     .select()
     .from(students)
     .where(
-      and(
-        eq(students.id, Number(id)),
-        eq(students.user_id, teacher.user_id),
-      ),
+      and(eq(students.id, Number(id)), ),
     );
   if (result.length === 0) notFound();
   const s = result[0];

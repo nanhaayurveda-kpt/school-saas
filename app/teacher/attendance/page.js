@@ -57,7 +57,7 @@ export default async function TeacherAttendancePage({ searchParams }) {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, teacher.user_id));
+    ;
   const filteredStudents = allStudents.filter(
     (s) =>
       assignedClasses.includes(s.class) &&

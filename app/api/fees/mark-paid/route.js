@@ -1,6 +1,5 @@
 // app/api/fees/mark-paid/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -59,10 +58,7 @@ export async function POST(request) {
     .select()
     .from(schema.fees)
     .where(
-      and(
-        eq(schema.fees.id, fee_id),
-        eq(schema.fees.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.fees.id, fee_id), ),
     );
   const fee = feeResult[0];
   if (!fee) {
@@ -77,11 +73,7 @@ export async function POST(request) {
       .select()
       .from(schema.fee_payments)
       .where(
-        and(
-          eq(schema.fee_payments.fee_id, fee_id),
-          eq(schema.fee_payments.user_id, MASTER_USER_ID),
-          eq(schema.fee_payments.note, `token:${clientToken}`),
-        ),
+        and(eq(schema.fee_payments.fee_id, fee_id), eq(schema.fee_payments.note, `token:${clientToken}`), ),
       );
     if (dupePayment.length > 0) {
       await setFlash("success", "Payment already recorded.");
@@ -93,7 +85,6 @@ export async function POST(request) {
   await db.insert(schema.fee_payments).values({
     fee_id,
     student_id: fee.student_id,
-    user_id: MASTER_USER_ID,
     amount: paid_amount,
     payment_mode,
     paid_date: new Date(paid_date),
@@ -108,10 +99,7 @@ export async function POST(request) {
     .select({ amount: schema.fee_payments.amount })
     .from(schema.fee_payments)
     .where(
-      and(
-        eq(schema.fee_payments.fee_id, fee_id),
-        eq(schema.fee_payments.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.fee_payments.fee_id, fee_id), ),
     );
   const newPaidAmount = allPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const newStatus = newPaidAmount >= fee.amount ? "paid" : "partial";
@@ -126,10 +114,7 @@ export async function POST(request) {
       paid_amount: newPaidAmount,
     })
     .where(
-      and(
-        eq(schema.fees.id, fee_id),
-        eq(schema.fees.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.fees.id, fee_id), ),
     );
 
   await setFlash("success", "Payment recorded!");

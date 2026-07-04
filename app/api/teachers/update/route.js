@@ -1,6 +1,5 @@
 // app/api/teachers/update/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, ne } from "drizzle-orm";
@@ -50,7 +49,7 @@ export async function POST(request) {
   const teacherCheck = await db
     .select()
     .from(schema.teachers)
-    .where(and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, MASTER_USER_ID)));
+    .where(eq(schema.teachers.id, id));
   if (!teacherCheck.length) {
     return NextResponse.redirect(new URL("/teachers", request.url), {
       status: 303,
@@ -68,11 +67,7 @@ export async function POST(request) {
       .select()
       .from(schema.teachers)
       .where(
-        and(
-          eq(schema.teachers.user_id, MASTER_USER_ID),
-          eq(schema.teachers.pin, pin),
-          ne(schema.teachers.id, id),
-        ),
+        and(eq(schema.teachers.pin, pin), ne(schema.teachers.id, id), ),
       );
     if (pinConflict.length > 0) {
       await setFlash(
@@ -96,7 +91,6 @@ export async function POST(request) {
   // ─── Duplicate check: same name + phone (excluding self) ───────────────
   if (phone) {
     const conditions = [
-      eq(schema.teachers.user_id, MASTER_USER_ID),
       eq(schema.teachers.name, name),
       eq(schema.teachers.phone, phone),
       ne(schema.teachers.id, id),
@@ -127,7 +121,7 @@ export async function POST(request) {
       email,
       pin,
     })
-    .where(and(eq(schema.teachers.id, id), eq(schema.teachers.user_id, MASTER_USER_ID)));
+    .where(eq(schema.teachers.id, id));
 
   await setFlash("success", "Teacher updated successfully!");
   return NextResponse.redirect(new URL(`/teachers/${id}`, request.url), {

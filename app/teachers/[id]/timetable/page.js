@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import {
   teachers,
   teacher_subjects,
@@ -38,7 +37,7 @@ export default async function TeacherTimetablePage({ params }) {
   const teacherResult = await db
     .select()
     .from(teachers)
-    .where(and(eq(teachers.id, teacherId), eq(teachers.user_id, MASTER_USER_ID)));
+    .where(eq(teachers.id, teacherId));
   const teacher = teacherResult[0];
   if (!teacher) notFound();
 
@@ -51,16 +50,13 @@ export default async function TeacherTimetablePage({ params }) {
     db
       .select()
       .from(period_timings)
-      .where(eq(period_timings.user_id, MASTER_USER_ID))
+      
       .orderBy(period_timings.period_no),
     db
       .select()
       .from(timetable)
       .where(
-        and(
-          eq(timetable.user_id, MASTER_USER_ID),
-          eq(timetable.teacher_name, teacher.name),
-        ),
+        and(eq(timetable.teacher_name, teacher.name), ),
       ),
   ]);
 

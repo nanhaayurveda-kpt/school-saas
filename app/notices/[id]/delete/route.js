@@ -4,7 +4,6 @@ import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
-import { MASTER_USER_ID } from "@/lib/config";
 
 export async function GET(request, { params }) {
   // ─── ताला: सिर्फ logged-in admin ────────────────────────────────────────
@@ -19,7 +18,7 @@ export async function GET(request, { params }) {
   if (!isNaN(noticeId)) {
     await db
       .delete(notices)
-      .where(and(eq(notices.id, noticeId), eq(notices.user_id, MASTER_USER_ID)));
+      .where(eq(notices.id, noticeId));
   }
 
   redirect("/notices");

@@ -1,6 +1,5 @@
 // app/api/certificates/issue/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -57,10 +56,7 @@ export async function POST(request) {
     .select()
     .from(schema.students)
     .where(
-      and(
-        eq(schema.students.id, student_id),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.students.id, student_id), ),
     );
   if (!studentCheck.length) {
     return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
@@ -72,10 +68,7 @@ export async function POST(request) {
       .select()
       .from(schema.certificates)
       .where(
-        and(
-          eq(schema.certificates.user_id, MASTER_USER_ID),
-          eq(schema.certificates.serial_no, serial_no),
-        ),
+        and(eq(schema.certificates.serial_no, serial_no), ),
       );
     if (serialConflict.length > 0) {
       await setFlash(
@@ -89,7 +82,6 @@ export async function POST(request) {
   // ─── Duplicate check 2: same student + cert_type + issue_date ──────────
   // Prevents accidental re-issue of the same certificate on the same day
   const conditions = [
-    eq(schema.certificates.user_id, MASTER_USER_ID),
     eq(schema.certificates.student_id, student_id),
     eq(schema.certificates.cert_type, cert_type),
     eq(schema.certificates.issue_date, issue_date),
@@ -117,7 +109,6 @@ export async function POST(request) {
     last_exam_passed,
     conduct,
     custom_content,
-    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Certificate issued successfully!");

@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -41,7 +40,7 @@ export default async function PayFeePage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(and(eq(fees.id, parseInt(id)), eq(fees.user_id, MASTER_USER_ID)));
+    .where(eq(fees.id, parseInt(id)));
 
   if (result.length === 0) notFound();
   const fee = result[0];

@@ -1,6 +1,5 @@
 // app/api/settings/save-period-timings/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -42,7 +41,7 @@ export async function POST(request) {
   // Per-user data, full replacement on every save
   await db
     .delete(schema.period_timings)
-    .where(eq(schema.period_timings.user_id, MASTER_USER_ID));
+    ;
 
   const rows = [];
   for (let i = 1; i <= totalPeriods; i++) {
@@ -51,7 +50,6 @@ export async function POST(request) {
     const label = formData.get(`label_${i}`) || "teaching";
     if (!start || !end) continue;
     rows.push({
-      user_id: MASTER_USER_ID,
       period_no: i,
       start_time: start,
       end_time: end,

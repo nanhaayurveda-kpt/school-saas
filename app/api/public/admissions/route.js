@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -50,12 +49,7 @@ export async function POST(request) {
     .select({ id: schema.admission_applications.id })
     .from(schema.admission_applications)
     .where(
-      and(
-        eq(schema.admission_applications.user_id, MASTER_USER_ID),
-        eq(schema.admission_applications.phone, phone),
-        eq(schema.admission_applications.applying_class, applying_class),
-        eq(schema.admission_applications.status, "pending"),
-      ),
+      and(eq(schema.admission_applications.phone, phone), eq(schema.admission_applications.applying_class, applying_class), eq(schema.admission_applications.status, "pending"), ),
     );
   if (existing.length > 0) {
     return NextResponse.json(
@@ -65,7 +59,6 @@ export async function POST(request) {
   }
 
   await db.insert(schema.admission_applications).values({
-    user_id: MASTER_USER_ID,
     name,
     dob: body.dob?.trim() || null,
     applying_class,

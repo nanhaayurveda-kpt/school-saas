@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { teachers, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
@@ -27,7 +26,7 @@ export default async function EditTeacherPage({ params }) {
   const result = await db
     .select()
     .from(teachers)
-    .where(and(eq(teachers.id, Number(id)), eq(teachers.user_id, MASTER_USER_ID)));
+    .where(eq(teachers.id, Number(id)));
   if (result.length === 0) notFound();
   const t = result[0];
 

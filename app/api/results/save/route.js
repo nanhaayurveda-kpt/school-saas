@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { results, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -61,11 +60,7 @@ export async function POST(request) {
         .update(results)
         .set({ marks_obtained: marksNum, grade, remarks })
         .where(
-          and(
-            eq(results.exam_id, exam_id),
-            eq(results.student_id, parseInt(sid)),
-            eq(results.user_id, MASTER_USER_ID),
-          ),
+          and(eq(results.exam_id, exam_id), eq(results.student_id, parseInt(sid)), ),
         );
     } else {
       await db.insert(results).values({
@@ -74,7 +69,6 @@ export async function POST(request) {
         marks_obtained: marksNum,
         grade,
         remarks,
-        user_id: MASTER_USER_ID,
       });
     }
   }

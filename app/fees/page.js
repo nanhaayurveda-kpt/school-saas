@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { fees, students, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import Link from "next/link";
@@ -55,7 +54,7 @@ export default async function FeesPage({ searchParams }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(eq(students.user_id, MASTER_USER_ID))
+    
     .orderBy(fees.due_date);
 
   const todayDate = new Date();

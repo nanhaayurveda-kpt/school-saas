@@ -1,6 +1,5 @@
 // app/api/students/promote/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, inArray } from "drizzle-orm";
@@ -59,11 +58,7 @@ export async function POST(request) {
     .select({ id: schema.students.id })
     .from(schema.students)
     .where(
-      and(
-        inArray(schema.students.id, student_ids),
-        eq(schema.students.class, from_class),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(inArray(schema.students.id, student_ids), eq(schema.students.class, from_class), ),
     );
 
   if (toPromote.length === 0) {
@@ -80,10 +75,7 @@ export async function POST(request) {
       fee_status: "pending",
     })
     .where(
-      and(
-        inArray(schema.students.id, toPromote.map((s) => s.id)),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(inArray(schema.students.id, toPromote.map((s) => s.id)), ),
     );
 
   await setFlash(

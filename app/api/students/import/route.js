@@ -1,6 +1,5 @@
 // app/api/students/import/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -51,11 +50,7 @@ export async function POST(request) {
     .select({ roll_number: schema.students.roll_number })
     .from(schema.students)
     .where(
-      and(
-        eq(schema.students.user_id, MASTER_USER_ID),
-        eq(schema.students.class, className),
-        eq(schema.students.section, section),
-      ),
+      and(eq(schema.students.class, className), eq(schema.students.section, section), ),
     );
   const takenRolls = new Set(
     existing.map((r) => r.roll_number).filter(Boolean),
@@ -99,7 +94,6 @@ export async function POST(request) {
       roll_number: roll_number || null,
       phone: phone || null,
       fee_status: "pending",
-      user_id: MASTER_USER_ID,
     });
     inserted++;
   }

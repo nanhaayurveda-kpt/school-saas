@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, ne } from "drizzle-orm";
@@ -39,7 +38,7 @@ export async function POST(request, { params }) {
   const ownRows = await db
     .select({ id: schema.fee_packages.id })
     .from(schema.fee_packages)
-    .where(and(eq(schema.fee_packages.id, packageId), eq(schema.fee_packages.user_id, MASTER_USER_ID)));
+    .where(eq(schema.fee_packages.id, packageId));
   if (ownRows.length === 0) {
     return NextResponse.redirect(new URL("/fee-structure", request.url), { status: 303 });
   }
@@ -96,12 +95,7 @@ export async function POST(request, { params }) {
     .select({ id: schema.fee_packages.id })
     .from(schema.fee_packages)
     .where(
-      and(
-        eq(schema.fee_packages.user_id, MASTER_USER_ID),
-        eq(schema.fee_packages.class, cls),
-        eq(schema.fee_packages.academic_year, academic_year),
-        ne(schema.fee_packages.id, packageId),
-      ),
+      and(eq(schema.fee_packages.class, cls), eq(schema.fee_packages.academic_year, academic_year), ne(schema.fee_packages.id, packageId), ),
     );
   if (dupRows.length > 0) {
     await setFlash("error", `Another package for Class ${cls} (${academic_year}) already exists.`);
@@ -113,7 +107,7 @@ export async function POST(request, { params }) {
   await db
     .update(schema.fee_packages)
     .set({ class: cls, academic_year, total_amount: computedTotal })
-    .where(and(eq(schema.fee_packages.id, packageId), eq(schema.fee_packages.user_id, MASTER_USER_ID)));
+    .where(eq(schema.fee_packages.id, packageId));
 
   await db.delete(schema.fee_package_items).where(eq(schema.fee_package_items.package_id, packageId));
 

@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { fees, students } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -38,7 +37,7 @@ export default async function EditFeePage({ params }) {
     })
     .from(fees)
     .leftJoin(students, eq(fees.student_id, students.id))
-    .where(and(eq(fees.id, feeId), eq(fees.user_id, MASTER_USER_ID)));
+    .where(eq(fees.id, feeId));
 
   const fee = rows[0];
   if (!fee) redirect("/fees");

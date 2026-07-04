@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -32,7 +31,7 @@ export async function POST(request, { params }) {
   const ownRows = await db
     .select({ id: schema.fees.id })
     .from(schema.fees)
-    .where(and(eq(schema.fees.id, feeId), eq(schema.fees.user_id, MASTER_USER_ID)));
+    .where(eq(schema.fees.id, feeId));
   if (!ownRows.length)
     return NextResponse.redirect(new URL("/fees", request.url), {
       status: 303,

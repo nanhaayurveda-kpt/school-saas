@@ -1,6 +1,5 @@
 // app/api/exams/add/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -60,7 +59,6 @@ export async function POST(request) {
 
   // ─── Duplicate check: same exam (name + class + subject + date) ────────
   const conditions = [
-    eq(schema.exams.user_id, MASTER_USER_ID),
     eq(schema.exams.name, name),
     eq(schema.exams.class, className),
     eq(schema.exams.subject, subject),
@@ -88,7 +86,6 @@ export async function POST(request) {
     academic_year,
     max_marks,
     passing_marks,
-    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Exam scheduled successfully!");

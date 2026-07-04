@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { exams, students, results } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -24,14 +23,14 @@ export default async function MarksEntryPage({ params }) {
   const examResult = await db
     .select()
     .from(exams)
-    .where(and(eq(exams.id, parseInt(id)), eq(exams.user_id, MASTER_USER_ID)));
+    .where(eq(exams.id, parseInt(id)));
   if (examResult.length === 0) notFound();
   const exam = examResult[0];
 
   const classStudents = await db
     .select()
     .from(students)
-    .where(and(eq(students.class, exam.class), eq(students.user_id, MASTER_USER_ID)));
+    .where(eq(students.class, exam.class));
 
   const existingResults = await db
     .select()

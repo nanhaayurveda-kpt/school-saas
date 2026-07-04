@@ -1,0 +1,141 @@
+=== AUTO-FIX ACTIONS ===
+app\actions.js: removed 20 'user_id: ...,' object line(s)
+app\actions.js: cleaned unused MASTER_USER_ID import
+app\admissions\applications\page.js: cleaned unused MASTER_USER_ID import
+app\admissions\page.js: cleaned unused MASTER_USER_ID import
+app\api\admissions\applications\[id]\approve\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\admissions\applications\[id]\approve\route.js: cleaned unused MASTER_USER_ID import
+app\api\admissions\applications\[id]\reject\route.js: cleaned unused MASTER_USER_ID import
+app\api\attendance\save\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\certificates\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\certificates\issue\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\certificates\issue\route.js: removed 1 array-condition line(s)
+app\api\certificates\issue\route.js: cleaned unused MASTER_USER_ID import
+app\api\certificates\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\certificates\route.js: cleaned unused MASTER_USER_ID import
+app\api\certificates\update\route.js: cleaned unused MASTER_USER_ID import
+app\api\concessions\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\concessions\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\concessions\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\cron\absent-alert\route.js: cleaned unused MASTER_USER_ID import
+app\api\cron\fee-reminder\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\cron\fee-reminder\route.js: removed 1 array-condition line(s)
+app\api\cron\fee-reminder\route.js: cleaned unused MASTER_USER_ID import
+app\api\exams\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\exams\add\route.js: removed 1 array-condition line(s)
+app\api\exams\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\exams\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\fee-structure\packages\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\fee-structure\packages\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\fee-structure\packages\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\fee-structure\packages\[id]\edit\route.js: cleaned unused MASTER_USER_ID import
+app\api\fee-structure\[id]\edit\route.js: removed 1 array-condition line(s)
+app\api\fee-structure\[id]\edit\route.js: cleaned unused MASTER_USER_ID import
+app\api\fees\bulk-add\route.js: removed 4 'user_id: ...,' object line(s)
+app\api\fees\bulk-add\route.js: removed 1 array-condition line(s)
+app\api\fees\bulk-add\route.js: cleaned unused MASTER_USER_ID import
+app\api\fees\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\fees\mark-paid\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\fees\mark-paid\route.js: cleaned unused MASTER_USER_ID import
+app\api\fees\[id]\edit\route.js: cleaned unused MASTER_USER_ID import
+app\api\notices\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\notices\add\route.js: removed 1 array-condition line(s)
+app\api\notices\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\parents\save\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\parents\save\route.js: cleaned unused MASTER_USER_ID import
+app\api\public\admissions\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\public\admissions\route.js: cleaned unused MASTER_USER_ID import
+app\api\results\save\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\results\save\route.js: cleaned unused MASTER_USER_ID import
+app\api\settings\save\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\settings\save\route.js: cleaned unused MASTER_USER_ID import
+app\api\settings\save-period-timings\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\settings\save-period-timings\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\students\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\check-admission-no\route.js: removed 1 array-condition line(s)
+app\api\students\check-admission-no\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\import\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\students\import\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\next-admission-no\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\promote\route.js: cleaned unused MASTER_USER_ID import
+app\api\students\update\route.js: cleaned unused MASTER_USER_ID import
+app\api\teacher\homework\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\teacher\students\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\teacher-attendance\save\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\teacher-attendance\save\route.js: cleaned unused MASTER_USER_ID import
+app\api\teachers\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\teachers\add\route.js: removed 1 array-condition line(s)
+app\api\teachers\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\teachers\add-subject\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\teachers\add-subject\route.js: removed 1 array-condition line(s)
+app\api\teachers\add-subject\route.js: cleaned unused MASTER_USER_ID import
+app\api\teachers\delete\route.js: cleaned unused MASTER_USER_ID import
+app\api\teachers\delete-subject\route.js: cleaned unused MASTER_USER_ID import
+app\api\teachers\save-schedule\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\teachers\save-schedule\route.js: cleaned unused MASTER_USER_ID import
+app\api\teachers\update\route.js: removed 1 array-condition line(s)
+app\api\teachers\update\route.js: cleaned unused MASTER_USER_ID import
+app\api\timetable\add-period\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\timetable\add-period\route.js: removed 1 array-condition line(s)
+app\api\timetable\add-period\route.js: cleaned unused MASTER_USER_ID import
+app\api\transport\assign\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\transport\assign\route.js: removed 1 array-condition line(s)
+app\api\transport\assign\route.js: cleaned unused MASTER_USER_ID import
+app\api\transport\routes\add\route.js: removed 1 'user_id: ...,' object line(s)
+app\api\transport\routes\add\route.js: removed 1 array-condition line(s)
+app\api\transport\routes\add\route.js: cleaned unused MASTER_USER_ID import
+app\api\whatsapp\route.js: cleaned unused MASTER_USER_ID import
+app\attendance\mark\page.js: cleaned unused MASTER_USER_ID import
+app\attendance\page.js: cleaned unused MASTER_USER_ID import
+app\certificates\issue\page.js: cleaned unused MASTER_USER_ID import
+app\certificates\page.js: cleaned unused MASTER_USER_ID import
+app\certificates\[id]\edit\page.js: cleaned unused MASTER_USER_ID import
+app\certificates\[id]\page.js: cleaned unused MASTER_USER_ID import
+app\dashboard\page.js: cleaned unused MASTER_USER_ID import
+app\exams\page.js: cleaned unused MASTER_USER_ID import
+app\exams\[id]\report\page.js: cleaned unused MASTER_USER_ID import
+app\exams\[id]\results\page.js: cleaned unused MASTER_USER_ID import
+app\fee-structure\packages\[id]\edit\page.js: cleaned unused MASTER_USER_ID import
+app\fee-structure\page.js: cleaned unused MASTER_USER_ID import
+app\fee-structure\[id]\edit\page.js: cleaned unused MASTER_USER_ID import
+app\fees\add\page.js: cleaned unused MASTER_USER_ID import
+app\fees\page.js: cleaned unused MASTER_USER_ID import
+app\fees\[id]\edit\page.js: cleaned unused MASTER_USER_ID import
+app\fees\[id]\pay\page.js: cleaned unused MASTER_USER_ID import
+app\fees\[id]\receipt\page.js: cleaned unused MASTER_USER_ID import
+app\marksheet\page.js: cleaned unused MASTER_USER_ID import
+app\marksheet\view\page.js: removed 1 array-condition line(s)
+app\marksheet\view\page.js: cleaned unused MASTER_USER_ID import
+app\notices\page.js: cleaned unused MASTER_USER_ID import
+app\notices\[id]\delete\route.js: cleaned unused MASTER_USER_ID import
+app\promote\page.js: cleaned unused MASTER_USER_ID import
+app\reports\page.js: cleaned unused MASTER_USER_ID import
+app\settings\page.js: cleaned unused MASTER_USER_ID import
+app\settings\periods\page.js: cleaned unused MASTER_USER_ID import
+app\students\page.js: cleaned unused MASTER_USER_ID import
+app\students\[id]\edit\page.js: cleaned unused MASTER_USER_ID import
+app\students\[id]\page.js: cleaned unused MASTER_USER_ID import
+app\students\[id]\parent\page.js: cleaned unused MASTER_USER_ID import
+app\teacher-attendance\page.js: cleaned unused MASTER_USER_ID import
+app\teachers\page.js: cleaned unused MASTER_USER_ID import
+app\teachers\[id]\edit\page.js: cleaned unused MASTER_USER_ID import
+app\teachers\[id]\page.js: cleaned unused MASTER_USER_ID import
+app\teachers\[id]\timetable\page.js: cleaned unused MASTER_USER_ID import
+app\timetable\add\page.js: cleaned unused MASTER_USER_ID import
+app\timetable\page.js: cleaned unused MASTER_USER_ID import
+app\transport\page.js: cleaned unused MASTER_USER_ID import
+app\transport\receipt\page.js: cleaned unused MASTER_USER_ID import
+app\transport\students\add\page.js: cleaned unused MASTER_USER_ID import
+
+Total auto-fix actions: 129
+
+=== REMAINING .user_id REFERENCES (मैनुअली चेक करें) ===
+Files with leftovers: 2
+
+app\actions.js:
+  userId = teacherResult[0]?.user_id;
+
+app\api\attendance\save\route.js:
+  userId = teacherResult[0]?.user_id;

@@ -53,12 +53,7 @@ export async function POST(request) {
     .select()
     .from(students)
     .where(
-      and(
-        eq(students.user_id, teacher.user_id),
-        eq(students.class, className),
-        eq(students.section, section),
-        eq(students.roll_number, roll_number),
-      ),
+      and(eq(students.class, className), eq(students.section, section), eq(students.roll_number, roll_number), ),
     );
   if (rollConflict.length > 0) {
     await setFlash(
@@ -77,10 +72,7 @@ export async function POST(request) {
       .select()
       .from(students)
       .where(
-        and(
-          eq(students.user_id, teacher.user_id),
-          eq(students.admission_no, admission_no),
-        ),
+        and(eq(students.admission_no, admission_no), ),
       );
     if (admConflict.length > 0) {
       await setFlash(
@@ -116,7 +108,6 @@ export async function POST(request) {
     address: formData.get("address") || null,
     academic_year: formData.get("academic_year") || null,
     fee_status: formData.get("fee_status") || "pending",
-    user_id: teacher.user_id,
   });
 
   await setFlash("success", "Student added successfully!");

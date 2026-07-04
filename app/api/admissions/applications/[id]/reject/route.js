@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -32,10 +31,7 @@ export async function POST(request, { params }) {
     .update(schema.admission_applications)
     .set({ status: "rejected" })
     .where(
-      and(
-        eq(schema.admission_applications.id, applicationId),
-        eq(schema.admission_applications.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.admission_applications.id, applicationId), ),
     );
 
   await setFlash("success", "Application rejected");

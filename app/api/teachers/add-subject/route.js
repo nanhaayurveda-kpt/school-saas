@@ -1,6 +1,5 @@
 // app/api/teachers/add-subject/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -51,10 +50,7 @@ export async function POST(request) {
     .select()
     .from(schema.teachers)
     .where(
-      and(
-        eq(schema.teachers.id, teacher_id),
-        eq(schema.teachers.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.teachers.id, teacher_id), ),
     );
   if (!teacherCheck.length) {
     return NextResponse.redirect(new URL("/teachers", request.url), { status: 303 });
@@ -62,7 +58,6 @@ export async function POST(request) {
 
   // ─── Duplicate check: same teacher + subject + class + section ─────────
   const conditions = [
-    eq(schema.teacher_subjects.user_id, MASTER_USER_ID),
     eq(schema.teacher_subjects.teacher_id, teacher_id),
     eq(schema.teacher_subjects.subject, subject),
     eq(schema.teacher_subjects.class, className),
@@ -88,7 +83,6 @@ export async function POST(request) {
     subject,
     class: className,
     section,
-    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Subject assigned successfully!");

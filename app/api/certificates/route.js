@@ -1,7 +1,6 @@
 // app/api/certificates/route.js
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { certificates, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -27,15 +26,10 @@ export async function GET(request) {
   let rows;
   if (studentId) {
     rows = await db.select().from(certificates).where(
-      and(
-        eq(certificates.student_id, Number(studentId)),
-        eq(certificates.user_id, MASTER_USER_ID)
-      )
+      eq(certificates.student_id, Number(studentId))
     );
   } else {
-    rows = await db.select().from(certificates).where(
-      eq(certificates.user_id, MASTER_USER_ID)
-    );
+    rows = await db.select().from(certificates);
   }
 
   return Response.json(rows);
@@ -72,7 +66,6 @@ export async function POST(request) {
     last_exam_passed: last_exam_passed || null,
     conduct: conduct || "Good",
     custom_content: custom_content || null,
-    user_id: MASTER_USER_ID,
   });
 
   return Response.json({ success: true });

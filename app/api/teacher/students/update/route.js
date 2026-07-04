@@ -35,7 +35,7 @@ export async function POST(request) {
   const studentCheck = await db
     .select()
     .from(students)
-    .where(and(eq(students.id, id), eq(students.user_id, teacher.user_id)));
+    .where(eq(students.id, id));
   if (!studentCheck.length) {
     return NextResponse.redirect(new URL("/teacher/students", request.url), 303);
   }
@@ -77,7 +77,7 @@ export async function POST(request) {
       academic_year: formData.get("academic_year") || null,
       fee_status: formData.get("fee_status") || undefined,
     })
-    .where(and(eq(students.id, id), eq(students.user_id, teacher.user_id)));
+    .where(eq(students.id, id));
 
   return NextResponse.redirect(new URL("/teacher/students?updated=1", request.url), 303);
 }

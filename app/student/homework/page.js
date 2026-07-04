@@ -24,10 +24,7 @@ export default async function StudentHomeworkPage() {
     .from(homeworks)
     .leftJoin(teachers, eq(homeworks.teacher_id, teachers.id))
     .where(
-      and(
-        eq(homeworks.class, student.class),
-        eq(teachers.user_id, student.user_id),
-      ),
+      and(eq(homeworks.class, student.class), ),
     )
     .orderBy(homeworks.created_at);
 

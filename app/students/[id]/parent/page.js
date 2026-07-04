@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { students, parents, users } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -28,7 +27,7 @@ export default async function CreateParentPage({ params }) {
   const result = await db
     .select()
     .from(students)
-    .where(and(eq(students.id, parseInt(id)), eq(students.user_id, MASTER_USER_ID)));
+    .where(eq(students.id, parseInt(id)));
   if (result.length === 0) notFound();
   const student = result[0];
 

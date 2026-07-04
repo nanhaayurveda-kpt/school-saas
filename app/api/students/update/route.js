@@ -1,6 +1,5 @@
 // app/api/students/update/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and, ne } from "drizzle-orm";
@@ -43,10 +42,7 @@ export async function POST(request) {
     .select()
     .from(schema.students)
     .where(
-      and(
-        eq(schema.students.id, id),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.students.id, id), ),
     );
   if (!studentCheck.length) {
     return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
@@ -66,13 +62,7 @@ export async function POST(request) {
       .select()
       .from(schema.students)
       .where(
-        and(
-          eq(schema.students.user_id, MASTER_USER_ID),
-          eq(schema.students.class, newClass),
-          eq(schema.students.section, newSection),
-          eq(schema.students.roll_number, newRoll),
-          ne(schema.students.id, id),
-        ),
+        and(eq(schema.students.class, newClass), eq(schema.students.section, newSection), eq(schema.students.roll_number, newRoll), ne(schema.students.id, id), ),
       );
     if (rollConflict.length > 0) {
       await setFlash(
@@ -89,11 +79,7 @@ export async function POST(request) {
       .select()
       .from(schema.students)
       .where(
-        and(
-          eq(schema.students.user_id, MASTER_USER_ID),
-          eq(schema.students.admission_no, newAdmission),
-          ne(schema.students.id, id),
-        ),
+        and(eq(schema.students.admission_no, newAdmission), ne(schema.students.id, id), ),
       );
     if (admConflict.length > 0) {
       await setFlash(
@@ -140,10 +126,7 @@ export async function POST(request) {
     .update(schema.students)
     .set(updateData)
     .where(
-      and(
-        eq(schema.students.id, id),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.students.id, id), ),
     );
 
   await setFlash("success", "Student updated successfully!");

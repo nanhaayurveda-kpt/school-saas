@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { exams } from "@/lib/schema";
 import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
@@ -28,7 +27,7 @@ export default async function MarksheetPage({ searchParams }) {
   const allExams = await db
     .select()
     .from(exams)
-    .where(eq(exams.user_id, MASTER_USER_ID));
+    ;
 
   const classes = [
     "Nursery",

@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import {
   transport,
   student_transport,
@@ -39,7 +38,7 @@ export default async function TransportReceiptPage({ searchParams }) {
   const settingsRows = await db
     .select()
     .from(school_settings)
-    .where(eq(school_settings.user_id, MASTER_USER_ID));
+    ;
   const school = settingsRows[0] || {};
 
   const rows = await db

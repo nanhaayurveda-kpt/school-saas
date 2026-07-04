@@ -1,6 +1,5 @@
 // app/api/parents/save/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -57,10 +56,7 @@ export async function POST(request) {
     .select()
     .from(schema.students)
     .where(
-      and(
-        eq(schema.students.id, student_id),
-        eq(schema.students.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.students.id, student_id), ),
     );
   if (!studentCheck.length) {
     return NextResponse.redirect(new URL("/students", request.url), { status: 303 });
@@ -71,7 +67,6 @@ export async function POST(request) {
     phone,
     email: email || null,
     password,
-    user_id: MASTER_USER_ID,
   };
 
   // ─── UPSERT pattern (naturally retry-safe) ─────────────────────────────
@@ -81,10 +76,7 @@ export async function POST(request) {
     .select()
     .from(schema.parents)
     .where(
-      and(
-        eq(schema.parents.student_id, student_id),
-        eq(schema.parents.user_id, MASTER_USER_ID),
-      ),
+      and(eq(schema.parents.student_id, student_id), ),
     );
 
   if (existing.length > 0) {
@@ -97,10 +89,7 @@ export async function POST(request) {
       .update(schema.parents)
       .set(updateData)
       .where(
-        and(
-          eq(schema.parents.student_id, student_id),
-          eq(schema.parents.user_id, MASTER_USER_ID),
-        ),
+        and(eq(schema.parents.student_id, student_id), ),
       );
     await setFlash("success", "Parent account updated successfully!");
   } else {

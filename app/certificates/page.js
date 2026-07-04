@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { db } from "@/lib/db";
-import { MASTER_USER_ID } from "@/lib/config";
 import { certificates, students } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import Link from "next/link";
@@ -62,7 +61,7 @@ export default async function CertificatesPage({ searchParams }) {
     })
     .from(certificates)
     .leftJoin(students, eq(certificates.student_id, students.id))
-    .where(eq(students.user_id, MASTER_USER_ID))
+    
     .orderBy(desc(certificates.created_at));
 
   const filtered = allCerts.filter((c) => {

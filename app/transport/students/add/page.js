@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import { transport, students, users } from "@/lib/schema";
 import { eq } from "drizzle-orm";
@@ -27,12 +26,12 @@ export default async function AssignTransportPage() {
   const allStudents = await db
     .select()
     .from(students)
-    .where(eq(students.user_id, MASTER_USER_ID))
+    
     .orderBy(students.class, students.name);
   const allRoutes = await db
     .select()
     .from(transport)
-    .where(eq(transport.user_id, MASTER_USER_ID))
+    
     .orderBy(transport.route_name);
 
   const today = new Date().toISOString().split("T")[0];

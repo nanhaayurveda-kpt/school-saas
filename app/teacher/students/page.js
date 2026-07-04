@@ -47,7 +47,7 @@ export default async function TeacherStudentsPage({ searchParams }) {
     ? await db
         .select()
         .from(students)
-        .where(eq(students.user_id, teacher.user_id))
+        
     : [];
 
   return (

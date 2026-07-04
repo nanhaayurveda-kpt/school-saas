@@ -1,6 +1,5 @@
 // app/api/transport/routes/add/route.js
 import { NextResponse } from "next/server";
-import { MASTER_USER_ID } from "@/lib/config";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -50,7 +49,6 @@ export async function POST(request) {
 
   // ─── Duplicate check: same route + stop already exists ────────────────
   const conditions = [
-    eq(schema.transport.user_id, MASTER_USER_ID),
     eq(schema.transport.route_name, route_name),
     eq(schema.transport.stop_name, stop_name),
   ];
@@ -73,7 +71,6 @@ export async function POST(request) {
     monthly_fee,
     driver_name,
     vehicle_no,
-    user_id: MASTER_USER_ID,
   });
 
   await setFlash("success", "Route added successfully!");
